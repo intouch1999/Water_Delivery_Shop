@@ -1,0 +1,15 @@
+
+	ErrorDocument 404 /ErrorPage/error.php
+	ErrorDocument 500 /ErrorPage/error.php
+	ErrorDocument 400 /ErrorPage/error.php
+	ErrorDocument 403 /ErrorPage/error.php
+	ErrorDocument 503 /ErrorPage/error.php
+
+
+# Turn Rewrite Engine On
+RewriteEngine On  
+RewriteCond %{THE_REQUEST} /([^.]+)\.php [NC]
+RewriteRule ^ /%1 [NC,L,R=307]
+
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^ %{REQUEST_URI}.php [NC,L]
