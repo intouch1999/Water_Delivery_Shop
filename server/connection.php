@@ -1,5 +1,5 @@
 <?php
-$servername = "da85.hostneverdie.com";
+$servername = "localhost";
 $username = "Username";
 $password = "Password";
 try {
