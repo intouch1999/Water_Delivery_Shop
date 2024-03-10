@@ -196,7 +196,7 @@ $cur_date_th = date('d/m/').(date('Y')+543);
             </li>
             
             <li class="menu-item" id="menu_delivery_task" data-menu="menu_delivery_task">
-              <a href="delivery_task" class="menu-link">
+              <a href="delivery_t" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-location-plus"></i>
                 <div data-i18n="Basic">เพิ่มนัดหมาย</div>
               </a>

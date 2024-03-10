@@ -78,5 +78,106 @@ if(@$decode['case']=='deli_add_customer'){
 	  $data[0] = array('status'=>0,"error_message" => $e->getMessage());
 	}
     echo json_encode(@$data);
+} else if(@$decode['case']=='deli_task'){
+// 	try {
+// 	$data = array();
+// 	$data[0] = array('status' => 0);
+	
+// 	$searchCus = $decode['SearchCus'];
+	
+// 	$query = "SELECT `cus_id`, `cus_name`, `comp_type`, `cus_address`, `lat`, `lon`, `create_user`, `create_datetime` FROM `delivery_customer` WHERE `cus_name` = :searchCus";
+	
+// 	$stmt = $conn->prepare($query);
+// 	$stmt->bindParam(':searchCus', $searchCus, PDO::PARAM_STR);
+// 	$stmt->execute();
+	
+// 		if ($stmt->rowCount() > 0) {
+// 			$data[0]['status'] = 1;
+// 			while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+// 				$data[] = $row;
+// 			}
+// 		} else {
+// 			$data[0]['status'] = 0;
+// 		}
+
+// 	} catch(PDOException $e) {
+// 	$data[0]['error_message'] = $e->getMessage();
+// }
+try {
+    $data = array();
+    $data[0] = array('status' => 0);
+    
+    $searchCus = $decode['SearchCus'];
+    
+    $query = "SELECT `cus_id`, `cus_name`, `comp_type`, `cus_address`, `lat`, `lon`, `create_user`, `create_datetime` FROM `delivery_customer` WHERE `cus_name` = '$searchCus'";
+    
+    $stmt = $conn->prepare($query);
+    $stmt->execute();
+    
+    if ($stmt->rowCount() > 0) {
+        $data[0]['status'] = 1;
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $data[] = $row;
+        }
+    } else {
+        $data[0]['status'] = 0;
+    }
+
+} catch(PDOException $e) {
+    $data[0]['error_message'] = $e->getMessage();
 }
+
+	echo json_encode($data);
+	
+} else if(@$decode['case']=='searchcus'){
+	// try {
+	// 	$data = array();
+	// 	$data[0] = array('status' => 0);
+		
+	// 	$searchCus = $decode['SearchCus'];
+		
+	// 	$query = "SELECT `cus_id`, `cus_name`, `comp_type`, `cus_address`, `lat`, `lon`, `create_user`, `create_datetime` FROM `delivery_customer` WHERE `cus_name` OR `cus_address` LIKE :searchCus";
+		
+	// 	$stmt = $conn->prepare($query);
+	// 	$searchCus = "%".$searchCus."%";
+	// 	$stmt->bindParam(':searchCus', $searchCus, PDO::PARAM_STR);
+	// 	$stmt->execute();
+		
+	// 	if ($stmt->rowCount() > 0) {
+	// 		$data[0]['status'] = 1;
+	// 		while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+	// 			$data[] = $row;
+	// 		}
+	// 	}
+	// } catch(PDOException $e) {
+	// 	$data[0]['error_message'] = $e->getMessage();
+	// }
+	try {
+		$data = array();
+		$data[0] = array('status' => 0);
+	
+		$searchCus = $decode['SearchCus'];
+		$searchCus = htmlspecialchars($searchCus);
+	
+		$query = "SELECT `cus_id`, `cus_name`, `comp_type`, `cus_address`, `lat`, `lon`, `create_user`, `create_datetime` FROM `delivery_customer` WHERE `cus_name` LIKE '%$searchCus%' OR `cus_address` LIKE '%$searchCus%'";
+	
+		$stmt = $conn->query($query);
+	
+			if ($stmt->rowCount() > 0) {
+				$data[0]['status'] = 1;
+				while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+					$data[] = $row;
+				}
+			} else {
+				$data[0]['status'] = 0;
+			}
+		
+	} catch (PDOException $e) {
+		$data[0]['error_message'] = $e->getMessage();
+	}
+	
+	echo json_encode($data);
+}
+
+
 ?>
