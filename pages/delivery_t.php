@@ -22,6 +22,7 @@
     #searchInput{
     border: none;
     }
+    
 
 </style>
     <!-- Content wrapper -->
@@ -41,6 +42,20 @@
                 </div>
             </div>
                 <div id="customerInfo"></div>
+                    <table id="myDataTable" class="display">
+                        <thead>
+                            <tr>
+                            <th>Customer ID</th>
+                            <th>Customer Name</th>
+                            <th>Company Type</th>
+                            <th>Customer Address</th>
+                                <!-- รายการคอลัมน์อื่น ๆ ต่อไป -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- ข้อมูลในตารางจะถูกแสดงที่นี่ -->
+                        </tbody>
+                    </table>
             </div>
         </div>
     </div>
@@ -48,6 +63,8 @@
 <div class="rush-task">
     <button class="btn btn-info btn-rush-task"><i class="menu-icon tf-icons bx bx-message-square-add"></i></button>
 </div> 
+<link rel="stylesheet" href="https://cdn.datatables.net/2.0.2/css/dataTables.dataTables.css" />
+<script src="https://cdn.datatables.net/2.0.2/js/dataTables.js"></script>
 <script>
 let timer;
 
@@ -147,6 +164,7 @@ document.getElementById('submitButton').addEventListener('click', function() {
                     <h3>รหัสลูกค้า : ${customer.cus_id} | ชื่อลูกค้า : ${customer.cus_name}</h3>
                     <h4>ที่อยู่: ${customer.cus_address}</h4>
                     <p><input type="text"></p>
+                    <p>input type</p>
                 `;
                 customerInfoDiv.appendChild(customerDiv);
             });
