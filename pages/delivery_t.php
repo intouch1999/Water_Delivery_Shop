@@ -1,4 +1,16 @@
 <?php include("head.php"); ?>
+<head>
+    <!-- Include jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Include DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+
+    <!-- Include DataTables JS -->
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+</head>
+
+
 <style>
   .rush-task .btn-rush-task{
     position: fixed;
@@ -41,21 +53,20 @@
                     <button class="btn btn-info" id="submitButton">Submit</button>
                 </div>
             </div>
-                <div id="customerInfo"></div>
-                    <table id="myDataTable" class="display">
-                        <thead>
-                            <tr>
-                            <th>Customer ID</th>
-                            <th>Customer Name</th>
-                            <th>Company Type</th>
-                            <th>Customer Address</th>
-                                <!-- รายการคอลัมน์อื่น ๆ ต่อไป -->
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- ข้อมูลในตารางจะถูกแสดงที่นี่ -->
-                        </tbody>
-                    </table>
+            <table id="customerData" class="display">
+    <thead>
+        <tr>
+            <th>Customer ID</th>
+            <th>Name</th>
+            <th>Company Type</th>
+            <th>Address</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+    </tbody>
+</table>
+
             </div>
         </div>
     </div>
@@ -63,8 +74,7 @@
 <div class="rush-task">
     <button class="btn btn-info btn-rush-task"><i class="menu-icon tf-icons bx bx-message-square-add"></i></button>
 </div> 
-<link rel="stylesheet" href="https://cdn.datatables.net/2.0.2/css/dataTables.dataTables.css" />
-<script src="https://cdn.datatables.net/2.0.2/js/dataTables.js"></script>
+
 <script>
 let timer;
 
@@ -180,6 +190,42 @@ document.getElementById('submitButton').addEventListener('click', function() {
 //     const inputText = this.value.length > 48 ? this.value.substring(0, 48) + '...' : this.value;
 //     this.value = inputText;
 // });
+
+$(document).ready(function() {
+    // AJAX request to fetch customer data
+    $.ajax({
+        url: '../api/customer?case=select_cus_datatable',
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            console.log(response);
+            if (response.error_message) {
+                // Display error message if any
+                $('#customerData').text('Error: ' + response.error_message);
+            } else {
+                // Initialize DataTable with received data
+                $('#customerData').DataTable({
+                    data: response,
+                    columns: [
+                        { data: 'cus_id' },
+                        { data: 'cus_name' },
+                        { data: 'comp_type' },
+                        { data: 'cus_address' }
+                    ]
+                });
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error: ' + error);
+        }
+    });
+});
+
+
+
+
+
+
 
 </script>
 <?php include("foot.php"); ?>

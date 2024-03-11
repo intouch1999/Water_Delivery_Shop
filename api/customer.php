@@ -193,14 +193,12 @@ try {
 // 	} catch (PDOException $e) {
 // 		$data[0]['error_message'] = $e->getMessage();
 // 	}
-	
+// 	// console log
 // 	echo json_encode($data);
 // }
 } else if(isset($_GET['case']) && $_GET['case'] === 'select_cus_datatable') {
     try {
-        // เชื่อมต่อกับฐานข้อมูล (ให้แทนที่ด้วยข้อมูลการเชื่อมต่อของคุณ)
-        $conn = new PDO('mysql:host=localhost;dbname=ชื่อฐานข้อมูล', 'ชื่อผู้ใช้', 'รหัสผ่าน');
-        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
 
         // เตรียมคำสั่ง SQL เพื่อดึงข้อมูลลูกค้า
         $query = "SELECT `cus_id`, `cus_name`, `comp_type`, `cus_address` FROM `delivery_customer` ORDER BY cus_id ASC";
@@ -211,9 +209,9 @@ try {
         // ตรวจสอบว่ามีข้อมูลหรือไม่
         if ($stmt->rowCount() > 0) {
             $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            echo json_encode($data); // ส่งข้อมูลในรูปแบบ JSON กลับไปยัง AJAX
+            echo json_encode($data);
         } else {
-            echo json_encode([]); // ส่งข้อมูลว่างกลับไปถ้าไม่มีข้อมูล
+            echo json_encode([]);
         }
     } catch (PDOException $e) {
         echo json_encode(array('error_message' => $e->getMessage())); // ส่งข้อความข้อผิดพลาดกลับไปในรูปแบบ JSON กรณีเกิดข้อผิดพลาด
