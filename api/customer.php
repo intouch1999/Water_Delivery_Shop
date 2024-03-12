@@ -79,30 +79,6 @@ if(@$decode['case']=='deli_add_customer'){
 	}
     echo json_encode(@$data);
 } else if(@$decode['case']=='deli_task'){
-// 	try {
-// 	$data = array();
-// 	$data[0] = array('status' => 0);
-	
-// 	$searchCus = $decode['SearchCus'];
-	
-// 	$query = "SELECT `cus_id`, `cus_name`, `comp_type`, `cus_address`, `lat`, `lon`, `create_user`, `create_datetime` FROM `delivery_customer` WHERE `cus_name` = :searchCus";
-	
-// 	$stmt = $conn->prepare($query);
-// 	$stmt->bindParam(':searchCus', $searchCus, PDO::PARAM_STR);
-// 	$stmt->execute();
-	
-// 		if ($stmt->rowCount() > 0) {
-// 			$data[0]['status'] = 1;
-// 			while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-// 				$data[] = $row;
-// 			}
-// 		} else {
-// 			$data[0]['status'] = 0;
-// 		}
-
-// 	} catch(PDOException $e) {
-// 	$data[0]['error_message'] = $e->getMessage();
-// }
 try {
     $data = array();
     $data[0] = array('status' => 0);
@@ -130,28 +106,6 @@ try {
 	echo json_encode($data);
 	
 } else if(@$decode['case']=='searchcus'){
-	// try {
-	// 	$data = array();
-	// 	$data[0] = array('status' => 0);
-		
-	// 	$searchCus = $decode['SearchCus'];
-		
-	// 	$query = "SELECT `cus_id`, `cus_name`, `comp_type`, `cus_address`, `lat`, `lon`, `create_user`, `create_datetime` FROM `delivery_customer` WHERE `cus_name` OR `cus_address` LIKE :searchCus";
-		
-	// 	$stmt = $conn->prepare($query);
-	// 	$searchCus = "%".$searchCus."%";
-	// 	$stmt->bindParam(':searchCus', $searchCus, PDO::PARAM_STR);
-	// 	$stmt->execute();
-		
-	// 	if ($stmt->rowCount() > 0) {
-	// 		$data[0]['status'] = 1;
-	// 		while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-	// 			$data[] = $row;
-	// 		}
-	// 	}
-	// } catch(PDOException $e) {
-	// 	$data[0]['error_message'] = $e->getMessage();
-	// }
 	try {
 		$data = array();
 		$data[0] = array('status' => 0);
@@ -196,29 +150,6 @@ try {
 	// console log
 	echo json_encode($data);
 }
-// } else if(isset($_GET['case']) && $_GET['case'] === 'select_cus_datatable') {
-//     try {
-
-
-//         // เตรียมคำสั่ง SQL เพื่อดึงข้อมูลลูกค้า
-//         $query = "SELECT `cus_id`, `cus_name`, `comp_type`, `cus_address` FROM `delivery_customer` ORDER BY cus_id ASC";
-
-//         // ดำเนินการค้นหาข้อมูล
-//         $stmt = $conn->query($query);
-
-//         // ตรวจสอบว่ามีข้อมูลหรือไม่
-//         if ($stmt->rowCount() > 0) {
-//             $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-//             echo json_encode($data);
-//         } else {
-//             echo json_encode([]);
-//         }
-//     } catch (PDOException $e) {
-//         echo json_encode(array('error_message' => $e->getMessage())); // ส่งข้อความข้อผิดพลาดกลับไปในรูปแบบ JSON กรณีเกิดข้อผิดพลาด
-//     }
-// } else {
-//     echo json_encode(array('error_message' => 'Invalid request')); // ส่งข้อความข้อผิดพลาดกลับไปในรูปแบบ JSON กรณีไม่พบคำขอที่ถูกต้อง
-// }
 
 
 
