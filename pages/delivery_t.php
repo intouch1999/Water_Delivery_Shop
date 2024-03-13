@@ -19,10 +19,15 @@
         align-items: center;
         float: right;
     }
-
-    #searchInput {
-        border: none;
+    #cusINFO {
+    display: flex;
+    justify-content: center;
     }
+
+    #cusINFO h3 {
+    margin: 0 30px;
+    }
+
 </style>
 <!-- Content wrapper -->
 <div class="content-wrapper">
@@ -98,120 +103,9 @@
 </div>
 
 <script>
-    let timer;
 
-    document.getElementById('searchInput').addEventListener('keyup', function(event) {
-        const SearchCus = this.value.trim();
 
-        // เช็คว่ากดปุ่ม Enter หรือไม่
-        if (event.key !== 'Enter') {
-            clearTimeout(timer);
 
-            timer = setTimeout(() => {
-                if (SearchCus !== '') {
-                    fetch('../api/customer', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                case: 'searchcus',
-                                SearchCus: SearchCus
-                            })
-                        })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Network response was not ok');
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            console.log(data);
-                            populateDataList(data);
-                        })
-                        .catch(error => {
-                            console.error('Error fetching delivery customer data:', error);
-                        });
-                }
-            }, 1000);
-        }
-    });
-
-    function populateDataList(data) {
-        const datalist = document.getElementById('customers');
-        datalist.innerHTML = '';
-
-        if (data.length > 0 && data[0].status === 1) {
-            data.forEach(customer => {
-                if (customer.cus_name !== '' && customer.cus_address !== '') { // เพิ่มเงื่อนไขนี้
-                    const option = document.createElement('option');
-                    option.value = customer.cus_name + ' - ' + customer.cus_address;
-                    datalist.appendChild(option);
-                }
-            });
-        } else {
-            const option = document.createElement('option');
-            option.value = 'No customers found';
-            datalist.appendChild(option);
-        }
-    }
-
-    document.getElementById('submitButton').addEventListener('click', function() {
-        const selectedOption = document.getElementById('searchInput').value;
-        const selectedCustomer = selectedOption.split(' - ')[0];
-
-        fetch('../api/customer', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    case: 'deli_task',
-                    SearchCus: selectedCustomer
-                })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log(data);
-                populateDataList(data);
-                document.getElementById('searchInput').value = '';
-            })
-            .catch(error => {
-                console.error('Error fetching delivery customer data:', error);
-            });
-
-        function populateDataList(data) {
-            const customerInfoDiv = document.getElementById('customerInfo');
-            customerInfoDiv.innerHTML = '';
-
-            if (data.length > 0 && data[0].status === 1) {
-                data.slice(1).forEach(customer => {
-                    const customerDiv = document.createElement('div');
-                    customerDiv.innerHTML = `
-                    <h3>รหัสลูกค้า : ${customer.cus_id} | ชื่อลูกค้า : ${customer.cus_name}</h3>
-                    <h4>ที่อยู่: ${customer.cus_address}</h4>
-                    <p><input type="text"></p>
-                    <p>input type</p>
-                `;
-                    customerInfoDiv.appendChild(customerDiv);
-                });
-            } else {
-                const noCustomerInfoDiv = document.createElement('div');
-                noCustomerInfoDiv.innerText = 'No customer information found';
-                customerInfoDiv.appendChild(noCustomerInfoDiv);
-            }
-        }
-    });
-
-    // document.getElementById('searchInput').addEventListener('input', function() {
-    //     const inputText = this.value.length > 48 ? this.value.substring(0, 48) + '...' : this.value;
-    //     this.value = inputText;
-    // });
 </script>
 <?php include("foot.php"); ?>
 <footer>
@@ -225,6 +119,32 @@
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
 </footer>
 <script>
+$(document).ready(function() {
+    fetch('../api/category?chk_deli_product', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            case: 'chk_deli_product'
+        })
+    })
+    .then(function (response) {
+        if (!response.ok) {
+            throw new Error('Failed to fetch data');
+        }
+        return response.json();
+    })
+    .then(function (dataArrays) {
+        dataArrays.forEach(dataArray => {
+            console.log(dataArray);
+        });
+    })
+    .catch(function (error) {
+        console.error('Error fetching data:', error);
+    });
+});
+
     $(document).ready(function() {
         // AJAX request to fetch customer data
 
@@ -269,6 +189,7 @@
 
                         populateDataList(data);
                     });
+                    
 
                     function populateDataList(data) {
 
@@ -276,29 +197,12 @@
 
                         const customerInfoHTML = `
                                                 <div id="customerInfo">
-                                                    <!-- Customer information will be populated here -->
-                                                    <button id="backButton" class="btn btn-secondary">ย้อนกลับ</button>
-                                                    <h3>รหัสลูกค้า : ${data.cus_id} | ชื่อลูกค้า : ${data.cus_name}</h3>
-                                                    <div class="form-group">
-                                                        <label for="cusIdInput">Customer ID</label>
-                                                        <input type="text" class="form-control" id="cusIdInput" value="${data.cus_id}" readonly>
+                                                    <button id="backButton" class="btn btn-secondary mb-3">ย้อนกลับ</button>
+                                                    <div id="cusINFO">
+                                                        <h3>รหัสลูกค้า : ${data.cus_id}</h3> 
+                                                        <h3> ชื่อลูกค้า : ${data.cus_name}</h3>
                                                     </div>
-                                                    <div class="form-group">
-                                                        <label for="cusNameInput">Name</label>
-                                                        <input type="text" class="form-control" id="cusNameInput" value="${data.cus_name}" readonly>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="input1">Input 1</label>
-                                                        <input type="text" class="form-control" id="input1">
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="input2">Input 2</label>
-                                                        <input type="text" class="form-control" id="input2">
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="input3">Input 3</label>
-                                                        <input type="text" class="form-control" id="input3">
-                                                    </div>
+                                                    <div id="compINFO">
                                                     <button class="btn btn-primary">ตกลง</button>
                                                     <button class="btn btn-secondary">ยกเลิก</button>
                                                 </div>
@@ -336,4 +240,6 @@
             }
         });
     });
+
+    
 </script>
