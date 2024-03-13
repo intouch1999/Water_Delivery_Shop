@@ -42,20 +42,20 @@
                 </div>
                 <div id="customerInfo"></div>
                 <div id="DataTable" class="table-responsive text-nowrap">
-                <table id="customerData" class="display">
-                    <thead>
-                        <tr>
-                            <th>Customer ID</th>
-                            <th>Name</th>
-                            <th>Company Type</th>
-                            <th>Address</th>
-                            <th>action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-
-                    </tbody>
-                </table>
+                    <table id="customerData" class="display">
+                        <thead>
+                            <tr>
+                                <th>Customer ID</th>
+                                <th>Name</th>
+                                <th>Company Type</th>
+                                <th>Address</th>
+                                <th>action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <!-- datatavle -->
+                        </tbody>
+                    </table>
                 </div>
                 <!-- Modal -->
                 <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
@@ -264,14 +264,58 @@
                     // Handle edit button click event
                     $('#customerData').on('click', '.btn-edit', function() {
                         var data = table.row($(this).parents('tr')).data();
-                        // Open the modal
-                        $('#editModal').modal('show');
 
-                        // Set input values in the modal
-                        $('#cusIdInput').val(data.cus_id);
-                        $('#cusNameInput').val(data.cus_name);
-                        $('#compTypeInput').val(data.comp_type);
+                        $('#DataTable').hide();
+
+                        populateDataList(data);
                     });
+
+                    function populateDataList(data) {
+
+                        $('#customerInfo').html('');
+
+                        const customerInfoHTML = `
+                                                <div id="customerInfo">
+                                                    <!-- Customer information will be populated here -->
+                                                    <button id="backButton" class="btn btn-secondary">ย้อนกลับ</button>
+                                                    <h3>รหัสลูกค้า : ${data.cus_id} | ชื่อลูกค้า : ${data.cus_name}</h3>
+                                                    <div class="form-group">
+                                                        <label for="cusIdInput">Customer ID</label>
+                                                        <input type="text" class="form-control" id="cusIdInput" value="${data.cus_id}" readonly>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="cusNameInput">Name</label>
+                                                        <input type="text" class="form-control" id="cusNameInput" value="${data.cus_name}" readonly>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="input1">Input 1</label>
+                                                        <input type="text" class="form-control" id="input1">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="input2">Input 2</label>
+                                                        <input type="text" class="form-control" id="input2">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="input3">Input 3</label>
+                                                        <input type="text" class="form-control" id="input3">
+                                                    </div>
+                                                    <button class="btn btn-primary">ตกลง</button>
+                                                    <button class="btn btn-secondary">ยกเลิก</button>
+                                                </div>
+                                            `;
+
+                        $('#customerInfo').append(customerInfoHTML);
+
+                        // Add click event listener to the back button
+                        $('#backButton').on('click', function() {
+
+                            $('#DataTable').show();
+
+                            $('#customerInfo').html('');
+                        });
+                    }
+
+
 
                     // Handle cancel button click event
                     $('#cancelButton').click(function() {
