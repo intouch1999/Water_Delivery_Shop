@@ -166,10 +166,10 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 } else if(@$decode['case']=='TaskPro') {
     function generateTaskIdFromMySQL() {
 		include('../server/connection.php');
-		$currentYear = date('Y');
+		$currentYear = date('y'); // เปลี่ยนจาก 'Y' เป็น 'y' เพื่อให้ได้ปีในรูปแบบสองหลัก
 		$nextTaskId = '';
 		try {
-			$query = "SELECT MAX(CAST(SUBSTRING(task_id, 3) AS UNSIGNED)) AS max_task_id FROM delivery_task";
+			$query = "SELECT MAX(CAST(SUBSTRING(task_id, 5) AS UNSIGNED)) AS max_task_id FROM delivery_task WHERE task_id LIKE 'SV$currentYear%'";
 			$stmt = $conn->query($query);
 			$row = $stmt->fetch(PDO::FETCH_ASSOC);
 			$maxTaskId = $row['max_task_id'];
@@ -184,15 +184,16 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 			$maxTaskId++;
 	
 			// Pad $maxTaskId with leading zeros
-			$paddedTaskId = str_pad($maxTaskId, 6, '0', STR_PAD_LEFT);
+			$paddedTaskId = str_pad($maxTaskId, 5, '0', STR_PAD_LEFT); // เปลี่ยนจาก 6 เป็น 5 เพราะไม่รวมส่วน 'SV'
 	
 			// Construct the next task id
-			$nextTaskId = 'SV' . substr($currentYear, -2) . $paddedTaskId;
+			$nextTaskId = 'SV' . $currentYear . $paddedTaskId;
 		} catch (PDOException $e) {
 			echo "Connection failed: " . $e->getMessage();
 		}
 		return $nextTaskId;
 	}
+	
 	
 
     $taskId = generateTaskIdFromMySQL();

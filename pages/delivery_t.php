@@ -117,13 +117,9 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </footer>
 <script>
-flatpickr("input[type=datetime-local]" , {});
-
-
+    flatpickr("input[type=datetime-local]", {});
 </script>
 <script>
-
-
     // $(document).ready(function() {
     //     function fetchProductData() {
     //         fetch('../api/product?case=show_product', {
@@ -162,19 +158,16 @@ flatpickr("input[type=datetime-local]" , {});
 
 
     $(document).ready(function() {
-        // AJAX request to fetch customer data
+    // AJAX request to fetch customer data
 
-        $.ajax({
-            url: '../api/customer?case=select_cus_datatable',
-            type: 'GET',
-            dataType: 'json',
-            success: function(response) {
-                console.log(response);
-                if (response.error_message) {
-                    // Display error message if any
-                    $('#customerData').text('Error: ' + response.error_message);
-                } else {
-                    // Initialize DataTable with received data
+    $.ajax({
+        url: '../api/customer?case=select_cus_datatable',
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            console.log(response);
+            try {
+                if (!response.error_message) {
                     var table = $('#customerData').DataTable({
                         response: true,
                         data: response,
@@ -197,8 +190,6 @@ flatpickr("input[type=datetime-local]" , {});
                         ]
                     });
                     console.log(table);
-
-                    // Handle edit button click event
                     $('#customerData').on('click', '.btn-edit', function() {
                         var data = table.row($(this).parents('tr')).data();
                         $('#appointmentForm').show();
@@ -208,13 +199,24 @@ flatpickr("input[type=datetime-local]" , {});
                         $('#productInfo').show();
                         $('#appointmentForm').show();
                     });
+                } else {
+                    $('#customerData').text('Error: ' + response.error_message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error: ' + error);
+        }
+    });
+});
 
+        function populateDataList(data) {
 
-                    function populateDataList(data) {
+            $('#customerInfo').html('');
 
-                        $('#customerInfo').html('');
-
-                        const customerInfoHTML = ` 
+            const customerInfoHTML = ` 
                         <div id="customerInfo">
                         <div id="cusINFO">
                             <h3>รหัสลูกค้า : ${data.cus_id}</h3> 
@@ -254,41 +256,36 @@ flatpickr("input[type=datetime-local]" , {});
                        </div>
                                             `;
 
-                        $('#customerInfo').append(customerInfoHTML);
+            $('#customerInfo').append(customerInfoHTML);
 
-                        // Add click event listener to the back button
-                        $('#backButton').on('click', function() {
+            // Add click event listener to the back button
+            $('#backButton').on('click', function() {
 
-                            $('#DataTable').show();
+                $('#DataTable').show();
 
-                            $('#customerInfo').html('');
-                            $('#productInfo').html('');
-                        });
-                        $('#SaveBut').on('click', function() {
-                            fetch ('../api/product', {
-                                method: 'POST',
-                                body: JSON.stringify({
-                                case: 'TaskPro',
-                                cus_id: $('#cus_id').val(),
-                                Taskdatetime: $('#datetime').val(),
-                                }),
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                console.log(data);
-                                return data;
-                            })
-                            .catch(error => {
-                                console.error('Error:', error);
-                            })
-                        })
-                    }
+                $('#customerInfo').html('');
+                $('#productInfo').html('');
+            });
+            $('#SaveBut').on('click', function() {
+                fetch('../api/product', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            case: 'TaskPro',
+                            cus_id: $('#cus_id').val(),
+                            Taskdatetime: $('#datetime').val(),
+                        }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
 
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error('Error: ' + error);
-            }
-        });
-    });
+                        $('#DataTable').show();
+                        $('#customerInfo').html('');
+                        return data;
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    })
+            })
+        }
+
 </script>
