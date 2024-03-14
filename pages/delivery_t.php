@@ -19,15 +19,20 @@
         align-items: center;
         float: right;
     }
+
     #cusINFO {
-    display: flex;
-    justify-content: center;
+        display: flex;
+        justify-content: center;
     }
 
     #cusINFO h3 {
-    margin: 0 30px;
+        margin: 0 30px;
     }
 
+    #productInfo {
+        display: none;
+        /* Hide the productInfo initially */
+    }
 </style>
 <!-- Content wrapper -->
 <div class="content-wrapper">
@@ -36,16 +41,12 @@
         <div class="row mb-2">
         </div>
         <div class="row">
-            <div class="card mb-4" id="customerDat">
+            <div class="card mb-4">
                 <h1>เพิ่มนัดหมาย</h1>
-                <div class="input-group mb-3">
-                    <datalist id="customers"></datalist>
-                    <input type="text" id="searchInput" list="customers" class="form-control" style="margin-right: 10px;" placeholder="Search...">
-                    <div class="input-group-append">
-                        <button class="btn btn-info" id="submitButton">Submit</button>
-                    </div>
-                </div>
+                <!-- End Appointment Form -->
+                <div id="productInfo"></div>
                 <div id="customerInfo"></div>
+
                 <div id="DataTable" class="table-responsive text-nowrap">
                     <table id="customerData" class="display">
                         <thead>
@@ -58,7 +59,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                        <!-- datatavle -->
+                            <!-- datatavle -->
                         </tbody>
                     </table>
                 </div>
@@ -102,11 +103,6 @@
     <button class="btn btn-info btn-rush-task"><i class="menu-icon tf-icons bx bx-message-square-add"></i></button>
 </div>
 
-<script>
-
-
-
-</script>
 <?php include("foot.php"); ?>
 <footer>
     <!-- Include jQuery -->
@@ -117,33 +113,53 @@
 
     <!-- Include DataTables JS -->
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </footer>
 <script>
-$(document).ready(function() {
-    fetch('../api/category?chk_deli_product', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            case: 'chk_deli_product'
-        })
-    })
-    .then(function (response) {
-        if (!response.ok) {
-            throw new Error('Failed to fetch data');
-        }
-        return response.json();
-    })
-    .then(function (dataArrays) {
-        dataArrays.forEach(dataArray => {
-            console.log(dataArray);
-        });
-    })
-    .catch(function (error) {
-        console.error('Error fetching data:', error);
-    });
-});
+flatpickr("input[type=datetime-local]" , {});
+
+
+</script>
+<script>
+
+
+    // $(document).ready(function() {
+    //     function fetchProductData() {
+    //         fetch('../api/product?case=show_product', {
+    //                 method: 'POST',
+    //                 headers: {
+    //                     'Content-Type': 'application/json'
+    //                 }
+    //             })
+    //             .then(function(response) {
+    //                 if (!response.ok) {
+    //                     throw new Error('Network response was not ok');
+    //                 }
+    //                 return response.json();
+    //             })
+    //             .then(function(products) {
+    //                 console.log(products);
+
+    //                 $('#productInfo').html('');
+
+    //                 products.forEach(function(product) {
+    //                     $('#productInfo').append('<p>สินค้า: ' + product.product_id + ' - ' + product.product_name + '</p>')
+    //                     .append('<img src="' + product.product_img + '" width="100" height="100">')    
+    //                     .append('<input type="number" id="quantity' + product.product_id + '">');
+
+    //                 });
+    //             })
+    //             .catch(function(error) {
+    //                 console.error('Error during fetch operation:', error);
+    //             });
+    //     }
+
+    //     fetchProductData();
+    // });
+
+
+
 
     $(document).ready(function() {
         // AJAX request to fetch customer data
@@ -181,31 +197,61 @@ $(document).ready(function() {
                         ]
                     });
                     console.log(table);
+
                     // Handle edit button click event
                     $('#customerData').on('click', '.btn-edit', function() {
                         var data = table.row($(this).parents('tr')).data();
-
+                        $('#appointmentForm').show();
                         $('#DataTable').hide();
 
                         populateDataList(data);
+                        $('#productInfo').show();
+                        $('#appointmentForm').show();
                     });
-                    
+
 
                     function populateDataList(data) {
 
                         $('#customerInfo').html('');
 
-                        const customerInfoHTML = `
-                                                <div id="customerInfo">
-                                                    <button id="backButton" class="btn btn-secondary mb-3">ย้อนกลับ</button>
-                                                    <div id="cusINFO">
-                                                        <h3>รหัสลูกค้า : ${data.cus_id}</h3> 
-                                                        <h3> ชื่อลูกค้า : ${data.cus_name}</h3>
-                                                    </div>
-                                                    <div id="compINFO">
-                                                    <button class="btn btn-primary">ตกลง</button>
-                                                    <button class="btn btn-secondary">ยกเลิก</button>
-                                                </div>
+                        const customerInfoHTML = ` 
+                        <div id="customerInfo">
+                        <div id="cusINFO">
+                            <h3>รหัสลูกค้า : ${data.cus_id}</h3> 
+                            <h3> ชื่อลูกค้า : ${data.cus_name}</h3>
+                        </div>               
+                        <form id="appointmentForm">
+                    <input type="hidden" id="task_id" name="task_id" >
+                    <input type="hidden" id="cus_id" name="cus_id" value="${data.cus_id}" readonly>
+                    <input type="hidden" id="task_datetime" name="task_datetime">
+                    <input type="hidden" id="pay_datetime" name="pay_datetime">
+                    <div class="form-group">
+                        <label for="task_datetime">Task Date and Time</label>
+                        <input type="datetime-local" class="form-control" id="datetime" name="task_datetime">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pay_status">Pay Status</label>
+                        <select class="form-control" id="pay_status" name="pay_status">
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pay_type">Pay Type</label>
+                        <input type="text" class="form-control" id="pay_type" name="pay_type">
+                    </div>
+                    <div class="form-group">
+                        <label for="pay_total">Pay Total</label>
+                        <input type="number" class="form-control" id="pay_total" name="pay_total">
+                    </div>
+                </form>
+
+                <div id="compINFO ">
+                <button id="SaveBut" class="btn btn-primary">ตกลง</button>
+                <button id="backButton" class="btn btn-secondary">ยกเลิก</button>
+                       </div>
                                             `;
 
                         $('#customerInfo').append(customerInfoHTML);
@@ -216,23 +262,28 @@ $(document).ready(function() {
                             $('#DataTable').show();
 
                             $('#customerInfo').html('');
+                            $('#productInfo').html('');
                         });
+                        $('#SaveBut').on('click', function() {
+                            fetch ('../api/product', {
+                                method: 'POST',
+                                body: JSON.stringify({
+                                case: 'TaskPro',
+                                cus_id: $('#cus_id').val(),
+                                Taskdatetime: $('#datetime').val(),
+                                }),
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log(data);
+                                return data;
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                            })
+                        })
                     }
 
-
-
-                    // Handle cancel button click event
-                    $('#cancelButton').click(function() {
-                        $('#editModal').modal('hide');
-                    });
-
-                    // Handle confirm button click event
-                    $('#confirmButton').click(function() {
-                        // Perform actions when confirm button is clicked
-                        // For example, you can retrieve input values and perform AJAX request to update data
-                        // After that, you can close the modal
-                        $('#editModal').modal('hide');
-                    });
                 }
             },
             error: function(xhr, status, error) {
@@ -240,6 +291,4 @@ $(document).ready(function() {
             }
         });
     });
-
-    
 </script>

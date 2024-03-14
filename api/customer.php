@@ -150,8 +150,4 @@ try {
 	// console log
 	echo json_encode($data);
 }
-
-
-
-
 ?>

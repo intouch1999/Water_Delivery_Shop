@@ -145,5 +145,80 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 		$data[0] = array("status"=>"0","error_message" => $e->getMessage());
 	}
 	echo json_encode(@$data);
+} else if(@$_REQUEST['case']=='show_product'){
+	try {
+		$data = array();
+	
+		$query = "SELECT * FROM `product_info`";
+	
+		$stmt = $conn->query($query);
+	
+		if ($stmt->rowCount() > 0) {
+			while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+				$data[] = $row;
+			}
+		}
+	} catch (PDOException $e) {
+		$data[0]['error_message'] = $e->getMessage();
+	}
+	// console log
+	echo json_encode($data);
+} else if(@$decode['case']=='TaskPro') {
+    function generateTaskIdFromMySQL() {
+		include('../server/connection.php');
+		$currentYear = date('Y');
+		$nextTaskId = '';
+		try {
+			$query = "SELECT MAX(CAST(SUBSTRING(task_id, 3) AS UNSIGNED)) AS max_task_id FROM delivery_task";
+			$stmt = $conn->query($query);
+			$row = $stmt->fetch(PDO::FETCH_ASSOC);
+			$maxTaskId = $row['max_task_id'];
+	
+			// Check if $maxTaskId is null or empty
+			if ($maxTaskId === null) {
+				// If null, set $maxTaskId to 0
+				$maxTaskId = 0;
+			}
+	
+			// Increment $maxTaskId by 1
+			$maxTaskId++;
+	
+			// Pad $maxTaskId with leading zeros
+			$paddedTaskId = str_pad($maxTaskId, 6, '0', STR_PAD_LEFT);
+	
+			// Construct the next task id
+			$nextTaskId = 'SV' . substr($currentYear, -2) . $paddedTaskId;
+		} catch (PDOException $e) {
+			echo "Connection failed: " . $e->getMessage();
+		}
+		return $nextTaskId;
+	}
+	
+
+    $taskId = generateTaskIdFromMySQL();
+    
+    $customerId = $decode['cus_id'];
+    
+    $taskDatetime = $decode['Taskdatetime'];
+    
+    $taskStatus = 1;
+
+    try {
+        $query = "INSERT INTO `delivery_task` (`task_id`, `cus_id`, `task_datetime`, `sale_user`, `task_status`)
+                    VALUES ('$taskId', '$customerId', '$taskDatetime', '$sivanat_user', '$taskStatus')";
+        
+        $stmt = $conn->query($query);
+
+        if($stmt) {
+            $data[0] = array("status" => "1", "message" => "Task added successfully");
+        } else {
+            $data[0] = array("status" => "0", "error_message" => "Failed to add task");
+        }
+    } catch(PDOException $e) {
+        $data[0] = array("status" => "0", "error_message" => $e->getMessage());
+    }
+    
+    echo json_encode($data);
 }
+
 ?>
