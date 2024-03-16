@@ -145,81 +145,89 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 		$data[0] = array("status"=>"0","error_message" => $e->getMessage());
 	}
 	echo json_encode(@$data);
-} else if(@$_REQUEST['case']=='show_product'){
-	try {
-		$data = array();
-	
-		$query = "SELECT * FROM `product_info`";
-	
-		$stmt = $conn->query($query);
-	
-		if ($stmt->rowCount() > 0) {
-			while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-				$data[] = $row;
-			}
-		}
-	} catch (PDOException $e) {
-		$data[0]['error_message'] = $e->getMessage();
-	}
-	// console log
-	echo json_encode($data);
-} else if(@$decode['case']=='TaskPro') {
-    function generateTaskIdFromMySQL() {
-		include('../server/connection.php');
-		$currentYear = date('y'); // เปลี่ยนจาก 'Y' เป็น 'y' เพื่อให้ได้ปีในรูปแบบสองหลัก
-		$nextTaskId = '';
-		try {
-			$query = "SELECT MAX(CAST(SUBSTRING(task_id, 5) AS UNSIGNED)) AS max_task_id FROM delivery_task WHERE task_id LIKE 'SV$currentYear%'";
-			$stmt = $conn->query($query);
-			$row = $stmt->fetch(PDO::FETCH_ASSOC);
-			$maxTaskId = $row['max_task_id'];
-	
-			// Check if $maxTaskId is null or empty
-			if ($maxTaskId === null) {
-				// If null, set $maxTaskId to 0
-				$maxTaskId = 0;
-			}
-	
-			// Increment $maxTaskId by 1
-			$maxTaskId++;
-	
-			// Pad $maxTaskId with leading zeros
-			$paddedTaskId = str_pad($maxTaskId, 5, '0', STR_PAD_LEFT); // เปลี่ยนจาก 6 เป็น 5 เพราะไม่รวมส่วน 'SV'
-	
-			// Construct the next task id
-			$nextTaskId = 'SV' . $currentYear . $paddedTaskId;
-		} catch (PDOException $e) {
-			echo "Connection failed: " . $e->getMessage();
-		}
-		return $nextTaskId;
-	}
-	
-	
-
-    $taskId = generateTaskIdFromMySQL();
-    
-    $customerId = $decode['cus_id'];
-    
-    $taskDatetime = $decode['Taskdatetime'];
-    
-    $taskStatus = 1;
-
+} else if (@$decode['case'] == 'show_product') {
     try {
+
+		$data[0] = array('status' => 0);
+        $query = "SELECT Nindex, product_id, product_name, product_img FROM `product_info`";
+
+		$stmt = $conn->query($query);  
+
+		while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){ 
+	
+			$data[0] = array('status'=>1);
+	
+			$data[] = $row;
+        }
+    } catch (PDOException $e) {
+        $data[0]['error_message'] = $e->getMessage();
+    }
+    // console log
+    echo json_encode($data);
+} else if(@$decode['case']=='TaskPro') {
+    try {
+        // Generate task ID
+        function generateTaskIdFromMySQL($conn) {
+            $currentYear = date('y');
+            $nextTaskId = '';
+            $query = "SELECT MAX(CAST(SUBSTRING(task_id, 5) AS UNSIGNED)) AS max_task_id FROM delivery_task WHERE task_id LIKE 'SV$currentYear%'";
+            $stmt = $conn->query($query);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $maxTaskId = $row['max_task_id'];
+
+            if ($maxTaskId === null) {
+                $maxTaskId = 0;
+            }
+
+            $maxTaskId++;
+
+            $paddedTaskId = str_pad($maxTaskId, 5, '0', STR_PAD_LEFT);
+
+            $nextTaskId = 'SV' . $currentYear . $paddedTaskId;
+            return $nextTaskId;
+        }
+
+        $taskId = generateTaskIdFromMySQL($conn); // Pass $conn to the function
+
+        // Insert into delivery_task table
+        $customerId = $decode['cus_id'];
+        $taskDatetime = $decode['Taskdatetime'];
+        $taskStatus = 1;
+
         $query = "INSERT INTO `delivery_task` (`task_id`, `cus_id`, `task_datetime`, `sale_user`, `task_status`)
                     VALUES ('$taskId', '$customerId', '$taskDatetime', '$sivanat_user', '$taskStatus')";
-        
+
         $stmt = $conn->query($query);
 
-        if($stmt) {
-            $data[0] = array("status" => "1", "message" => "Task added successfully");
+        // Check if the first insert was successful
+        if ($stmt->rowCount() > 0) {
+            // Insert into delivery_task_produced table
+            $product_id = $decode['product_id']; // Assuming you have product_id in your $decode array
+
+            $query2 = "INSERT INTO `delivery_task_product` (`task_id`, `product_id`)
+                        VALUES ('$taskId', '$product_id')";
+            $stmt2 = $conn->query($query2);
+
+            if ($stmt2->rowCount() > 0) {
+                // Both inserts were successful
+                $data['status'] = 1;
+            } else {
+                // Failed to insert into delivery_task_produced
+                $data['status'] = 0;
+                $data['error_message'] = "Failed to insert into delivery_task_produced";
+            }
         } else {
-            $data[0] = array("status" => "0", "error_message" => "Failed to add task");
+            // Failed to insert into delivery_task
+            $data['status'] = 0;
+            $data['error_message'] = "Failed to insert into delivery_task";
         }
-    } catch(PDOException $e) {
-        $data[0] = array("status" => "0", "error_message" => $e->getMessage());
+    } catch (PDOException $e) {
+        $data['status'] = 0;
+        $data['error_message'] = $e->getMessage();
     }
-    
+
     echo json_encode($data);
 }
+
 
 ?>
