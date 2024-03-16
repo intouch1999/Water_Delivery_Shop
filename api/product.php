@@ -227,7 +227,28 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
     }
 
     echo json_encode($data);
+} else if(@$decode['case'] == 'TaskShow') {
+    try {
+        $data = array();
+		// $cusID = $decode['cus_id'];
+		$query = "SELECT * FROM `delivery_task` WHERE `cus_id` = '" . $decode['cus_id'] . "' ORDER BY `task_datetime` DESC";
+
+
+        $stmt = $conn->query($query);
+        if ($stmt->rowCount() > 0) {
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $data[] = $row; // Store each fetched row in the $data array
+            }
+        }
+    } catch (PDOException $e) {
+        // Handle PDO exceptions
+        $data['status'] = 0;
+        $data['error_message'] = $e->getMessage(); // Provide error message in case of exception
+    }
+    echo json_encode(@$data); // Encode $data array as JSON and echo the response
 }
+
+
 
 
 ?>
