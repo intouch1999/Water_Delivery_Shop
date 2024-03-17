@@ -105,35 +105,9 @@ try {
 
 	echo json_encode($data);
 	
-} else if(@$decode['case']=='searchcus'){
-	try {
-		$data = array();
-		$data[0] = array('status' => 0);
-	
-		$searchCus = $decode['SearchCus'];
-		$searchCus = htmlspecialchars($searchCus);
-	
-		$query = "SELECT `cus_id`, `cus_name`, `comp_type`, `cus_address`, `lat`, `lon`, `create_user`, `create_datetime` FROM `delivery_customer` WHERE `cus_name` LIKE '%$searchCus%' OR `cus_address` LIKE '%$searchCus%'";
-	
-		$stmt = $conn->query($query);
-	
-			if ($stmt->rowCount() > 0) {
-				$data[0]['status'] = 1;
-				while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-					$data[] = $row;
-				}
-			} else {
-				$data[0]['status'] = 0;
-			}
-		
-	} catch (PDOException $e) {
-		$data[0]['error_message'] = $e->getMessage();
-	}
-	
-	echo json_encode($data);
 } else if(@$_REQUEST['case']=='select_cus_datatable'){
 	try {
-		$data = array();
+		$data[0] = array('status' => 0);
 	
 		$query = "SELECT `cus_id`, `cus_name`, `comp_type`, `cus_address` FROM `delivery_customer` ORDER BY cus_id ASC";
 	
@@ -141,6 +115,7 @@ try {
 	
 		if ($stmt->rowCount() > 0) {
 			while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+				$data[0] = array('status' => 1);
 				$data[] = $row;
 			}
 		}
@@ -148,6 +123,6 @@ try {
 		$data[0]['error_message'] = $e->getMessage();
 	}
 	// console log
-	echo json_encode($data);
+	echo json_encode(@$data);
 }
 ?>

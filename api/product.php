@@ -145,32 +145,13 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 		$data[0] = array("status"=>"0","error_message" => $e->getMessage());
 	}
 	echo json_encode(@$data);
-} else if (@$decode['case'] == 'show_product') {
-    try {
-
-		$data[0] = array('status' => 0);
-        $query = "SELECT Nindex, product_id, product_name, product_img FROM `product_info`";
-
-		$stmt = $conn->query($query);  
-
-		while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){ 
-	
-			$data[0] = array('status'=>1);
-	
-			$data[] = $row;
-        }
-    } catch (PDOException $e) {
-        $data[0]['error_message'] = $e->getMessage();
-    }
-    // console log
-    echo json_encode($data);
-} else if(@$decode['case']=='TaskPro') {
+}else if (@$decode['case'] == 'TaskPro') {
     try {
         // Generate task ID
         function generateTaskIdFromMySQL($conn) {
             $currentYear = date('y');
             $nextTaskId = '';
-            $query = "SELECT MAX(CAST(SUBSTRING(task_id, 5) AS UNSIGNED)) AS max_task_id FROM delivery_task WHERE task_id LIKE 'SV$currentYear%'";
+            $query = "SELECT MAX(CAST(SUBSTRING(task_id, 6) AS UNSIGNED)) AS max_task_id FROM delivery_task WHERE task_id LIKE 'SV$currentYear%'";
             $stmt = $conn->query($query);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             $maxTaskId = $row['max_task_id'];
@@ -181,7 +162,7 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 
             $maxTaskId++;
 
-            $paddedTaskId = str_pad($maxTaskId, 5, '0', STR_PAD_LEFT);
+            $paddedTaskId = str_pad($maxTaskId, 6, '0', STR_PAD_LEFT);
 
             $nextTaskId = 'SV' . $currentYear . $paddedTaskId;
             return $nextTaskId;
@@ -193,59 +174,72 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
         $customerId = $decode['cus_id'];
         $taskDatetime = $decode['Taskdatetime'];
         $taskStatus = 1;
+		$product_id = $decode['find_product'];
+		$product_active = 1;
+		$product_qty = $decode['product_qty'];
 
-        $query = "INSERT INTO `delivery_task` (`task_id`, `cus_id`, `task_datetime`, `sale_user`, `task_status`)
+        $query_task = "INSERT INTO `delivery_task` (`task_id`, `cus_id`, `task_datetime`, `sale_user`, `task_status`)
                     VALUES ('$taskId', '$customerId', '$taskDatetime', '$sivanat_user', '$taskStatus')";
 
-        $stmt = $conn->query($query);
+        $stmt_task = $conn->query($query_task);
 
-        // Check if the first insert was successful
-        if ($stmt->rowCount() > 0) {
-            // Insert into delivery_task_produced table
-            $product_id = $decode['product_id']; // Assuming you have product_id in your $decode array
+		$query_product = "INSERT INTO `delivery_task_product` (`task_id`, `product_id`, `product_active`, `product_qty`, `create_datetime`, `sale_user`)
+					VALUES ('$taskId', '$product_id', '$product_active', '$product_qty', NOW(), '$sivanat_user')";
 
-            $query2 = "INSERT INTO `delivery_task_product` (`task_id`, `product_id`)
-                        VALUES ('$taskId', '$product_id')";
-            $stmt2 = $conn->query($query2);
-
-            if ($stmt2->rowCount() > 0) {
-                // Both inserts were successful
-                $data['status'] = 1;
-            } else {
-                // Failed to insert into delivery_task_produced
-                $data['status'] = 0;
-                $data['error_message'] = "Failed to insert into delivery_task_produced";
-            }
+		$stmt_product = $conn->query($query_product);
+		if ($stmt_task && $stmt_product) {
+            $data[0] = array('status' => 1);
         } else {
-            // Failed to insert into delivery_task
-            $data['status'] = 0;
-            $data['error_message'] = "Failed to insert into delivery_task";
+			$data[0] = array('status' => 0);
         }
     } catch (PDOException $e) {
-        $data['status'] = 0;
-        $data['error_message'] = $e->getMessage();
-    }
-
+        $data[0]['error_message'] = $e->getMessage();
+	}
     echo json_encode($data);
+
 } else if(@$decode['case'] == 'TaskShow') {
     try {
-        $data = array();
-		// $cusID = $decode['cus_id'];
-		$query = "SELECT * FROM `delivery_task` WHERE `cus_id` = '" . $decode['cus_id'] . "' ORDER BY `task_datetime` DESC";
+        $data[0] = array('status' => 0);
+		$cusID = $decode['cus_id'];
+		$query = "SELECT * FROM `delivery_task` WHERE `cus_id` = '{$cusID}' ORDER BY `task_datetime` DESC";
 
 
         $stmt = $conn->query($query);
         if ($stmt->rowCount() > 0) {
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                $data[] = $row; // Store each fetched row in the $data array
+				$data[0] = array('status' => 1);
+                $data[] = $row;
             }
         }
     } catch (PDOException $e) {
-        // Handle PDO exceptions
-        $data['status'] = 0;
-        $data['error_message'] = $e->getMessage(); // Provide error message in case of exception
+        $data[0]['error_message'] = $e->getMessage();
     }
-    echo json_encode(@$data); // Encode $data array as JSON and echo the response
+    echo json_encode(@$data);
+
+} else if (@$decode['case'] == 'Tasksucc') {
+    try {
+        $data[0] = array('status' => 0);
+        $taskID = $decode['taskID'];
+		$last_datetime = $decode['last_datetime'];
+        
+        // Update delivery_task table
+        $query_task = "UPDATE `delivery_task` SET `task_status` = 2 WHERE `task_id` = '{$taskID}'";
+        $stmt_task = $conn->query($query_task);
+
+        // Update delivery_task_product table
+        $query_product = "UPDATE `delivery_task_product` SET `product_active` = 2 , `last_datetime` = '{$last_datetime}' WHERE `task_id` = '{$taskID}'";
+        $stmt_product = $conn->query($query_product);
+
+        // Check if both queries were successful
+        if ($stmt_task && $stmt_product) {
+            $data[0] = array('status' => 1);
+        } else {
+			$data[0] = array('status' => 0);
+        }
+    } catch (PDOException $e) {
+        $data[0]['error_message'] = $e->getMessage();
+	}
+    echo json_encode($data);
 }
 
 
