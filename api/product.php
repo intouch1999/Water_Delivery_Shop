@@ -145,6 +145,57 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 		$data[0] = array("status"=>"0","error_message" => $e->getMessage());
 	}
 	echo json_encode(@$data);
+// }else if (@$decode['case'] == 'TaskPro') {
+//     try {
+//         // Generate task ID
+//         function generateTaskIdFromMySQL($conn) {
+//             $currentYear = date('y');
+//             $nextTaskId = '';
+//             $query = "SELECT MAX(CAST(SUBSTRING(task_id, 6) AS UNSIGNED)) AS max_task_id FROM delivery_task WHERE task_id LIKE 'SV$currentYear%'";
+//             $stmt = $conn->query($query);
+//             $row = $stmt->fetch(PDO::FETCH_ASSOC);
+//             $maxTaskId = $row['max_task_id'];
+
+//             if ($maxTaskId === null) {
+//                 $maxTaskId = 0;
+//             }
+
+//             $maxTaskId++;
+
+//             $paddedTaskId = str_pad($maxTaskId, 6, '0', STR_PAD_LEFT);
+
+//             $nextTaskId = 'SV' . $currentYear . $paddedTaskId;
+//             return $nextTaskId;
+//         }
+
+//         $taskId = generateTaskIdFromMySQL($conn); // Pass $conn to the function
+
+//         // Insert into delivery_task table
+//         $customerId = $decode['cus_id'];
+//         $taskDatetime = $decode['Taskdatetime'];
+//         $taskStatus = 1;
+// 		$product_id = $decode['find_product'];
+// 		$product_active = 1;
+// 		$product_qty = $decode['product_qty'];
+
+//         $query_task = "INSERT INTO `delivery_task` (`task_id`, `cus_id`, `task_datetime`, `sale_user`, `task_status`)
+//                     VALUES ('$taskId', '$customerId', '$taskDatetime', '$sivanat_user', '$taskStatus')";
+
+//         $stmt_task = $conn->query($query_task);
+
+// 		$query_product = "INSERT INTO `delivery_task_product` (`task_id`, `product_id`, `product_active`, `product_qty`, `create_datetime`, `sale_user`)
+// 					VALUES ('$taskId', '$product_id', '$product_active', '$product_qty', NOW(), '$sivanat_user')";
+
+// 		$stmt_product = $conn->query($query_product);
+// 		if ($stmt_task && $stmt_product) {
+//             $data[0] = array('status' => 1);
+//         } else {
+// 			$data[0] = array('status' => 0);
+//         }
+//     } catch (PDOException $e) {
+//         $data[0]['error_message'] = $e->getMessage();
+// 	}
+//     echo json_encode($data);
 }else if (@$decode['case'] == 'TaskPro') {
     try {
         // Generate task ID
@@ -174,36 +225,49 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
         $customerId = $decode['cus_id'];
         $taskDatetime = $decode['Taskdatetime'];
         $taskStatus = 1;
-		$product_id = $decode['find_product'];
-		$product_active = 1;
-		$product_qty = $decode['product_qty'];
+        $sivanat_user = $decode['sivanat_user']; // assuming you have this value
+        
+        // Loop through each product and insert into delivery_task_product
+        foreach ($decode['find_product'] as $index => $product_id) {
+            $product_active = 1;
+            $product_qty = $decode['product_qty'][$index];
+            
+            $query_product = "INSERT INTO `delivery_task_product` (`task_id`, `product_id`, `product_active`, `product_qty`, `create_datetime`, `sale_user`)
+                    VALUES ('$taskId', '$product_id', '$product_active', '$product_qty', NOW(), '$sivanat_user')";
 
+            $stmt_product = $conn->query($query_product);
+            
+            if (!$stmt_product) {
+                $data[0] = array('status' => 0);
+                echo json_encode($data);
+                exit; // Exit if insertion fails
+            }
+        }
+        
+        // Insert into delivery_task table after products are inserted
         $query_task = "INSERT INTO `delivery_task` (`task_id`, `cus_id`, `task_datetime`, `sale_user`, `task_status`)
                     VALUES ('$taskId', '$customerId', '$taskDatetime', '$sivanat_user', '$taskStatus')";
 
         $stmt_task = $conn->query($query_task);
 
-		$query_product = "INSERT INTO `delivery_task_product` (`task_id`, `product_id`, `product_active`, `product_qty`, `create_datetime`, `sale_user`)
-					VALUES ('$taskId', '$product_id', '$product_active', '$product_qty', NOW(), '$sivanat_user')";
-
-		$stmt_product = $conn->query($query_product);
-		if ($stmt_task && $stmt_product) {
+        if ($stmt_task) {
             $data[0] = array('status' => 1);
         } else {
-			$data[0] = array('status' => 0);
+            $data[0] = array('status' => 0);
         }
     } catch (PDOException $e) {
         $data[0]['error_message'] = $e->getMessage();
-	}
-    echo json_encode($data);
+    }
+    echo json_encode(@$data);
 
-} else if(@$decode['case'] == 'TaskShow') {
+}else if(@$decode['case'] == 'TaskShow') {
     try {
         $data[0] = array('status' => 0);
 		$cusID = $decode['cus_id'];
-		$query = "SELECT * FROM `delivery_task` WHERE `cus_id` = '{$cusID}' ORDER BY `task_datetime` DESC";
-
-
+		$query = "SELECT delivery_task.task_id, delivery_task.cus_id, delivery_task.task_datetime, delivery_task.task_status, delivery_task_product.product_id, delivery_task_product.product_active, delivery_task_product.product_qty, delivery_task_product.create_datetime, delivery_task_product.last_datetime FROM delivery_task            
+		         INNER JOIN delivery_task_product ON delivery_task.task_id = delivery_task_product.task_id
+                  WHERE delivery_task.cus_id = '{$cusID}'
+                  ORDER BY delivery_task.task_datetime DESC";
         $stmt = $conn->query($query);
         if ($stmt->rowCount() > 0) {
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -215,7 +279,6 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
         $data[0]['error_message'] = $e->getMessage();
     }
     echo json_encode(@$data);
-
 } else if (@$decode['case'] == 'Tasksucc') {
     try {
         $data[0] = array('status' => 0);
@@ -240,6 +303,26 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
         $data[0]['error_message'] = $e->getMessage();
 	}
     echo json_encode($data);
+} else if (@$decode['case'] == 'thisisaproduct') {
+	try {
+		$data[0] = array('status' => 0);
+		$query = "SELECT `nIndex`, `product_id`, `product_name`, `product_img`
+		,(SELECT cat_name FROM product_category WHERE cat_id = t1.cat_id) AS cat_name
+		,(SELECT cat_sub_name FROM product_category_sub WHERE cat_sub_id = t1.cat_sub_id) AS cat_sub_name
+		,unit,`unit_price`,pack, `pack_price`, `product_active`, `create_user`, `create_date`, `edit_user`, `edit_date` FROM `product_info` AS t1
+		 ORDER BY nIndex DESC
+		";
+		$stmt = $conn->query($query);
+		if ($stmt->rowCount() > 0) {
+			while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+				$data[0] = array('status' => 1);
+				$data[] = $row;
+			}
+		}
+	} catch (PDOException $e) {
+		$data[0]['error_message'] = $e->getMessage();
+	}
+	echo json_encode($data);
 }
 
 

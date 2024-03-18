@@ -77,7 +77,6 @@
                     </h5>
                     <input type="hidden" id="task_id" name="task_id">
                     <input type="hidden" id="cus_id" name="cus_id" value="${data.cus_id}" readonly>
-                    <input type="hidden" id="task_datetime" name="task_datetime">
                     <input type="hidden" id="pay_datetime" name="pay_datetime">
                     <div class="row gx-3 gy-2 align-items-center">
                         <div class="col-md-3">
@@ -89,10 +88,11 @@
                             <input type="text" class="form-control" list="data_product_list" name="inp_search_product" id="find_product" placeholder="ระบุชื่อ หรือ รหัสสินค้า">
                         </div>
                         <datalist id="data_product_list"></datalist>
-                        <div class="col-md-1">
+                        <div class="col-md-2">
                             <label class="form-label" for="product_qty">จำนวน</label>
                             <input type="number" class="form-control" id="product_qty" placeholder="จำนวน">
                         </div>
+                        
                         <!-- <div class="form-group">
                             <label for="pay_status">Pay Status</label>
                             <select class="form-control" id="pay_status" name="pay_status">
@@ -120,6 +120,14 @@
                             <button type="button" id="submit_Task" class="btn btn-primary d-block">บันทึก</button>
                         </div>
                     </div>
+                    <div class="row gx-3 gy-2 align-items-center">
+                    <div class="col-md-3">
+                            <label class="form-label" for="myproduct">สินค้า</label>
+                            <div id="myproduct" class="product-container">
+
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive text-nowrap">
@@ -129,6 +137,10 @@
                                     <th>รหัสนัดหมาย</th>
                                     <th>รหัสลูกค้า</th>
                                     <th>วันที่นัดหมาย</th>
+                                    <th>สินค้าที่ต้องจัดส่ง</th>
+                                    <th>จำนวน</th>
+                                    <th>จัดส่งสำเร็จเวลา</th>
+
                                 </tr>
                             </thead>
                             <tbody>
@@ -154,9 +166,8 @@
                 <!-- <link rel="stylesheet" href="https://cdn.datatables.net/rowreorder/1.5.0/css/rowReorder.dataTables.css" />
             <script src="https:/cdn.datatables.net/rowreorder/1.5.0/js/dataTables.rowReorder.js"></script> -->
 
-            </footer>>
+            </footer>
             <script>
-
                 $(document).ready(function() {
 
                     $.ajax({
@@ -171,7 +182,7 @@
                                     var table = $('#customerData').DataTable({
                                         responsive: true,
                                         data: response.filter(function(item) {
-                                        return !('status' in item);
+                                            return !('status' in item);
                                         }),
                                         columns: [{
                                                 data: 'cus_id'
@@ -198,129 +209,128 @@
                                         location.reload();
                                     });
 
-                                    $('#customerData').on('click', '.btn-edit', function() {
-                                        var data = table.row($(this).parents('tr')).data();
-                                        var cus_id = data.cus_id;
-                                        $('#DataTable').hide();
-                                        $('#taskuserlist').show();
+                                    // $('#customerData').on('click', '.btn-edit', function() {
+                                    //     var data = table.row($(this).parents('tr')).data();
+                                    //     var cus_id = data.cus_id;
+                                    //     $('#DataTable').hide();
+                                    //     $('#taskuserlist').show();
 
-                                        $('#cus_id').val(cus_id);
+                                    //     $('#cus_id').val(cus_id);
 
-                                        if ($.fn.DataTable.isDataTable('#taskData')) {
-                                            taskDataTable.destroy();
-                                        }
+                                    //     if ($.fn.DataTable.isDataTable('#taskData')) {
+                                    //         taskDataTable.destroy();
+                                    //     }
 
-                                        $.ajax({
-                                            url: '../api/product?case=TaskShow',
-                                            type: 'POST',
-                                            dataType: 'json',
-                                            contentType: 'application/json',
-                                            data: JSON.stringify({
-                                                case: 'TaskShow',
-                                                cus_id: cus_id
-                                            }),
-                                            success: function(response) {
-                                            console.log(response);
-                                            try {
-                                                if (!response.error_message) {
-                                                    taskDataTable = $('#taskData').DataTable({
-                                                        response: true,
-                                                        data: response.filter(function(item) {
-                                                        return !('status' in item);
-                                                        }),
-                                                        columns: [{
-                                                                data: 'task_id'
-                                                            },
-                                                            {
-                                                                data: 'cus_id'
-                                                            },
-                                                            {
-                                                                data: 'task_datetime'
-                                                            },
-                                                            {
-                                                                data: null,
-                                                                defaultContent: '<button class="btn btn-primary btn-sm btn-success">จัดส่งสำเร็จ</button>'
-                                                            }
-                                                        ]
-                                                    });
-                                                    $('#submit_Task').on('click', async function() {
-                                                    try {
-                                                        const response = await fetch('../api/product?case=TaskPro', {
-                                                            method: 'POST',
-                                                            body: JSON.stringify({
-                                                                case: 'TaskPro',
-                                                                cus_id: $('#cus_id').val(),
-                                                                Taskdatetime: $('#datetime').val(),
-                                                                find_product: $('#find_product').val(),
-                                                                product_qty: $('#product_qty').val()
-                                                            }),
-                                                        });
+                                    //     $.ajax({
+                                    //         url: '../api/product?case=TaskShow',
+                                    //         type: 'POST',
+                                    //         dataType: 'json',
+                                    //         contentType: 'application/json',
+                                    //         data: JSON.stringify({
+                                    //             case: 'TaskShow',
+                                    //             cus_id: cus_id
+                                    //         }),
+                                    //         success: function(response) {
+                                    //         console.log(response);
+                                    //         try {
+                                    //             if (!response.error_message) {
+                                    //                 taskDataTable = $('#taskData').DataTable({
+                                    //                     response: true,
+                                    //                     data: response.filter(function(item) {
+                                    //                     return !('status' in item);
+                                    //                     }),
+                                    //                     columns: [{
+                                    //                             data: 'task_id'
+                                    //                         },
+                                    //                         {
+                                    //                             data: 'cus_id'
+                                    //                         },
+                                    //                         {
+                                    //                             data: 'task_datetime'
+                                    //                         },
+                                    //                         {
+                                    //                             data: null,
+                                    //                             defaultContent: '<button class="btn btn-primary btn-sm btn-success">จัดส่งสำเร็จ</button>'
+                                    //                         }
+                                    //                     ]
+                                    //                 });
+                                    //                 $('#submit_Task').on('click', async function() {
+                                    //                 try {
+                                    //                     const response = await fetch('../api/product?case=TaskPro', {
+                                    //                         method: 'POST',
+                                    //                         body: JSON.stringify({
+                                    //                             case: 'TaskPro',
+                                    //                             cus_id: $('#cus_id').val(),
+                                    //                             Taskdatetime: $('#datetime').val(),
+                                    //                             find_product: $('#find_product').val(),
+                                    //                             product_qty: $('#product_qty').val()
+                                    //                         }),
+                                    //                     });
 
-                                                        if (!response.ok) {
-                                                            throw new Error('Network response was not ok');
-                                                        }
+                                    //                     if (!response.ok) {
+                                    //                         throw new Error('Network response was not ok');
+                                    //                     }
 
-                                                        const json = await response.json();
+                                    //                     const json = await response.json();
 
-                                                        if (json[0].status == '0') {
-                                                            alert_snackbar('error', json[0].error_message);
-                                                        } else {
-                                                            alert_snackbar('success', "เพิ่มนัดหมายสำเร็จ");
-                                                            await preload_page(); // เรียกใช้ preload_page() เมื่อเสร็จสิ้นการเพิ่มนัดหมาย
-                                                        }
-                                                    } catch (error) {
-                                                        console.error('Error:', error);
-                                                    }
-                                                });
+                                    //                     if (json[0].status == '0') {
+                                    //                         alert_snackbar('error', json[0].error_message);
+                                    //                     } else {
+                                    //                         alert_snackbar('success', "เพิ่มนัดหมายสำเร็จ");
+                                    //                         await preload_page(); // เรียกใช้ preload_page() เมื่อเสร็จสิ้นการเพิ่มนัดหมาย
+                                    //                     }
+                                    //                 } catch (error) {
+                                    //                     console.error('Error:', error);
+                                    //                 }
+                                    //             });
 
-                                                    } else {
-                                                        $('#taskData').text('Error: ' + response.error_message);
-                                                    }
-                                                } catch (error) {
-                                                    console.error('Error:', error);
-                                                }
-                                            },
-                                            error: function(xhr, status, error) {
-                                                console.error('Error: ' + error);
-                                            }
-                                        });
-                                    });
+                                    //                 } else {
+                                    //                     $('#taskData').text('Error: ' + response.error_message);
+                                    //                 }
+                                    //             } catch (error) {
+                                    //                 console.error('Error:', error);
+                                    //             }
+                                    //         },
+                                    //         error: function(xhr, status, error) {
+                                    //             console.error('Error: ' + error);
+                                    //         }
+                                    //     });
+                                    // });
 
-                                    $('#taskData').on('click', '.btn-success', function() {
-                                    var rowData = taskDataTable.row($(this).parents('tr')).data();
+                                    //     $('#taskData').on('click', '.btn-success', function() {
+                                    //     var rowData = taskDataTable.row($(this).parents('tr')).data();
 
-                                    var last_datetime = new Date().toISOString(); // Format: YYYY-MM-DDTHH:MM:SSZ
+                                    //     var last_datetime = new Date().toISOString(); // Format: YYYY-MM-DDTHH:MM:SSZ
 
-                                    rowData.task_datetime = last_datetime;
+                                    //     rowData.task_datetime = last_datetime;
 
-                                    // taskDataTable.row($(this).parents('tr')).data(rowData).draw();
+                                    //     // taskDataTable.row($(this).parents('tr')).data(rowData).draw();
 
-                                    fetch('../api/product?case=Tasksucc', {
-                                        method: 'POST',
-                                        body: JSON.stringify({
-                                            case: 'Tasksucc',
-                                            taskID: rowData.task_id,
-                                            last_datetime: last_datetime
-                                        }),
-                                    })
-                                    .then(function(response) {
-                                        return response.json();
-                                    })
-                                    .then(function(json) {
-                                        if(json[0].status=='0'){
-                                            alert_snackbar('error',json[0].error_message);
-                                        }else{
-                                            alert_snackbar('success',"จัดส่งสำเร็จ");
-                                        
-			                            }
-                                    })
-                                    .catch(function(error) {
-                                        console.error('Error:', error);
-                                    });
-                                });
-
-
-
+                                    //     fetch('../api/product?case=Tasksucc', {
+                                    //         method: 'POST',
+                                    //         body: JSON.stringify({
+                                    //             case: 'Tasksucc',
+                                    //             taskID: rowData.task_id,
+                                    //             last_datetime: last_datetime
+                                    //         }),
+                                    //     })
+                                    //     .then(function(response) {
+                                    //         return response.json();
+                                    //     })
+                                    //     .then(function(json) {
+                                    //         if(json[0].status=='0'){
+                                    //             alert_snackbar('error',json[0].error_message);
+                                    //         }else{
+                                    //             alert_snackbar('success',"จัดส่งสำเร็จ");
+                                    //             setTimeout(function(){
+                                    //             window.location.href = "delivery_t.php";
+                                    //             },1500);
+                                    //         }
+                                    //     })
+                                    //     .catch(function(error) {
+                                    //         console.error('Error:', error);
+                                    //     });
+                                    // });
                                 } else {
                                     $('#customerData').text('Error: ' + response.error_message);
                                 }
@@ -333,6 +343,183 @@
                         }
                     });
                 });
+
+                function editButtonClicked() {
+                    var rowData = getTableRowData($(this));
+                    var cus_id = rowData.cus_id;
+                    $('#DataTable').hide();
+                    $('#taskuserlist').show();
+
+                    $('#cus_id').val(cus_id);
+
+                    if ($.fn.DataTable.isDataTable('#taskData')) {
+                        taskDataTable.destroy();
+                    }
+
+                    $.ajax({
+                        url: '../api/product?case=TaskShow',
+                        type: 'POST',
+                        dataType: 'json',
+                        contentType: 'application/json',
+                        data: JSON.stringify({
+                            case: 'TaskShow',
+                            cus_id: cus_id
+                        }),
+                        success: function(response) {
+                            console.log(response);
+                            try {
+                                if (!response.error_message) {
+                                    taskDataTable = $('#taskData').DataTable({
+                                        response: true,
+                                        data: response.filter(function(item) {
+                                            return !('status' in item);
+                                        }),
+                                        columns: [{
+                                                data: 'task_id'
+                                            },
+                                            {
+                                                data: 'cus_id'
+                                            },
+                                            {
+                                                data: 'task_datetime'
+                                            },
+                                            { 
+                                                data: 'product_id'
+                                            },
+                                            { 
+                                                data: 'product_qty'
+                                            },
+                                            { 
+                                                data: 'last_datetime'
+                                            },
+                                            {
+                                                data: null,
+                                                defaultContent: '<button class="btn btn-primary btn-sm btn-success">จัดส่งสำเร็จ</button>'
+                                            }
+                                        ]
+                                    });
+
+                                } else {
+                                    $('#taskData').text('Error: ' + response.error_message);
+                                }
+                            } catch (error) {
+                                console.error('Error:', error);
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error: ' + error);
+                        }
+                    });
+                };
+                
+                function submitTask() {
+                    fetch('../api/product?case=TaskPro', {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                case: 'TaskPro',
+                                cus_id: $('#cus_id').val(),
+                                Taskdatetime: $('#datetime').val(),
+                                find_product: $('#find_product').val(),
+                                product_qty: $('#product_qty').val()
+                            }),
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        })
+                        .then(function(response) {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(function(json) {
+                            if (json[0].status == '0') {
+                                alert_snackbar('error', json[0].error_message);
+                            } else {
+                                alert_snackbar('success', "เพิ่มนัดหมายสำเร็จ");
+                                setTimeout(function() {
+                                    window.location.href = "delivery_t.php";
+                                }, 1500);
+                            }
+                        })
+                        .catch(function(error) {
+                            console.error('Error:', error);
+                        });
+                }
+
+                function handleSuccessButtonClick() {
+                    var rowData = taskDataTable.row($(this).parents('tr')).data();
+                    var last_datetime = new Date().toISOString(); // Format: YYYY-MM-DDTHH:MM:SSZ
+                    rowData.task_datetime = last_datetime;
+
+                    fetch('../api/product?case=Tasksucc', {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                case: 'Tasksucc',
+                                taskID: rowData.task_id,
+                                last_datetime: last_datetime
+                            }),
+                        })
+                        .then(function(response) {
+                            return response.json();
+                        })
+                        .then(function(json) {
+                            if (json[0].status == '0') {
+                                alert_snackbar('error', json[0].error_message);
+                            } else {
+                                alert_snackbar('success', "จัดส่งสำเร็จ");
+                                setTimeout(function() {
+                                    window.location.href = "delivery_t.php";
+                                }, 1500);
+                            }
+                        })
+                        .catch(function(error) {
+                            console.error('Error:', error);
+                        });
+                }
+
+                function thisisaproduct() {
+                    fetch('../api/product?case=thisisaproduct', {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                case: 'thisisaproduct'
+                            }),
+                        })
+                        .then(function(response) {
+                            return response.json();
+                            
+                        })
+                        .then(products => {
+                        // ดึง div ด้วย id "myproduct"
+                        const myProductDiv = document.getElementById('myproduct');
+
+                        // กรองข้อมูลสินค้าที่ต้องการแสดง
+                        const filteredProducts = products.filter(item => !('status' in item));
+
+                        // เช็คว่ามีสินค้าหรือไม่
+                        if (filteredProducts.length > 0) {
+                            // สำหรับแต่ละสินค้าที่ผ่านการกรอง ให้ทำการดำเนินการตามที่ต้องการ
+                            filteredProducts.forEach(product => {
+                                // สร้าง HTML เพื่อแสดงข้อมูลสินค้า
+                                const productHTML = `
+                                    <div>
+                                        <p>${product.product_id} | ${product.product_name}</p>
+                                        <input type="number" class="form-control" list="data_product_list" name="inp_search_product" id="find_product" placeholder="จำนวน">
+                                    </div>
+                                `;
+
+                                // เพิ่ม HTML สำหรับสินค้านี้ลงใน div
+                                myProductDiv.innerHTML += productHTML;
+                            });
+                        } else {
+                            // ถ้าไม่มีสินค้า
+                            myProductDiv.innerHTML = '<p>No products available.</p>';
+                        }
+                    })
+                    }
+
+
+
                 $(document).ready(function() {
                     const inpSearchProduct = $("#find_product");
                     const dataProductList = $("#data_product_list");
@@ -371,4 +558,21 @@
                         inpSearchProduct.val(selectedOption); // Set input value to product_id
                     });
                 });
+
+
+                $(document).ready(function() {
+                    thisisaproduct();
+
+                    $('#customerData').on('click', '.btn-edit', editButtonClicked);
+                    $('#submit_Task').on('click', submitTask);
+                    $('#taskData').on('click', '.btn-success', handleSuccessButtonClick);
+
+
+                });
+
+                function getTableRowData(btnElement) {
+                    var table = $('#customerData').DataTable(); // กำหนด table ภายในฟังก์ชัน
+                    var data = table.row(btnElement.parents('tr')).data();
+                    return data;
+                }
             </script>
