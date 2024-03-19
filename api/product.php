@@ -225,15 +225,14 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
         $customerId = $decode['cus_id'];
         $taskDatetime = $decode['Taskdatetime'];
         $taskStatus = 1;
-        $sivanat_user = $decode['sivanat_user']; // assuming you have this value
         
         // Loop through each product and insert into delivery_task_product
         foreach ($decode['find_product'] as $index => $product_id) {
             $product_active = 1;
-            $product_qty = $decode['product_qty'][$index];
+            $order_qty = $decode['order_qty'][$index];
             
-            $query_product = "INSERT INTO `delivery_task_product` (`task_id`, `product_id`, `product_active`, `product_qty`, `create_datetime`, `sale_user`)
-                    VALUES ('$taskId', '$product_id', '$product_active', '$product_qty', NOW(), '$sivanat_user')";
+            $query_product = "INSERT INTO `delivery_task_product` (`task_id`, `product_id`, `product_active`, `order_qty`, `create_datetime`, `sale_user`)
+                    VALUES ('$taskId', '$product_id', '$product_active', '$order_qty', NOW(), '$sivanat_user')";
 
             $stmt_product = $conn->query($query_product);
             
@@ -264,7 +263,7 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
     try {
         $data[0] = array('status' => 0);
 		$cusID = $decode['cus_id'];
-		$query = "SELECT delivery_task.task_id, delivery_task.cus_id, delivery_task.task_datetime, delivery_task.task_status, delivery_task_product.product_id, delivery_task_product.product_active, delivery_task_product.product_qty, delivery_task_product.create_datetime, delivery_task_product.last_datetime FROM delivery_task            
+		$query = "SELECT delivery_task.task_id, delivery_task.cus_id, delivery_task.task_datetime, delivery_task.task_status, delivery_task_product.product_id, delivery_task_product.product_active, delivery_task_product.order_qty, delivery_task_product.create_datetime, delivery_task_product.last_datetime FROM delivery_task            
 		         INNER JOIN delivery_task_product ON delivery_task.task_id = delivery_task_product.task_id
                   WHERE delivery_task.cus_id = '{$cusID}'
                   ORDER BY delivery_task.task_datetime DESC";

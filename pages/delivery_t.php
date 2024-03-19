@@ -92,7 +92,7 @@
                             <label class="form-label" for="product_qty">จำนวน</label>
                             <input type="number" class="form-control" id="product_qty" placeholder="จำนวน">
                         </div>
-                        
+
                         <!-- <div class="form-group">
                             <label for="pay_status">Pay Status</label>
                             <select class="form-control" id="pay_status" name="pay_status">
@@ -121,13 +121,41 @@
                         </div>
                     </div>
                     <div class="row gx-3 gy-2 align-items-center">
-                    <div class="col-md-3">
+                        <div class="col-md-3">
                             <label class="form-label" for="myproduct">สินค้า</label>
                             <div id="myproduct" class="product-container">
 
                             </div>
                         </div>
                     </div>
+                </div>
+                <div class="row">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Product Name</th>
+                                <th>Quantity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Product 1</td>
+                                <td><input type="number" class="form-control" name="quantity1" id="quantity1" value="0"></td>
+                            </tr>
+                            <tr>
+                                <td>Product 2</td>
+                                <td><input type="number" class="form-control" name="quantity2" id="quantity2" value="0"></td>
+                            </tr>
+                            <tr>
+                                <td>Product 3</td>
+                                <td><input type="number" class="form-control" name="quantity3" id="quantity3" value="0"></td>
+                            </tr>
+                            <tr>
+                                <td>Product 4</td>
+                                <td><input type="number" class="form-control" name="quantity4" id="quantity4" value="0"></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive text-nowrap">
@@ -383,13 +411,13 @@
                                             {
                                                 data: 'task_datetime'
                                             },
-                                            { 
+                                            {
                                                 data: 'product_id'
                                             },
-                                            { 
-                                                data: 'product_qty'
+                                            {
+                                                data: 'order_qty'
                                             },
-                                            { 
+                                            {
                                                 data: 'last_datetime'
                                             },
                                             {
@@ -411,16 +439,44 @@
                         }
                     });
                 };
-                
+
                 function submitTask() {
+                    var productsAndQuantities = [];
+
+                    // วนลูปผ่านทุกๆ element ที่มีคลาส "theproduct"
+                    document.querySelectorAll('.theproduct').forEach(element => {
+                        // ดึงค่า ID และจำนวนสินค้าออกมาจาก element แต่ละตัว
+                        var productId = element.getAttribute('data-id');
+                        var quantityInput = element.querySelector('input[type="number"]');
+                        var quantity = quantityInput.value;
+
+                        // เพิ่มข้อมูลเกี่ยวกับสินค้าและจำนวนสินค้าลงในอาร์เรย์
+                        if (quantity && parseInt(quantity) !== 0) {
+                            productsAndQuantities.push({
+                                id: productId,
+                                quantity: quantity
+                            });
+                        }
+                    });
+
+                    console.log(productsAndQuantities);
+
+                    // แยกข้อมูลสินค้าและจำนวนสินค้า
+                    var findProduct = productsAndQuantities.map(item => item.id);
+                    var findQty = productsAndQuantities.map(item => item.quantity);
+
+
                     fetch('../api/product?case=TaskPro', {
                             method: 'POST',
                             body: JSON.stringify({
                                 case: 'TaskPro',
                                 cus_id: $('#cus_id').val(),
                                 Taskdatetime: $('#datetime').val(),
-                                find_product: $('#find_product').val(),
-                                product_qty: $('#product_qty').val()
+                                // find_product: $('#find_product').val(),
+                                // find_product: productsAndQuantities,
+                                // product_qty: $('#product_qty').val()
+                                find_product: findProduct,
+                                order_qty: findQty
                             }),
                             headers: {
                                 'Content-Type': 'application/json'
@@ -487,36 +543,28 @@
                         })
                         .then(function(response) {
                             return response.json();
-                            
+
                         })
                         .then(products => {
-                        // ดึง div ด้วย id "myproduct"
-                        const myProductDiv = document.getElementById('myproduct');
+                            const myProductDiv = document.getElementById('myproduct');
 
-                        // กรองข้อมูลสินค้าที่ต้องการแสดง
-                        const filteredProducts = products.filter(item => !('status' in item));
+                            const filteredProducts = products.filter(item => !('status' in item));
 
-                        // เช็คว่ามีสินค้าหรือไม่
-                        if (filteredProducts.length > 0) {
-                            // สำหรับแต่ละสินค้าที่ผ่านการกรอง ให้ทำการดำเนินการตามที่ต้องการ
-                            filteredProducts.forEach(product => {
-                                // สร้าง HTML เพื่อแสดงข้อมูลสินค้า
-                                const productHTML = `
-                                    <div>
-                                        <p>${product.product_id} | ${product.product_name}</p>
-                                        <input type="number" class="form-control" list="data_product_list" name="inp_search_product" id="find_product" placeholder="จำนวน">
-                                    </div>
-                                `;
+                            if (filteredProducts.length > 0) {
+                                filteredProducts.forEach(product => {
+                                    const productHTML = `
+                                <div class="col-md-3 theproduct" data-id="${product.product_id}">
+                                    <input type="text" class="form-control" id="${product.product_id}" value="${product.product_name}" readonly>
+                                    <input type="number" class="form-control" list="data_product_list" name="inp_search_product" id="find_product" placeholder="จำนวน">
+                                </div>`;
 
-                                // เพิ่ม HTML สำหรับสินค้านี้ลงใน div
-                                myProductDiv.innerHTML += productHTML;
-                            });
-                        } else {
-                            // ถ้าไม่มีสินค้า
-                            myProductDiv.innerHTML = '<p>No products available.</p>';
-                        }
-                    })
-                    }
+                                    myProductDiv.innerHTML += productHTML;
+                                });
+                            } else {
+                                myProductDiv.innerHTML = '<p>No products available.</p>';
+                            }
+                        })
+                }
 
 
 
