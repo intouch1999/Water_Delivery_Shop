@@ -123,7 +123,7 @@
                     <div class="row gx-3 gy-2 align-items-center">
                         <div class="col-md-3">
                             <label class="form-label" for="myproduct">สินค้า</label>
-                            <div id="myproduct" class="product-container">
+                            <div id="" class="product-container">
 
                             </div>
                         </div>
@@ -137,23 +137,8 @@
                                 <th>Quantity</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>Product 1</td>
-                                <td><input type="number" class="form-control" name="quantity1" id="quantity1" value="0"></td>
-                            </tr>
-                            <tr>
-                                <td>Product 2</td>
-                                <td><input type="number" class="form-control" name="quantity2" id="quantity2" value="0"></td>
-                            </tr>
-                            <tr>
-                                <td>Product 3</td>
-                                <td><input type="number" class="form-control" name="quantity3" id="quantity3" value="0"></td>
-                            </tr>
-                            <tr>
-                                <td>Product 4</td>
-                                <td><input type="number" class="form-control" name="quantity4" id="quantity4" value="0"></td>
-                            </tr>
+                        <tbody id="myproduct">
+
                         </tbody>
                     </table>
                 </div>
@@ -444,20 +429,33 @@
                     var productsAndQuantities = [];
 
                     // วนลูปผ่านทุกๆ element ที่มีคลาส "theproduct"
-                    document.querySelectorAll('.theproduct').forEach(element => {
-                        // ดึงค่า ID และจำนวนสินค้าออกมาจาก element แต่ละตัว
-                        var productId = element.getAttribute('data-id');
-                        var quantityInput = element.querySelector('input[type="number"]');
-                        var quantity = quantityInput.value;
+                    // document.querySelectorAll('.theproduct').forEach(element => {
+                    //     // ดึงค่า ID และจำนวนสินค้าออกมาจาก element แต่ละตัว
+                    //     var productId = element.getAttribute('data-id');
+                    //     var quantityInput = element.querySelector('input[type="number"]');
+                    //     var quantity = quantityInput.value;
 
-                        // เพิ่มข้อมูลเกี่ยวกับสินค้าและจำนวนสินค้าลงในอาร์เรย์
-                        if (quantity && parseInt(quantity) !== 0) {
+                    //     // เพิ่มข้อมูลเกี่ยวกับสินค้าและจำนวนสินค้าลงในอาร์เรย์
+                    //     if (quantity && parseInt(quantity) !== 0) {
+                    //         productsAndQuantities.push({
+                    //             id: productId,
+                    //             quantity: quantity
+                    //         });
+                    //     }
+                    // });
+                    document.querySelectorAll('#myproduct tr').forEach(row => {
+                    var productId = row.cells[0].id; // ดึงข้อมูลจากเซลล์แรก
+                    var quantityInput = row.cells[1].querySelector('input[type="number"]'); // ดึงข้อมูลจากเซลล์ที่สอง
+                    var quantity = quantityInput.value;
+
+                    if (quantity && parseInt(quantity) !== 0) {
                             productsAndQuantities.push({
                                 id: productId,
                                 quantity: quantity
                             });
                         }
                     });
+
 
                     console.log(productsAndQuantities);
 
@@ -547,20 +545,32 @@
                         })
                         .then(products => {
                             const myProductDiv = document.getElementById('myproduct');
+                            
 
                             const filteredProducts = products.filter(item => !('status' in item));
+                            // if (filteredProducts.length > 0) {
+                            //     filteredProducts.forEach(product => {
+                                //     const productHTML = `
+                                // <div class="col-md-3 theproduct" data-id="${product.product_id}">
+                                //     <input type="text" class="form-control" id="${product.product_id}" value="${product.product_name}" readonly>
+                                //     <input type="number" class="form-control" list="data_product_list" name="inp_search_product" id="find_product" placeholder="จำนวน">
+                                // </div>`;
 
-                            if (filteredProducts.length > 0) {
+                                //     myProductDiv.innerHTML += productHTML;
+                                // });
+                                if (filteredProducts.length > 0) {
                                 filteredProducts.forEach(product => {
-                                    const productHTML = `
-                                <div class="col-md-3 theproduct" data-id="${product.product_id}">
-                                    <input type="text" class="form-control" id="${product.product_id}" value="${product.product_name}" readonly>
-                                    <input type="number" class="form-control" list="data_product_list" name="inp_search_product" id="find_product" placeholder="จำนวน">
-                                </div>`;
-
-                                    myProductDiv.innerHTML += productHTML;
+                                    var newRow = document.createElement("tr");
+                                    newRow.innerHTML = `
+                                        <td id="${product.product_id}">${product.product_name}</td>
+                                        <td><input type="number" class="form-control" name="quantity${product.product_id}" id="quantity${product.product_id}" value="0"></td>
+                                    `;
+                                    
+                                    myProductDiv.appendChild(newRow);
                                 });
-                            } else {
+                            }
+                            
+                             else {
                                 myProductDiv.innerHTML = '<p>No products available.</p>';
                             }
                         })
