@@ -412,7 +412,7 @@
                                                 data: 'task_datetime'
                                             },
                                             {
-                                                data: 'product_id'
+                                                data: 'product_ids'
                                             },
                                             {
                                                 data: 'order_qty'
