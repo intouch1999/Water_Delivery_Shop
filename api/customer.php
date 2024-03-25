@@ -105,7 +105,7 @@ try {
 
 	echo json_encode($data);
 	
-} else if(@$_REQUEST['case']=='select_cus_datatable'){
+} else if(@$_REQUEST['case']=='customer_task'){
 	try {
 		$data[0] = array('status' => 0);
 	

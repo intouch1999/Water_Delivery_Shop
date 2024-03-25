@@ -196,7 +196,7 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 //         $data[0]['error_message'] = $e->getMessage();
 // 	}
 //     echo json_encode($data);
-}else if (@$decode['case'] == 'TaskPro') {
+}else if (@$decode['case'] == 'TaskProduct') {
     try {
         // Generate task ID
         function generateTaskIdFromMySQL($conn) {
@@ -259,7 +259,7 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
     }
     echo json_encode(@$data);
 
-}else if(@$decode['case'] == 'TaskShow') {
+}else if(@$decode['case'] == 'main_task') {
     try {
         $data[0] = array('status' => 0);
 		$cusID = $decode['cus_id'];
@@ -298,7 +298,7 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
         $data[0]['error_message'] = $e->getMessage();
     }
     echo json_encode(@$data);
-} else if (@$decode['case'] == 'Tasksucc') {
+} else if (@$decode['case'] == 'task_success') {
     try {
         $data[0] = array('status' => 0);
         $taskID = $decode['taskID'];
@@ -322,7 +322,7 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
         $data[0]['error_message'] = $e->getMessage();
 	}
     echo json_encode($data);
-} else if (@$decode['case'] == 'thisisaproduct') {
+} else if (@$decode['case'] == 'product_task_show') {
 	try {
 		$data[0] = array('status' => 0);
 		$query = "SELECT `nIndex`, `product_id`, `product_name`, `product_img`
