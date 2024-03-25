@@ -120,14 +120,6 @@
                             <button type="button" id="submit_Task" class="btn btn-primary d-block">บันทึก</button>
                         </div>
                     </div>
-                    <div class="row gx-3 gy-2 align-items-center">
-                        <div class="col-md-3">
-                            <label class="form-label" for="myproduct">สินค้า</label>
-                            <div id="" class="product-container">
-
-                            </div>
-                        </div>
-                    </div>
                 </div>
                 <div class="row">
                     <table class="table">
@@ -135,6 +127,7 @@
                             <tr>
                                 <th>Product Name</th>
                                 <th>Quantity</th>
+                                <th>Type</th>
                             </tr>
                         </thead>
                         <tbody id="myproduct">
@@ -142,6 +135,13 @@
                         </tbody>
                     </table>
                 </div>
+
+        
+</div>
+
+<div class="row" id="DataTable">
+            <div class="card mb-4">
+                <div class="card-header">
                 <div class="card-body">
                     <div class="table-responsive text-nowrap">
                         <table class="display responsive nowrap" width="100%" id="taskData">
@@ -163,6 +163,7 @@
                 </div>
 
             </div>
+        </div>
 
             <?php include("foot.php"); ?>
             <footer>

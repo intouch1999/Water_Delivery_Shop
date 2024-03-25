@@ -263,17 +263,30 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
     try {
         $data[0] = array('status' => 0);
 		$cusID = $decode['cus_id'];
-		$query = "SELECT delivery_task.task_id,
-						 delivery_task.cus_id, delivery_task.task_datetime, 
-						 delivery_task.task_status, 
-						 GROUP_CONCAT(delivery_task_product.product_id SEPARATOR ',') AS product_ids,
-						 delivery_task_product.product_active, delivery_task_product.order_qty, 
-						 delivery_task_product.create_datetime, delivery_task_product.last_datetime 
-						 FROM delivery_task            
-		         INNER JOIN delivery_task_product ON delivery_task.task_id = delivery_task_product.task_id
-                  WHERE delivery_task.cus_id = '{$cusID}'
-				  GROUP BY delivery_task_product.task_id
-                  ORDER BY delivery_task.task_datetime DESC";
+		$query = "SELECT 
+		delivery_task.task_id,
+		delivery_task.cus_id, 
+		delivery_task.task_datetime, 
+		delivery_task.task_status, 
+		GROUP_CONCAT(delivery_task_product.product_id SEPARATOR ',') AS product_ids,
+		GROUP_CONCAT(product_info.product_name SEPARATOR ',') AS product_names,
+		delivery_task_product.product_active, 
+		delivery_task_product.order_qty, 
+		delivery_task_product.create_datetime, 
+		delivery_task_product.last_datetime
+	FROM 
+		delivery_task            
+	INNER JOIN 
+		delivery_task_product ON delivery_task.task_id = delivery_task_product.task_id
+	LEFT JOIN 
+		product_info ON delivery_task_product.product_id = product_info.product_id
+	WHERE 
+		delivery_task.cus_id = '{$cusID}'
+	GROUP BY 
+		delivery_task_product.task_id
+	ORDER BY 
+		delivery_task.task_datetime DESC
+	";
         $stmt = $conn->query($query);
         if ($stmt->rowCount() > 0) {
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
