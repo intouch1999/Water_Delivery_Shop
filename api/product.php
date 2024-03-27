@@ -219,31 +219,45 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
             return $nextTaskId;
         }
 
-        $taskId = generateTaskIdFromMySQL($conn); // Pass $conn to the function
+        $taskId = generateTaskIdFromMySQL($conn); 
 
-        // Insert into delivery_task table
         $customerId = $decode['cus_id'];
         $taskDatetime = $decode['Taskdatetime'];
         $taskStatus = 1;
         
-        // Loop through each product and insert into delivery_task_product
-        foreach ($decode['find_product'] as $index => $product_id) {
-            $product_active = 1;
-            $order_qty = $decode['order_qty'][$index];
-            
-            $query_product = "INSERT INTO `delivery_task_product` (`task_id`, `product_id`, `product_active`, `order_qty`, `create_datetime`, `sale_user`)
-                    VALUES ('$taskId', '$product_id', '$product_active', '$order_qty', NOW(), '$sivanat_user')";
+        if (empty($decode['find_product'])) {
+			$product_id = 0; 
+			$order_qty = 0; 
+			$product_active = 0;
+		
+			$query_product = "INSERT INTO `delivery_task_product` (`task_id`, `product_id`, `product_active`, `order_qty`, `create_datetime`, `sale_user`)
+							VALUES ('$taskId', '$product_id', '$product_active', '$order_qty', NOW(), '$sivanat_user')";
+		
+			$stmt_product = $conn->query($query_product);
+		
+			if (!$stmt_product) {
+				$data[0] = array('status' => 0);
+				echo json_encode($data);
+				exit; 
+			}
+		} else {
+			foreach ($decode['find_product'] as $index => $product_id) {
+				$product_active = 1;
+				$order_qty = $decode['order_qty'][$index];
 
-            $stmt_product = $conn->query($query_product);
-            
-            if (!$stmt_product) {
-                $data[0] = array('status' => 0);
-                echo json_encode($data);
-                exit; // Exit if insertion fails
-            }
-        }
+				$query_product = "INSERT INTO `delivery_task_product` (`task_id`, `product_id`, `product_active`, `order_qty`, `create_datetime`, `sale_user`)
+						VALUES ('$taskId', '$product_id', '$product_active', '$order_qty', NOW(), '$sivanat_user')";
+		
+				$stmt_product = $conn->query($query_product);
+		
+				if (!$stmt_product) {
+					$data[0] = array('status' => 0);
+					echo json_encode($data);
+					exit;
+				}
+			}
+		}
         
-        // Insert into delivery_task table after products are inserted
         $query_task = "INSERT INTO `delivery_task` (`task_id`, `cus_id`, `task_datetime`, `sale_user`, `task_status`)
                     VALUES ('$taskId', '$customerId', '$taskDatetime', '$sivanat_user', '$taskStatus')";
 

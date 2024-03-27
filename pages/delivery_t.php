@@ -61,11 +61,16 @@
                         <button id="backButton" class="btn btn-secondary mx-2">ย้อนกลับ</button>
                         <button type="button" id="submit_Task" class="btn btn-primary">บันทึก</button>
                     </h5>
-                    <input type="hidden" id="task_id" name="task_id">
-                    <input type="hidden" id="cus_id" name="cus_id" value="${data.cus_id}" readonly>
-                    <input type="hidden" id="pay_datetime" name="pay_datetime">
                     <div class="row gx-3 gy-2 align-items-center">
-                        <div class="col-md-3">
+                        <div class="mt-3 col-md-2">
+                            <label class="form-label" for="cus_id">รหัสลูกค้า </label>
+                            <h3><span id="cus_id" name="cus_id"></span></h3>
+                        </div>
+                        <div class="mt-3 col-md-2 ">
+                            <label class="form-label" for="cus_name">ชื่อลูกค้า </label>
+                            <h3><span id="cus_name" name="cus_name"></span></h3>
+                        </div>
+                        <div class="col-md-2">
                             <label class="form-label" for="task_datetime">วันเวลาจัดส่ง </label>
                             <input type="datetime-local" class="form-control" id="datetime" name="task_datetime">
                         </div>
@@ -186,13 +191,18 @@
     });
 
     function task_button() {
-        var rowData = getTableRowData($(this));
-        var cus_id = rowData.cus_id;
+        // var rowData = getTableRowData($(this));
+        // var cus_id = rowData.cus_id;
+        var cus_id = $(this).closest('tr').find('td:eq(0)').text().trim();
+        var cus_name = $(this).closest('tr').find('td:eq(1)').text().trim();
+        get_cus_id = cus_id;
         $('#DataTable').hide();
         $('#taskuserlist').show();
         $('#tasklist').show();
 
-        $('#cus_id').val(cus_id);
+        $('#cus_id').text(cus_id);
+        // $('#cus_id').val(cus_id);
+        $('#cus_name').text(cus_name);
 
         $.ajax({
             url: '../api/product?case=main_task',
@@ -251,6 +261,7 @@
     };
 
     function submitTask() {
+        
         var productsAndQuantities = [];
         document.querySelectorAll('#product_list tr').forEach(row => {
             var productId = row.cells[0].id; // ดึงข้อมูลจากเซลล์แรก
@@ -270,12 +281,13 @@
         // แยกข้อมูลสินค้าและจำนวนสินค้า
         var findProduct = productsAndQuantities.map(item => item.id);
         var findQty = productsAndQuantities.map(item => item.quantity);
+        console.log(get_cus_id);
 
         fetch('../api/product?case=TaskProduct', {
                 method: 'POST',
                 body: JSON.stringify({
                     case: 'TaskProduct',
-                    cus_id: $('#cus_id').val(),
+                    cus_id: get_cus_id,
                     Taskdatetime: $('#datetime').val(),
                     find_product: findProduct,
                     order_qty: findQty
