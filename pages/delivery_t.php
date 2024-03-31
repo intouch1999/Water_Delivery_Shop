@@ -19,11 +19,54 @@
         align-items: center;
         float: right;
     }
+
     #taskuserlist {
         display: none;
     }
+
     #tasklist {
         display: none;
+    }
+
+    .table {
+        border-collapse: collapse;
+    }
+
+    .table,
+    .table th,
+    .table td {
+        border: none;
+    }
+
+    .dataTable .btn {
+        margin-right: 10px;
+    }
+
+    /* ปรับขนาดของตัวหนังสือในตารางให้เหมาะสม */
+    #product_detail_modal table {
+        font-size: 14px;
+        /* ปรับขนาดตัวหนังสือในตาราง */
+    }
+
+    #product_detail_modal table td {
+
+        overflow: hidden;
+        white-space: nowrap;
+
+    }
+
+
+    /* ปรับขนาดของตารางให้เต็มหน้าจอในโหมดมือถือ */
+    @media (max-width: 576px) {
+        #product_detail_modal .modal-dialog {
+            max-width: 100%;
+            /* ทำให้ตารางเต็มหน้าจอ */
+        }
+
+        #product_detail_modal .modal-content {
+            overflow-x: auto;
+            /* ให้สามารถเลื่อนแนวนอนในกรณีที่ตารางมีขนาดใหญ่เกินไป */
+        }
     }
 </style>
 <!-- Content wrapper -->
@@ -66,7 +109,7 @@
                             <label class="form-label" for="cus_id">รหัสลูกค้า </label>
                             <h3><span id="cus_id" name="cus_id"></span></h3>
                         </div>
-                        <div class="mt-3 col-md-2 ">
+                        <div class="mt-3 col-md-2">
                             <label class="form-label" for="cus_name">ชื่อลูกค้า </label>
                             <h3><span id="cus_name" name="cus_name"></span></h3>
                         </div>
@@ -74,15 +117,22 @@
                             <label class="form-label" for="task_datetime">วันเวลาจัดส่ง </label>
                             <input type="datetime-local" class="form-control" id="datetime" name="task_datetime">
                         </div>
+                        <div class="col-md-2">
+                            <label class="form-label" for="pay_stats">สถานะการจ่าย </label>
+                        <select id="pay_stats" class="form-select form-control-sm color-dropdown">
+                            <option value="no_pay">ยังไม่จ่าย</option>
+                            <option value="pay">จ่ายแล้ว</option>
+                        </select>
+                        </div>
                     </div>
                 </div>
                 <div class="row">
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>Product Name</th>
-                                <th>Quantity</th>
-                                <th>Type</th>
+                                <th>สินค้า</th>
+                                <th>จำนวน</th>
+                                <th>ประเภท</th>
                             </tr>
                         </thead>
                         <tbody id="product_list">
@@ -92,6 +142,7 @@
                 </div>
             </div>
         </div>
+
         <div class="row" id="tasklist">
             <div class="card mb-4">
                 <div class="card-header">
@@ -103,7 +154,6 @@
                                         <th>รหัสนัดหมาย</th>
                                         <th>รหัสลูกค้า</th>
                                         <th>วันที่นัดหมาย</th>
-                                        <th>สินค้าที่ต้องจัดส่ง</th>
                                         <th>จำนวน</th>
                                         <th>จัดส่งสำเร็จเวลา</th>
                                     </tr>
@@ -118,6 +168,38 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="product_detail_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">รายการที่สั่ง</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true" aria-label="Close">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="modalContent">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">สินค้า</th>
+                            <th scope="col">จำนวน</th>
+                            <th scope="col">ราคาต่อหน่วย</th>
+                            <th scope="col">ราคารวม</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productTableBody">
+                        <!-- Product details will be displayed here -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" aria-hidden="true" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
 <?php include("foot.php"); ?>
 <footer>
@@ -137,7 +219,31 @@
 </footer>
 <script>
     $(document).ready(function() {
+        window.onload = function() {
+            if (location.href.endsWith('delivery_t')) {
+                customer_task();
+            } else {
+                product_l()
+            }
+        }
 
+        $('#backButton').on('click', function() {
+            location.href = 'delivery_t.php';
+        });
+
+
+
+        $('#customerData').on('click', '.btn-edit', task_button, task());
+        $('#submit_Task').on('click', submitTask);
+        $('#taskData').on('click', '.btn-success', tasklist_success);
+        $('#taskData').on('click', '.btn-info', btn_info)
+        $('#product_detail_modal').on('click', '[aria-hidden="true"]', function() {
+            $('#product_detail_modal').modal('hide');
+        });
+
+    });
+
+    function customer_task() {
         $.ajax({
             url: '../api/customer?case=customer_task',
             type: 'GET',
@@ -166,15 +272,9 @@
                                 },
                                 {
                                     data: null,
-                                    defaultContent: '<button class="btn btn-primary btn-sm btn-edit">นัดหมาย</button>'
+                                    defaultContent: `<button class="btn btn-primary btn-sm btn-edit">นัดหมาย</button>`
                                 }
                             ]
-                        });
-                        // console.log(table);
-                        // var taskDataTable;
-
-                        $('#backButton').on('click', function() {
-                            location.reload();
                         });
 
                     } else {
@@ -188,109 +288,261 @@
                 console.error('Error: ' + error);
             }
         });
-    });
+    }
+
+
+    // function task_button() {
+    //     var rowData = getTableRowData($(this) , 'customerData');
+    //     var cus_id = rowData.cus_id;
+    //     var cus_name = rowData.cus_name;
+    //     get_cus_id = cus_id;
+    //     $('#DataTable').hide();
+    //     $('#taskuserlist').show();
+    //     $('#tasklist').show();
+
+    //     $('#cus_id').text(cus_id);
+    //     // $('#cus_id').val(cus_id);
+    //     $('#cus_name').text(cus_name);
+
+
+    //     $.ajax({
+    //         url: '../api/product?case=main_task',
+    //         type: 'POST',
+    //         dataType: 'json',
+    //         contentType: 'application/json',
+    //         data: JSON.stringify({
+    //             case: 'main_task',
+    //             cus_id: cus_id
+    //         }),
+    //         success: function(response) {
+    //             console.log(response);
+    //             try {
+    //                 if (!response.error_message) {
+    //                     task_list = $('#taskData').DataTable({
+    //                         response: true,
+    //                         data: response.filter(function(item) {
+    //                             return !('status' in item);
+    //                         }),
+    //                         columns: [{
+    //                                 data: 'task_id'
+    //                             },
+    //                             {
+    //                                 data: 'cus_id'
+    //                             },
+    //                             {
+    //                                 data: 'task_datetime'
+    //                             },
+    //                             {
+    //                                 data: 'order_qty'
+    //                             },
+    //                             {
+    //                                 data: 'last_datetime'
+    //                             },
+    //                             {
+    //                                 data: null,
+    //                                 defaultContent: `<button class="btn btn-primary btn-sm btn-success">จัดส่งสำเร็จ</button>
+    //                                                     <button class="btn btn-primary btn-sm btn-info">รายละเอียด</button>`
+    //                             }
+    //                         ],
+    //                         order: [
+    //                         [0, 'desc'] 
+    //                     ]
+    //                     }); 
+
+    //                 } else {
+    //                     $('#taskData').text('Error: ' + response.error_message);
+    //                 }
+    //             } catch (error) {
+    //                 console.error('Error:', error);
+    //             }
+    //         },
+    //         error: function(xhr, status, error) {
+    //             console.error('Error: ' + error);
+    //         }
+    //     });
+    // };
 
     function task_button() {
-        // var rowData = getTableRowData($(this));
-        // var cus_id = rowData.cus_id;
-        var cus_id = $(this).closest('tr').find('td:eq(0)').text().trim();
-        var cus_name = $(this).closest('tr').find('td:eq(1)').text().trim();
-        get_cus_id = cus_id;
-        $('#DataTable').hide();
-        $('#taskuserlist').show();
-        $('#tasklist').show();
-
-        $('#cus_id').text(cus_id);
-        // $('#cus_id').val(cus_id);
-        $('#cus_name').text(cus_name);
-
-        $.ajax({
-            url: '../api/product?case=main_task',
-            type: 'POST',
-            dataType: 'json',
-            contentType: 'application/json',
-            data: JSON.stringify({
-                case: 'main_task',
-                cus_id: cus_id
-            }),
-            success: function(response) {
-                console.log(response);
-                try {
-                    if (!response.error_message) {
-                        task_list = $('#taskData').DataTable({
-                            response: true,
-                            data: response.filter(function(item) {
-                                return !('status' in item);
-                            }),
-                            columns: [{
-                                    data: 'task_id'
-                                },
-                                {
-                                    data: 'cus_id'
-                                },
-                                {
-                                    data: 'task_datetime'
-                                },
-                                {
-                                    data: 'product_ids'
-                                },
-                                {
-                                    data: 'order_qty'
-                                },
-                                {
-                                    data: 'last_datetime'
-                                },
-                                {
-                                    data: null,
-                                    defaultContent: '<button class="btn btn-primary btn-sm btn-success">จัดส่งสำเร็จ</button>'
-                                }
-                            ]
-                        });
-
-                    } else {
-                        $('#taskData').text('Error: ' + response.error_message);
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error('Error: ' + error);
-            }
-        });
+        var rowData = getTableRowData($(this), 'customerData');
+        var cus_id = rowData.cus_id;
+        var cus_name = rowData.cus_name;
+        // get_cus_id = cus_id;
+        window.location.href = "delivery_t.php?cus_id=" + cus_id + "&cus_name=" + encodeURIComponent(cus_name);
     };
 
+    function task() {
+        var urlParams = new URLSearchParams(window.location.search);
+        var cus_id = urlParams.get('cus_id');
+        if (cus_id) {
+            // แสดง #taskuserlist และ #tasklist เมื่อมี cus_id ใน URL
+            $('#DataTable').hide();
+            $('#taskuserlist').show();
+            $('#tasklist').show();
+
+            // ตั้งค่าข้อมูลในหน้าเว็บด้วยข้อมูลจาก cus_id
+            $('#cus_id').text(cus_id);
+            // $('#cus_id').val(cus_id);
+            $('#cus_name').text(urlParams.get('cus_name'));
+
+            // เรียกใช้งาน AJAX เมื่อหน้าถูกโหลด
+            $.ajax({
+                url: '../api/product?case=main_task',
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    case: 'main_task',
+                    cus_id: cus_id
+                }),
+                success: function(response) {
+                    console.log(response);
+                    try {
+                        if (!response.error_message) {
+                            task_list = $('#taskData').DataTable({
+                                response: true,
+                                data: response.filter(function(item) {
+                                    return !('status' in item);
+                                }),
+                                columns: [{
+                                        data: 'task_id'
+                                    },
+                                    {
+                                        data: 'cus_id'
+                                    },
+                                    {
+                                        data: 'task_datetime'
+                                    },
+                                    {
+                                        data: 'order_qty'
+                                    },
+                                    {
+                                        data: 'last_datetime'
+                                    },
+                                    {
+                                        data: null,
+                                        defaultContent: `<button class="btn btn-primary btn-sm btn-success">จัดส่งสำเร็จ</button>
+                                                    <button class="btn btn-primary btn-sm btn-info">รายละเอียด</button>`
+                                    }
+                                ],
+                                order: [
+                                    [0, 'desc']
+                                ]
+                            });
+
+                        } else {
+                            $('#taskData').text('Error: ' + response.error_message);
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error: ' + error);
+                }
+            });
+        }
+    }
+
+    function btn_info() {
+        var rowData = getTableRowData($(this), 'taskData');
+        var task_id = rowData.task_id;
+
+        fetch('../api/product?case=product_details', {
+                method: 'POST',
+                body: JSON.stringify({
+                    case: 'product_details',
+                    task_id: task_id,
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(function(response) {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(function(json) {
+                if (json[0].status == '1') {
+                    const modalContentDiv = document.getElementById('modalContent');
+                    let productTableBody = document.getElementById('productTableBody');
+                    let total = 0;
+
+                    // Clear existing table body
+                    productTableBody.innerHTML = '';
+
+                    json.slice(1).forEach(product => {
+                        if (product.product_id !== undefined && product.order_qty !== undefined && product.product_type !== undefined && product.price !== undefined) {
+                            const totalPrice = product.price * product.order_qty;
+                            total += totalPrice;
+
+                            // Create a new row for each product
+                            let newRow = document.createElement("tr");
+                            newRow.innerHTML = `
+                                                <td>${product.product_name}</td>
+                                                <td>${product.order_qty}</td>
+                                                <td>${product.price}</td>
+                                                <td>${totalPrice}</td> 
+                                                                    `;
+
+                            // Append the new row to the table body
+                            productTableBody.appendChild(newRow);
+                        } else {
+                            console.log('Undefined product details:', product);
+                        }
+                    });
+
+                    // Display total price
+                    let totalRow = document.createElement("tr");
+                    totalRow.innerHTML = `
+            <td colspan="3" class="text-end">รวมทั้งหมด</td>
+            <td>${total}</td>
+        `;
+                    productTableBody.appendChild(totalRow);
+
+                    // Show the modal
+                    $('#product_detail_modal').modal('show');
+                } else {
+                    console.error('Error:', data.error_message);
+                }
+            })
+    }
+
     function submitTask() {
-        
+        var urlParams = new URLSearchParams(window.location.search);
+        var cus_id = urlParams.get('cus_id');
         var productsAndQuantities = [];
         document.querySelectorAll('#product_list tr').forEach(row => {
-            var productId = row.cells[0].id; // ดึงข้อมูลจากเซลล์แรก
-            var quantityInput = row.cells[1].querySelector('input[type="number"]'); // ดึงข้อมูลจากเซลล์ที่สอง
+            var productId = row.cells[0].id; // Get product ID from the first cell
+            var quantityInput = row.cells[1].querySelector('input[type="number"]'); // Get quantity from the second cell
             var quantity = quantityInput.value;
+            var productType = row.cells[2].querySelector('select').value; // Get product type from the select element
 
             if (quantity && parseInt(quantity) !== 0) {
                 productsAndQuantities.push({
                     id: productId,
-                    quantity: quantity
+                    quantity: quantity,
+                    type: productType
                 });
             }
         });
 
-        console.log(productsAndQuantities);
-
-        // แยกข้อมูลสินค้าและจำนวนสินค้า
+        // Extract product IDs, quantities, and types
         var findProduct = productsAndQuantities.map(item => item.id);
         var findQty = productsAndQuantities.map(item => item.quantity);
-        console.log(get_cus_id);
+        var findType = productsAndQuantities.map(item => item.type);
 
+        // Make AJAX request to submit task data
         fetch('../api/product?case=TaskProduct', {
                 method: 'POST',
                 body: JSON.stringify({
                     case: 'TaskProduct',
-                    cus_id: get_cus_id,
-                    Taskdatetime: $('#datetime').val(),
-                    find_product: findProduct,
-                    order_qty: findQty
+                    cus_id: cus_id, // Assuming get_cus_id is already defined
+                    Taskdatetime: $('#datetime').val(), // Get task datetime from the datetime input
+                    product: findProduct,
+                    order_qty: findQty,
+                    product_type: findType
                 }),
                 headers: {
                     'Content-Type': 'application/json'
@@ -308,7 +560,7 @@
                 } else {
                     alert_snackbar('success', "เพิ่มนัดหมายสำเร็จ");
                     setTimeout(function() {
-                        window.location.href = "delivery_t.php";
+                        location.reload();
                     }, 1500);
                 }
             })
@@ -316,6 +568,7 @@
                 console.error('Error:', error);
             });
     }
+
 
     function tasklist_success() {
         var timestamp = Date.now();
@@ -360,8 +613,10 @@
                 }),
             })
             .then(function(response) {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
                 return response.json();
-
             })
             .then(products => {
                 const product_list_Div = document.getElementById('product_list');
@@ -371,8 +626,18 @@
                     filteredProducts.forEach(product => {
                         var newRow = document.createElement("tr");
                         newRow.innerHTML = `
-                                        <td id="${product.product_id}">${product.product_name}</td>
-                                        <td><input type="number" class="form-control" name="quantity${product.product_id}" id="quantity${product.product_id}" value="0"></td>
+                        <td id="${product.product_id}">
+                        <img src="../assets/img/product/${product.product_img}" alt="user-avatar" class="d-block rounded" height="70px" width="70px">${product.product_name}
+                        </td>
+                        <td>
+                            <input type="number" class="form-control" name="quantity${product.product_id}" id="quantity${product.product_id}" value="0">
+                        </td>
+                        <td>
+                        <select id="product_type" class="form-select form-control-sm color-dropdown">
+                            <option value="pack">Pack (แพ็ค)</option>
+                            <option value="unit">Unit (ชิ้น)</option>
+                        </select>
+                        </td>
                                     `;
 
                         product_list_Div.appendChild(newRow);
@@ -383,17 +648,8 @@
             })
     }
 
-    $(document).ready(function() {
-        product_l();
-
-        $('#customerData').on('click', '.btn-edit', task_button);
-        $('#submit_Task').on('click', submitTask);
-        $('#taskData').on('click', '.btn-success', tasklist_success);
-
-    });
-
-    function getTableRowData(btnElement) {
-        var table = $('#customerData').DataTable(); // กำหนด table ภายในฟังก์ชัน
+    function getTableRowData(btnElement, tableId) {
+        var table = $('#' + tableId).DataTable();
         var data = table.row(btnElement.parents('tr')).data();
         return data;
     }

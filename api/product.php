@@ -225,7 +225,7 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
         $taskDatetime = $decode['Taskdatetime'];
         $taskStatus = 1;
         
-        if (empty($decode['find_product'])) {
+        if (empty($decode['product'])) {
 			$product_id = 0; 
 			$order_qty = 0; 
 			$product_active = 0;
@@ -241,12 +241,13 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 				exit; 
 			}
 		} else {
-			foreach ($decode['find_product'] as $index => $product_id) {
+			foreach ($decode['product'] as $index => $product_id) {
 				$product_active = 1;
 				$order_qty = $decode['order_qty'][$index];
+				$product_type = $decode['product_type'][$index];
 
-				$query_product = "INSERT INTO `delivery_task_product` (`task_id`, `product_id`, `product_active`, `order_qty`, `create_datetime`, `sale_user`)
-						VALUES ('$taskId', '$product_id', '$product_active', '$order_qty', NOW(), '$sivanat_user')";
+				$query_product = "INSERT INTO `delivery_task_product` (`task_id`, `product_id`, `product_active`, `order_qty`,`product_type`, `create_datetime`, `sale_user`)
+						VALUES ('$taskId', '$product_id', '$product_active', '$order_qty', '$product_type', NOW(), '$sivanat_user')";
 		
 				$stmt_product = $conn->query($query_product);
 		
@@ -278,28 +279,28 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
         $data[0] = array('status' => 0);
 		$cusID = $decode['cus_id'];
 		$query = "SELECT 
-		delivery_task.task_id,
-		delivery_task.cus_id, 
-		delivery_task.task_datetime, 
-		delivery_task.task_status, 
-		GROUP_CONCAT(delivery_task_product.product_id SEPARATOR ',') AS product_ids,
-		GROUP_CONCAT(product_info.product_name SEPARATOR ',') AS product_names,
-		delivery_task_product.product_active, 
-		delivery_task_product.order_qty, 
-		delivery_task_product.create_datetime, 
-		delivery_task_product.last_datetime
+		dt.task_id,
+		dt.cus_id, 
+		dt.task_datetime, 
+		dt.task_status, 
+		-- GROUP_CONCAT(delivery_task_product.product_id SEPARATOR ',') AS product_ids,
+		-- GROUP_CONCAT(product_info.product_name SEPARATOR ',') AS product_names,
+		dtp.product_active, 
+		dtp.order_qty, 
+		dtp.create_datetime, 
+		dtp.last_datetime
 	FROM 
-		delivery_task            
+		delivery_task AS dt       
 	INNER JOIN 
-		delivery_task_product ON delivery_task.task_id = delivery_task_product.task_id
+		delivery_task_product AS dtp ON dt.task_id = dtp.task_id
 	LEFT JOIN 
-		product_info ON delivery_task_product.product_id = product_info.product_id
+		product_info AS pi ON dtp.product_id = pi.product_id
 	WHERE 
-		delivery_task.cus_id = '{$cusID}'
+		dt.cus_id = '{$cusID}'
 	GROUP BY 
-		delivery_task_product.task_id
+		dtp.task_id
 	ORDER BY 
-		delivery_task.task_datetime DESC
+		dt.task_id DESC
 	";
         $stmt = $conn->query($query);
         if ($stmt->rowCount() > 0) {
@@ -356,7 +357,60 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 		$data[0]['error_message'] = $e->getMessage();
 	}
 	echo json_encode($data);
+}else if (@$decode['case'] == 'product_details') {
+    try {
+        // $total_price = 0; // เพิ่มตัวแปรเพื่อเก็บราคารวมทั้งหมด
+
+        $task_id = $decode['task_id'];
+        $query = "SELECT dtp.product_id, dtp.order_qty , dtp.product_type, pi.product_name , pi.unit , pi.unit_price , pi.pack , pi.pack_price
+        FROM delivery_task_product AS dtp
+        JOIN product_info AS pi ON dtp.product_id = pi.product_id
+        WHERE dtp.task_id = '{$task_id}'";
+
+        $stmt = $conn->query($query);
+        // if ($stmt->rowCount() > 0) {
+        //     $data = []; // สร้างอาร์เรย์ใหม่
+        //     $data[0] = array('status' => 1);
+
+        //     foreach ($stmt as $row) {
+        //         // คำนวณราคารวมของแต่ละแถว
+		// 		if ($row['product_type'] == 'unit') {
+        //             $row_total_price = ceil($row['unit_price']);
+        //         } elseif ($row['product_type'] == 'pack') {
+        //             $row_total_price = ceil($row['pack_price']);
+        //         }
+
+        //         // เพิ่มข้อมูลราคารวมของแถวนี้เข้าไปในอาร์เรย์ใหม่
+        //         $row['price'] = $row_total_price;
+        //         $data[] = $row;
+        //     }
+        // }
+		if ($stmt->rowCount() > 0) {
+			while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+				$data[0] = array('status' => 1);
+				if ($row['product_type'] == 'unit') {
+					$row_total_price = ceil($row['unit_price']);
+				} elseif ($row['product_type'] == 'pack') {
+					$row_total_price = ceil($row['pack_price']);
+				}
+				// เพิ่มข้อมูลราคารวมของแถวนี้เข้าไปในอาร์เรย์ใหม่
+				$row['price'] = $row_total_price;
+				$data[] = $row;
+			}
+		}
+    } catch (PDOException $e) {
+        $data = array(); // สร้างอาร์เรย์ใหม่
+        $data[0] = array('status' => 0, 'error_message' => $e->getMessage());
+    }
+
+    // // เพิ่มข้อมูลราคารวมทั้งหมดในอาร์เรย์ใหม่
+    // $data[]['total_price'] = $total_price;
+
+    echo json_encode($data);
+
+
 }
+
 
 
 
