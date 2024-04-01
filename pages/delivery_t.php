@@ -120,10 +120,25 @@
                         <div class="col-md-2">
                             <label class="form-label" for="pay_stats">สถานะการจ่าย </label>
                         <select id="pay_stats" class="form-select form-control-sm color-dropdown">
+                            <option selected>--เลือกสถานะการจ่าย--</option>
                             <option value="no_pay">ยังไม่จ่าย</option>
                             <option value="pay">จ่ายแล้ว</option>
                         </select>
                         </div>
+                        <div class="col-md-2">
+                            <label id="select_pay_label" class="form-label" for="select_pay">จ่ายเป็น </label>
+                            <select id="select_pay" class="form-select form-control-sm color-dropdown">
+                                <option selected>--เลือกประเภทการจ่าย--</option>
+                                <option value="cash">เงินสด</option>
+                                <option value="transfer">เงินโอน</option>
+                                <option value="credit">บัตรเครดิต</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label" for="pay_money" id="pay_money_label">จ่าย </label>
+                            <input type="number" class="form-control" id="pay_money" name="pay_money">
+                        </div>
+
                     </div>
                 </div>
                 <div class="row">
@@ -183,8 +198,8 @@
                         <tr>
                             <th scope="col">สินค้า</th>
                             <th scope="col">จำนวน</th>
-                            <th scope="col">ราคาต่อหน่วย</th>
-                            <th scope="col">ราคารวม</th>
+                            <!-- <th scope="col">ราคาต่อหน่วย</th> -->
+                            <th scope="col">ราคา</th>
                         </tr>
                     </thead>
                     <tbody id="productTableBody">
@@ -230,6 +245,27 @@
         $('#backButton').on('click', function() {
             location.href = 'delivery_t.php';
         });
+
+    $('#pay_stats').change(function() {
+        var payStatus = $(this).val();
+        if (payStatus === 'pay') {
+            $('#select_pay').show();
+            $('#select_pay_label').show();
+            $('#pay_money').show();
+            $('#pay_money_label').show();
+        } else {
+            $('#select_pay').hide();
+            $('#select_pay_label').hide();
+            $('#pay_money').hide();
+            $('#pay_money_label').hide();
+        }
+    });
+
+    $('#select_pay').hide();
+    $('#select_pay_label').hide();
+    $('#pay_money').hide();
+    $('#pay_money_label').hide();
+
 
 
 
@@ -482,9 +518,10 @@
                             newRow.innerHTML = `
                                                 <td>${product.product_name}</td>
                                                 <td>${product.order_qty}</td>
-                                                <td>${product.price}</td>
+                                                
                                                 <td>${totalPrice}</td> 
                                                                     `;
+                                                                    // <td>${product.price}</td>
 
                             // Append the new row to the table body
                             productTableBody.appendChild(newRow);
@@ -496,7 +533,7 @@
                     // Display total price
                     let totalRow = document.createElement("tr");
                     totalRow.innerHTML = `
-            <td colspan="3" class="text-end">รวมทั้งหมด</td>
+            <td colspan="2" class="text-end">รวมทั้งหมด</td>
             <td>${total}</td>
         `;
                     productTableBody.appendChild(totalRow);
