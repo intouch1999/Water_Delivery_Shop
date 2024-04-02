@@ -118,16 +118,16 @@
                             <input type="datetime-local" class="form-control" id="datetime" name="task_datetime">
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label" for="pay_stats">สถานะการจ่าย </label>
-                        <select id="pay_stats" class="form-select form-control-sm color-dropdown">
+                            <label class="form-label" for="pay_status">สถานะการจ่าย </label>
+                        <select id="pay_status" class="form-select form-control-sm color-dropdown">
                             <option selected>--เลือกสถานะการจ่าย--</option>
                             <option value="no_pay">ยังไม่จ่าย</option>
                             <option value="pay">จ่ายแล้ว</option>
                         </select>
                         </div>
                         <div class="col-md-2">
-                            <label id="select_pay_label" class="form-label" for="select_pay">จ่ายเป็น </label>
-                            <select id="select_pay" class="form-select form-control-sm color-dropdown">
+                            <label id="pay_type_label" class="form-label" for="pay_type">ประเภทการจ่าย </label>
+                            <select id="pay_type" class="form-select form-control-sm color-dropdown">
                                 <option selected>--เลือกประเภทการจ่าย--</option>
                                 <option value="cash">เงินสด</option>
                                 <option value="transfer">เงินโอน</option>
@@ -135,8 +135,8 @@
                             </select>
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label" for="pay_money" id="pay_money_label">จ่าย </label>
-                            <input type="number" class="form-control" id="pay_money" name="pay_money">
+                            <label class="form-label" for="pay_total" id="pay_total_label">จำนวนเงิน </label>
+                            <input type="number" class="form-control" id="pay_total" name="pay_total" placeholder="ระบุจำนวนเงิน">
                         </div>
 
                     </div>
@@ -193,6 +193,36 @@
                 </button>
             </div>
             <div class="modal-body" id="modalContent">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>อัพเดทข้อมูล
+                    </h5>
+                    <div class="row gx-3 gy-2 align-items-center">
+                            <label class="form-label" for="task_datetime">วันเวลาจัดส่ง </label>
+                            <input type="datetime-local" class="form-control" id="datetime_update" name="task_datetime">
+                        <div class="col-md-5">
+                            <label class="form-label" for="pay_status_update">สถานะการจ่าย </label>
+                        <select id="pay_status_update" class="form-select form-control-sm color-dropdown">
+                            <option selected>--เลือกสถานะการจ่าย--</option>
+                            <option value="no_pay">ยังไม่จ่าย</option>
+                            <option value="pay">จ่ายแล้ว</option>
+                        </select>
+                        </div>
+                        <div class="col-md-5">
+                            <label id="pay_type_update_label" class="form-label" for="pay_type_update">ประเภทการจ่าย </label>
+                            <select id="pay_type_update" class="form-select form-control-sm color-dropdown">
+                                <option selected>--เลือกประเภทการจ่าย--</option>
+                                <option value="cash">เงินสด</option>
+                                <option value="transfer">เงินโอน</option>
+                                <option value="credit">บัตรเครดิต</option>
+                            </select>
+                        </div>
+                            <label class="form-label" for="pay_total_update" id="pay_total_update_label">จำนวนเงิน </label>
+                            <input type="number" class="form-control" id="pay_total_update" name="pay_total" placeholder="ระบุจำนวนเงิน">
+                        <button type="button" id="update_Task" class="btn btn-primary">บันทึก</button>
+                    </div>
+                </div>
+            </div>
                 <table class="table">
                     <thead>
                         <tr>
@@ -246,25 +276,25 @@
             location.href = 'delivery_t.php';
         });
 
-    $('#pay_stats').change(function() {
+    $('#pay_status').change(function() {
         var payStatus = $(this).val();
         if (payStatus === 'pay') {
-            $('#select_pay').show();
-            $('#select_pay_label').show();
-            $('#pay_money').show();
-            $('#pay_money_label').show();
+            $('#pay_type').show();
+            $('#pay_type_label').show();
+            $('#pay_total').show();
+            $('#pay_total_label').show();
         } else {
-            $('#select_pay').hide();
-            $('#select_pay_label').hide();
-            $('#pay_money').hide();
-            $('#pay_money_label').hide();
+            $('#pay_type').hide();
+            $('#pay_type_label').hide();
+            $('#pay_total').hide();
+            $('#pay_total_label').hide();
         }
     });
 
-    $('#select_pay').hide();
-    $('#select_pay_label').hide();
-    $('#pay_money').hide();
-    $('#pay_money_label').hide();
+    $('#pay_type').hide();
+    $('#pay_type_label').hide();
+    $('#pay_total').hide();
+    $('#pay_total_label').hide();
 
 
 
@@ -500,6 +530,18 @@
                 return response.json();
             })
             .then(function(json) {
+                const taskDatetime = json[1].task_datetime;
+                const pay_status = json[1].pay_status;
+                document.getElementById('datetime_update').value = taskDatetime;
+                const payStatusElement = document.getElementById('pay_status_update');
+
+                if (pay_status == '1') {
+                    payStatusElement.value = 'pay';
+                } else {
+                    payStatusElement.value = 'no_pay';
+                }
+// ทำต่อพรุ่งนี้
+
                 if (json[0].status == '1') {
                     const modalContentDiv = document.getElementById('modalContent');
                     let productTableBody = document.getElementById('productTableBody');
@@ -510,33 +552,33 @@
 
                     json.slice(1).forEach(product => {
                         if (product.product_id !== undefined && product.order_qty !== undefined && product.product_type !== undefined && product.price !== undefined) {
-                            const totalPrice = product.price * product.order_qty;
-                            total += totalPrice;
+                                const totalPrice = Math.ceil(product.price * product.order_qty); // ปัดเศษของ totalPrice
 
-                            // Create a new row for each product
-                            let newRow = document.createElement("tr");
-                            newRow.innerHTML = `
-                                                <td>${product.product_name}</td>
-                                                <td>${product.order_qty}</td>
-                                                
-                                                <td>${totalPrice}</td> 
-                                                                    `;
-                                                                    // <td>${product.price}</td>
+                                // Create a new row for each product
+                                let newRow = document.createElement("tr");
+                                newRow.innerHTML = `
+                                    <td>${product.product_name}</td>
+                                    <td>${product.order_qty}</td>
+                                    <td>${totalPrice}</td> 
+                                `;
 
-                            // Append the new row to the table body
-                            productTableBody.appendChild(newRow);
-                        } else {
-                            console.log('Undefined product details:', product);
-                        }
-                    });
+                                // Append the new row to the table body
+                                productTableBody.appendChild(newRow);
 
-                    // Display total price
-                    let totalRow = document.createElement("tr");
-                    totalRow.innerHTML = `
-            <td colspan="2" class="text-end">รวมทั้งหมด</td>
-            <td>${total}</td>
-        `;
-                    productTableBody.appendChild(totalRow);
+                                total += totalPrice; // บวกราคารวมของสินค้าแต่ละรายการ
+                            } else {
+                                console.log('Undefined product details:', product);
+                            }
+                        });
+                        let totalCeil = Math.ceil(total); // ปัดเศษของผลรวมทั้งหมด
+
+                        // Display total price
+                        let totalRow = document.createElement("tr");
+                        totalRow.innerHTML = `
+                            <td colspan="2" class="text-end">รวมทั้งหมด</td>
+                            <td>${totalCeil}</td>
+                        `;
+                        productTableBody.appendChild(totalRow);
 
                     // Show the modal
                     $('#product_detail_modal').modal('show');
@@ -579,7 +621,10 @@
                     Taskdatetime: $('#datetime').val(), // Get task datetime from the datetime input
                     product: findProduct,
                     order_qty: findQty,
-                    product_type: findType
+                    product_type: findType,
+                    pay_status: $('#pay_status').val(),
+                    pay_type: $('#pay_type').val(),
+                    pay_total: $('#pay_total').val()
                 }),
                 headers: {
                     'Content-Type': 'application/json'

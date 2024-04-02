@@ -224,11 +224,30 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
         $customerId = $decode['cus_id'];
         $taskDatetime = $decode['Taskdatetime'];
         $taskStatus = 1;
+		if ($decode['pay_status'] == 'pay') {
+			$pay_status = 1;
+			$pay_datetime = date('Y-m-d H:i:s');
+		} else {
+			$pay_status = 0;
+		}
+
+		if ($decode['pay_type'] == 'cash') {
+			$pay_type = 0;
+		} else if ($decode['pay_type'] == 'transfer') {
+			$pay_type = 1;
+		} else if ($decode['pay_type'] == 'credit') {
+			$pay_type = 2;
+		}
+
+		$pay_total = $decode['pay_total'];
+
+
         
         if (empty($decode['product'])) {
 			$product_id = 0; 
 			$order_qty = 0; 
 			$product_active = 0;
+	
 		
 			$query_product = "INSERT INTO `delivery_task_product` (`task_id`, `product_id`, `product_active`, `order_qty`, `create_datetime`, `sale_user`)
 							VALUES ('$taskId', '$product_id', '$product_active', '$order_qty', NOW(), '$sivanat_user')";
@@ -259,8 +278,8 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 			}
 		}
         
-        $query_task = "INSERT INTO `delivery_task` (`task_id`, `cus_id`, `task_datetime`, `sale_user`, `task_status`)
-                    VALUES ('$taskId', '$customerId', '$taskDatetime', '$sivanat_user', '$taskStatus')";
+        $query_task = "INSERT INTO `delivery_task` (`task_id`, `cus_id`, `task_datetime`, `sale_user`, `task_status` , `pay_status`, `pay_type`, `pay_total`,`pay_datetime`)
+                    VALUES ('$taskId', '$customerId', '$taskDatetime', '$sivanat_user', '$taskStatus', '$pay_status', '$pay_type', '$pay_total', '$pay_datetime')";
 
         $stmt_task = $conn->query($query_task);
 
@@ -362,10 +381,14 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
         // $total_price = 0; // เพิ่มตัวแปรเพื่อเก็บราคารวมทั้งหมด
 
         $task_id = $decode['task_id'];
-        $query = "SELECT dtp.product_id, dtp.order_qty , dtp.product_type, pi.product_name , pi.unit , pi.unit_price , pi.pack , pi.pack_price
-        FROM delivery_task_product AS dtp
-        JOIN product_info AS pi ON dtp.product_id = pi.product_id
-        WHERE dtp.task_id = '{$task_id}'";
+        $query = "SELECT dt.task_id, dt.cus_id, dt.task_datetime, dt.task_status, dt.pay_status, dt.pay_type, dt.pay_total,
+		dtp.product_id, dtp.order_qty, dtp.product_type,
+		pi.product_name, pi.unit, pi.unit_price, pi.pack, pi.pack_price
+		FROM delivery_task AS dt
+		JOIN delivery_task_product AS dtp ON dt.task_id = dtp.task_id
+		JOIN product_info AS pi ON dtp.product_id = pi.product_id
+		WHERE dt.task_id = '{$task_id}';
+		";
 
         $stmt = $conn->query($query);
         // if ($stmt->rowCount() > 0) {
@@ -389,9 +412,9 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 			while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 				$data[0] = array('status' => 1);
 				if ($row['product_type'] == 'unit') {
-					$row_total_price = ceil($row['unit_price']);
+					$row_total_price = ($row['unit_price']);
 				} elseif ($row['product_type'] == 'pack') {
-					$row_total_price = ceil($row['pack_price']);
+					$row_total_price = ($row['pack_price']);
 				}
 				// เพิ่มข้อมูลราคารวมของแถวนี้เข้าไปในอาร์เรย์ใหม่
 				$row['price'] = $row_total_price;
