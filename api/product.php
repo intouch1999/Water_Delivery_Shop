@@ -229,6 +229,7 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 			$pay_datetime = date('Y-m-d H:i:s');
 		} else {
 			$pay_status = 0;
+			$pay_datetime = null;
 		}
 
 		// if ($decode['pay_type'] == 'cash') {

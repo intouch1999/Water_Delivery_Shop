@@ -115,7 +115,7 @@
                         </div>
                         <div class="col-md-2">
                             <label class="form-label" for="task_datetime">วันเวลาจัดส่ง </label>
-                            <input type="datetime-local" class="form-control" id="datetime" name="task_datetime">
+                            <input type="datetime-local" class="form-control" id="task_datetime" name="task_datetime">
                         </div>
                         <div class="col-md-2">
                             <label class="form-label" for="pay_status">สถานะการจ่าย </label>
@@ -530,37 +530,26 @@
                 return response.json();
             })
             .then(function(json) {
-                const taskDatetime = json[1].task_datetime;
-                const pay_status = json[1].pay_status;
-                const pay_type = json[1].pay_type;
-                const pay_total = json[1].pay_total;
-                document.getElementById('datetime_update').value = taskDatetime;
-                const payStatusElement = document.getElementById('pay_status_update');
-                const payTypeElement = document.getElementById('pay_type_update');
-                const payTotalElement = document.getElementById('pay_total_update');
+     
+                // const pay_total = json[1].pay_total;
+                document.getElementById('datetime_update').value = json[1].task_datetime;
+
+                if(json[1].pay_status === '1'){
+                    document.getElementById('pay_status_update').value = '1';
+                } else{
+                    document.getElementById('pay_status_update').value = '0';
+                }
+
+        
+                if (json[1].pay_type === '0') {
+                    document.getElementById('pay_type_update').value = '0';
+                } else if (json[1].pay_type == '1') {
+                    document.getElementById('pay_type_update').value = '1';
+                } else if (json[1].pay_type == '2') {
+                    document.getElementById('pay_type_update').value = '2';
+                }
                 
-                if (pay_status === '1') {
-                    payStatusElement.value = '1';
-                } else {
-                    payStatusElement.value = '0';
-                }
-                if (pay_type == '0') {
-                    payTypeElement.value = '0';
-                } else if (pay_type == '1') {
-                    payTypeElement.value = '1';
-                } else if (pay_type == '2') {
-                    payTypeElement.value = '2';
-                }
-
-                payTotalElement.value = pay_total;
-                // if (json[1].pay_type === '0') {
-                //     document.getElementById('pay_type_update').value = '0';
-                // } else if (json[1].pay_type === '1') {
-                //     document.getElementById('pay_type_update').value = '1';
-                // } else if (json[1].pay_type === '2') {
-                //     document.getElementById('pay_type_update').value = '2';
-                // }
-
+                document.getElementById('pay_total_update').value = json[1].pay_total;
 
                 if (json[0].status == '1') {
                     const modalContentDiv = document.getElementById('modalContent');
@@ -638,7 +627,7 @@
                 body: JSON.stringify({
                     case: 'TaskProduct',
                     cus_id: cus_id, // Assuming get_cus_id is already defined
-                    Taskdatetime: $('#datetime').val(), // Get task datetime from the datetime input
+                    Taskdatetime: $('#task_datetime').val(), // Get task datetime from the datetime input
                     product: findProduct,
                     order_qty: findQty,
                     product_type: findType,
