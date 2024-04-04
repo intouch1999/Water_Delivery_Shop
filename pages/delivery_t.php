@@ -121,17 +121,17 @@
                             <label class="form-label" for="pay_status">สถานะการจ่าย </label>
                         <select id="pay_status" class="form-select form-control-sm color-dropdown">
                             <option selected>--เลือกสถานะการจ่าย--</option>
-                            <option value="no_pay">ยังไม่จ่าย</option>
-                            <option value="pay">จ่ายแล้ว</option>
+                            <option value="0">ยังไม่จ่าย</option>
+                            <option value="1">จ่ายแล้ว</option>
                         </select>
                         </div>
                         <div class="col-md-2">
                             <label id="pay_type_label" class="form-label" for="pay_type">ประเภทการจ่าย </label>
                             <select id="pay_type" class="form-select form-control-sm color-dropdown">
                                 <option selected>--เลือกประเภทการจ่าย--</option>
-                                <option value="cash">เงินสด</option>
-                                <option value="transfer">เงินโอน</option>
-                                <option value="credit">บัตรเครดิต</option>
+                                <option value="0">เงินสด</option>
+                                <option value="1">เงินโอน</option>
+                                <option value="2">บัตรเครดิต</option>
                             </select>
                         </div>
                         <div class="col-md-2">
@@ -204,17 +204,17 @@
                             <label class="form-label" for="pay_status_update">สถานะการจ่าย </label>
                         <select id="pay_status_update" class="form-select form-control-sm color-dropdown">
                             <option selected>--เลือกสถานะการจ่าย--</option>
-                            <option value="no_pay">ยังไม่จ่าย</option>
-                            <option value="pay">จ่ายแล้ว</option>
+                            <option value="0">ยังไม่จ่าย</option>
+                            <option value="1">จ่ายแล้ว</option>
                         </select>
                         </div>
                         <div class="col-md-5">
                             <label id="pay_type_update_label" class="form-label" for="pay_type_update">ประเภทการจ่าย </label>
                             <select id="pay_type_update" class="form-select form-control-sm color-dropdown">
                                 <option selected>--เลือกประเภทการจ่าย--</option>
-                                <option value="cash">เงินสด</option>
-                                <option value="transfer">เงินโอน</option>
-                                <option value="credit">บัตรเครดิต</option>
+                                <option value="0">เงินสด</option>
+                                <option value="1">เงินโอน</option>
+                                <option value="2">บัตรเครดิต</option>
                             </select>
                         </div>
                             <label class="form-label" for="pay_total_update" id="pay_total_update_label">จำนวนเงิน </label>
@@ -278,7 +278,7 @@
 
     $('#pay_status').change(function() {
         var payStatus = $(this).val();
-        if (payStatus === 'pay') {
+        if (payStatus === '1') {
             $('#pay_type').show();
             $('#pay_type_label').show();
             $('#pay_total').show();
@@ -532,15 +532,35 @@
             .then(function(json) {
                 const taskDatetime = json[1].task_datetime;
                 const pay_status = json[1].pay_status;
+                const pay_type = json[1].pay_type;
+                const pay_total = json[1].pay_total;
                 document.getElementById('datetime_update').value = taskDatetime;
                 const payStatusElement = document.getElementById('pay_status_update');
-
-                if (pay_status == '1') {
-                    payStatusElement.value = 'pay';
+                const payTypeElement = document.getElementById('pay_type_update');
+                const payTotalElement = document.getElementById('pay_total_update');
+                
+                if (pay_status === '1') {
+                    payStatusElement.value = '1';
                 } else {
-                    payStatusElement.value = 'no_pay';
+                    payStatusElement.value = '0';
                 }
-// ทำต่อพรุ่งนี้
+                if (pay_type == '0') {
+                    payTypeElement.value = '0';
+                } else if (pay_type == '1') {
+                    payTypeElement.value = '1';
+                } else if (pay_type == '2') {
+                    payTypeElement.value = '2';
+                }
+
+                payTotalElement.value = pay_total;
+                // if (json[1].pay_type === '0') {
+                //     document.getElementById('pay_type_update').value = '0';
+                // } else if (json[1].pay_type === '1') {
+                //     document.getElementById('pay_type_update').value = '1';
+                // } else if (json[1].pay_type === '2') {
+                //     document.getElementById('pay_type_update').value = '2';
+                // }
+
 
                 if (json[0].status == '1') {
                     const modalContentDiv = document.getElementById('modalContent');

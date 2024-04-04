@@ -224,20 +224,21 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
         $customerId = $decode['cus_id'];
         $taskDatetime = $decode['Taskdatetime'];
         $taskStatus = 1;
-		if ($decode['pay_status'] == 'pay') {
+		if ($decode['pay_status'] == '1') {
 			$pay_status = 1;
 			$pay_datetime = date('Y-m-d H:i:s');
 		} else {
 			$pay_status = 0;
 		}
 
-		if ($decode['pay_type'] == 'cash') {
-			$pay_type = 0;
-		} else if ($decode['pay_type'] == 'transfer') {
-			$pay_type = 1;
-		} else if ($decode['pay_type'] == 'credit') {
-			$pay_type = 2;
-		}
+		// if ($decode['pay_type'] == 'cash') {
+		// 	$pay_type = 0;
+		// } else if ($decode['pay_type'] == 'transfer') {
+		// 	$pay_type = 1;
+		// } else if ($decode['pay_type'] == 'credit') {
+		// 	$pay_type = 2;
+		// }
+		$pay_type = $decode['pay_type'];
 
 		$pay_total = $decode['pay_total'];
 
