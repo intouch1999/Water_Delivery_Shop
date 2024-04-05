@@ -434,6 +434,26 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
     echo json_encode($data);
 
 
+} else if (@$decode['case'] == 'update_task') {
+	try {
+		$task_id = $decode['task_id'];
+		$pay_status = $decode['pay_status'];
+		$pay_type = $decode['pay_type'];
+		$pay_total = $decode['pay_total'];
+		$task_datetime = $decode['task_datetime'];
+		$query = "UPDATE delivery_task SET pay_status = '{$pay_status}' , pay_type = '{$pay_type}' , pay_total = '{$pay_total}' , task_datetime = '{$task_datetime}' WHERE task_id = '{$task_id}' ";
+
+		$stmt = $conn->query($query);
+		if ($stmt) {
+			$data[0] = array('status' => 1);
+		} else {
+			$data[0] = array('status' => 0);
+		}
+
+	} catch (PDOException $e) {
+		$data[0] = array('status' => 0, 'error_message' => $e->getMessage());
+	}
+	echo json_encode(@$data);
 }
 
 

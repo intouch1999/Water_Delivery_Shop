@@ -119,11 +119,11 @@
                         </div>
                         <div class="col-md-2">
                             <label class="form-label" for="pay_status">สถานะการจ่าย </label>
-                        <select id="pay_status" class="form-select form-control-sm color-dropdown">
-                            <option selected>--เลือกสถานะการจ่าย--</option>
-                            <option value="0">ยังไม่จ่าย</option>
-                            <option value="1">จ่ายแล้ว</option>
-                        </select>
+                            <select id="pay_status" class="form-select form-control-sm color-dropdown">
+                                <option selected>--เลือกสถานะการจ่าย--</option>
+                                <option value="0">ยังไม่จ่าย</option>
+                                <option value="1">จ่ายแล้ว</option>
+                            </select>
                         </div>
                         <div class="col-md-2">
                             <label id="pay_type_label" class="form-label" for="pay_type">ประเภทการจ่าย </label>
@@ -193,36 +193,52 @@
                 </button>
             </div>
             <div class="modal-body" id="modalContent">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5>อัพเดทข้อมูล
-                    </h5>
-                    <div class="row gx-3 gy-2 align-items-center">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>อัพเดทข้อมูล
+                        </h5>
+                        <div class="row gx-3 gy-2 align-items-center">
+                            <input id="task_id_update" type="hidden"> </input>
                             <label class="form-label" for="task_datetime">วันเวลาจัดส่ง </label>
                             <input type="datetime-local" class="form-control" id="datetime_update" name="task_datetime">
-                        <div class="col-md-5">
-                            <label class="form-label" for="pay_status_update">สถานะการจ่าย </label>
-                        <select id="pay_status_update" class="form-select form-control-sm color-dropdown">
-                            <option selected>--เลือกสถานะการจ่าย--</option>
-                            <option value="0">ยังไม่จ่าย</option>
-                            <option value="1">จ่ายแล้ว</option>
-                        </select>
-                        </div>
-                        <div class="col-md-5">
-                            <label id="pay_type_update_label" class="form-label" for="pay_type_update">ประเภทการจ่าย </label>
-                            <select id="pay_type_update" class="form-select form-control-sm color-dropdown">
-                                <option selected>--เลือกประเภทการจ่าย--</option>
-                                <option value="0">เงินสด</option>
-                                <option value="1">เงินโอน</option>
-                                <option value="2">บัตรเครดิต</option>
-                            </select>
-                        </div>
+                            <div class="col-md-5">
+                                <label class="form-label" for="pay_status_update">สถานะการจ่าย </label>
+                                <select id="pay_status_update" class="form-select form-control-sm color-dropdown">
+                                    <option selected>--เลือกสถานะการจ่าย--</option>
+                                    <option value="0">ยังไม่จ่าย</option>
+                                    <option value="1">จ่ายแล้ว</option>
+                                </select>
+                            </div>
+                            <div class="col-md-5">
+                                <label id="pay_type_update_label" class="form-label" for="pay_type_update">ประเภทการจ่าย </label>
+                                <select id="pay_type_update" class="form-select form-control-sm color-dropdown">
+                                    <option selected>--เลือกประเภทการจ่าย--</option>
+                                    <option value="0">เงินสด</option>
+                                    <option value="1">เงินโอน</option>
+                                    <option value="2">บัตรเครดิต</option>
+                                </select>
+                            </div>
                             <label class="form-label" for="pay_total_update" id="pay_total_update_label">จำนวนเงิน </label>
                             <input type="number" class="form-control" id="pay_total_update" name="pay_total" placeholder="ระบุจำนวนเงิน">
-                        <button type="button" id="update_Task" class="btn btn-primary">บันทึก</button>
+                <div class="row">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>สินค้า</th>
+                                <th>จำนวน</th>
+                                <th>ประเภท</th>
+                            </tr>
+                        </thead>
+                        <tbody id="product_list_update">
+
+                        </tbody>
+                    </table>
+                </div>
+
+                            <button type="button" id="update_Task" class="btn btn-primary">บันทึก</button>
+                        </div>
                     </div>
                 </div>
-            </div>
                 <table class="table">
                     <thead>
                         <tr>
@@ -276,25 +292,25 @@
             location.href = 'delivery_t.php';
         });
 
-    $('#pay_status').change(function() {
-        var payStatus = $(this).val();
-        if (payStatus === '1') {
-            $('#pay_type').show();
-            $('#pay_type_label').show();
-            $('#pay_total').show();
-            $('#pay_total_label').show();
-        } else {
-            $('#pay_type').hide();
-            $('#pay_type_label').hide();
-            $('#pay_total').hide();
-            $('#pay_total_label').hide();
-        }
-    });
+        $('#pay_status').change(function() {
+            var payStatus = $(this).val();
+            if (payStatus === '1') {
+                $('#pay_type').show();
+                $('#pay_type_label').show();
+                $('#pay_total').show();
+                $('#pay_total_label').show();
+            } else {
+                $('#pay_type').hide();
+                $('#pay_type_label').hide();
+                $('#pay_total').hide();
+                $('#pay_total_label').hide();
+            }
+        });
 
-    $('#pay_type').hide();
-    $('#pay_type_label').hide();
-    $('#pay_total').hide();
-    $('#pay_total_label').hide();
+        $('#pay_type').hide();
+        $('#pay_type_label').hide();
+        $('#pay_total').hide();
+        $('#pay_total_label').hide();
 
 
 
@@ -302,11 +318,11 @@
         $('#customerData').on('click', '.btn-edit', task_button, task());
         $('#submit_Task').on('click', submitTask);
         $('#taskData').on('click', '.btn-success', tasklist_success);
-        $('#taskData').on('click', '.btn-info', btn_info)
+        $('#taskData').on('click', '.btn-info', btn_info);
         $('#product_detail_modal').on('click', '[aria-hidden="true"]', function() {
             $('#product_detail_modal').modal('hide');
         });
-
+        $('#update_Task').on('click', update_task);
     });
 
     function customer_task() {
@@ -530,25 +546,25 @@
                 return response.json();
             })
             .then(function(json) {
-     
+                document.getElementById('task_id_update').value = json[1].task_id;
                 // const pay_total = json[1].pay_total;
                 document.getElementById('datetime_update').value = json[1].task_datetime;
 
-                if(json[1].pay_status === '1'){
+                if (json[1].pay_status == '1') {
                     document.getElementById('pay_status_update').value = '1';
-                } else{
+                } else {
                     document.getElementById('pay_status_update').value = '0';
                 }
 
-        
-                if (json[1].pay_type === '0') {
+
+                if (json[1].pay_type == '0') {
                     document.getElementById('pay_type_update').value = '0';
                 } else if (json[1].pay_type == '1') {
                     document.getElementById('pay_type_update').value = '1';
                 } else if (json[1].pay_type == '2') {
                     document.getElementById('pay_type_update').value = '2';
                 }
-                
+
                 document.getElementById('pay_total_update').value = json[1].pay_total;
 
                 if (json[0].status == '1') {
@@ -561,33 +577,33 @@
 
                     json.slice(1).forEach(product => {
                         if (product.product_id !== undefined && product.order_qty !== undefined && product.product_type !== undefined && product.price !== undefined) {
-                                // const totalPrice = Math.ceil(product.price * product.order_qty); // ปัดเศษของ totalPrice
-                                const totalPrice = product.price * product.order_qty;
-                                // Create a new row for each product
-                                let newRow = document.createElement("tr");
-                                newRow.innerHTML = `
-                                    <td>${product.product_name}</td>
-                                    <td>${product.order_qty}</td>
-                                    <td>${totalPrice}</td> 
-                                `;
+                            // const totalPrice = Math.ceil(product.price * product.order_qty); // ปัดเศษของ totalPrice
+                            const totalPrice = product.price * product.order_qty;
+                            // Create a new row for each product
+                            let newRow = document.createElement("tr");
+                            newRow.innerHTML = `
+                                <td>${product.product_name}</td>
+                                <td>${product.order_qty}</td>
+                                <td>${totalPrice}</td> 
+                            `;
 
-                                // Append the new row to the table body
-                                productTableBody.appendChild(newRow);
+                            // Append the new row to the table body
+                            productTableBody.appendChild(newRow);
 
-                                total += totalPrice; // บวกราคารวมของสินค้าแต่ละรายการ
-                            } else {
-                                console.log('Undefined product details:', product);
-                            }
-                        });
-                        let totalCeil = Math.ceil(total); // ปัดเศษของผลรวมทั้งหมด
+                            total += totalPrice; // บวกราคารวมของสินค้าแต่ละรายการ
+                        } else {
+                            console.log('Undefined product details:', product);
+                        }
+                    });
+                    let totalCeil = Math.ceil(total); // ปัดเศษของผลรวมทั้งหมด
 
-                        // Display total price
-                        let totalRow = document.createElement("tr");
-                        totalRow.innerHTML = `
-                            <td colspan="2" class="text-end">รวมทั้งหมด</td>
-                            <td>${totalCeil}</td>
-                        `;
-                        productTableBody.appendChild(totalRow);
+                    // Display total price
+                    let totalRow = document.createElement("tr");
+                    totalRow.innerHTML = `
+                        <td colspan="2" class="text-end">รวมทั้งหมด</td>
+                        <td>${totalCeil}</td>
+                    `;
+                    productTableBody.appendChild(totalRow);
 
                     // Show the modal
                     $('#product_detail_modal').modal('show');
@@ -595,6 +611,51 @@
                     console.error('Error:', data.error_message);
                 }
             })
+            .catch(function(error) {
+                console.error('Error:', error);
+            });
+    }
+
+    $('#product_detail_modal').on('shown.bs.modal', function() {
+        $('#update_Task').off('click').on('click', update_task);
+    });
+
+    function update_task() {
+
+        fetch('../api/product?case=update_task', {
+                method: 'POST',
+                body: JSON.stringify({
+                    case: 'update_task',
+                    task_id: $('#task_id_update').val(),
+                    pay_status: $('#pay_status_update').val(),
+                    pay_type: $('#pay_type_update').val(),
+                    pay_total: $('#pay_total_update').val(),
+                    task_datetime: $('#datetime_update').val(),
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(function(response) {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                } else {
+                    return response.json();
+                }
+            })
+            .then(function(json) {
+                if (json[0].status == '0') {
+                    alert_snackbar('error', json[0].error_message);
+                } else {
+                    alert_snackbar('success', "อัพเดทสำเร็จ");
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1500);
+                }
+            })
+            .catch(function(error) {
+                console.error('Error:', error);
+            });
     }
 
     function submitTask() {
@@ -606,60 +667,55 @@
             var quantityInput = row.cells[1].querySelector('input[type="number"]'); // Get quantity from the second cell
             var quantity = quantityInput.value;
             var productType = row.cells[2].querySelector('select').value; // Get product type from the select element
-            var productTypePrice = row.cells[2].querySelector('select').selectedOptions[0].getAttribute('data-price');
-            console.log(productTypePrice);
+            // var productTypePrice = row.cells[2].querySelector('select').selectedOptions[0].getAttribute('data-price');
             if (quantity && parseInt(quantity) !== 0) {
                 productsAndQuantities.push({
                     id: productId,
                     quantity: quantity,
                     type: productType,
-                    price: productTypePrice
+                    // price: productTypePrice
                 });
             }
         });
 
-        // Extract product IDs, quantities, and types
         var findProduct = productsAndQuantities.map(item => item.id);
         var findQty = productsAndQuantities.map(item => item.quantity);
         var findType = productsAndQuantities.map(item => item.type);
-        var findPrice = productsAndQuantities.map(item => item.price);
+        // var findPrice = productsAndQuantities.map(item => item.price);
 
-        var totalPrice = 0; // สร้างตัวแปรเพื่อเก็บราคารวมของทุกสินค้า
+        var totalPrice = 0;
 
-// วนลูปผ่านสินค้าแต่ละชิ้น
-productsAndQuantities.forEach(item => {
-    var productPrice = parseFloat(item.price); // แปลงราคาของสินค้าเป็นตัวเลขทศนิยม
-    var productQuantity = parseInt(item.quantity);
+        productsAndQuantities.forEach(item => {
+            var productPrice = parseFloat(item.price);
+            var productQuantity = parseInt(item.quantity);
 
-    // คำนวณราคารวมของแต่ละสินค้า
-    var totalPricePerProduct = productPrice * productQuantity;
 
-    // เพิ่มราคารวมของสินค้าแต่ละชิ้นเข้าไปในราคารวมทั้งหมด
-    totalPrice += totalPricePerProduct;
-});
+            var totalPricePerProduct = productPrice * productQuantity;
 
-// เพิ่มราคารวมลงในข้อมูลที่จะส่งไปยัง API
-var taskData = {
-    totalPrice: totalPrice, // เพิ่มราคารวมของสินค้าลงใน JSON object
-    // เพิ่มข้อมูลอื่น ๆ ตามที่ต้องการ
-};
 
-// ทำการ fetch เพื่อส่งข้อมูลไปยัง API
-fetch('../api/product?case=TaskProduct', {
-    method: 'POST',
-    body: JSON.stringify({
-        case: 'TaskProduct',
-        cus_id: cus_id,
-        Taskdatetime: $('#task_datetime').val(),
-        product: findProduct,
-        order_qty: findQty,
-        product_type: findType,
-        price: findPrice,
-        pay_status: $('#pay_status').val(),
-        pay_type: $('#pay_type').val(),
-        pay_total: $('#pay_total').val(),
-        totalPrice: totalPrice // เพิ่มราคารวมของสินค้าในข้อมูลที่ส่งไปยัง API
-    }),
+            totalPrice += totalPricePerProduct;
+        });
+
+        var taskData = {
+            totalPrice: totalPrice,
+        };
+
+        // ทำการ fetch เพื่อส่งข้อมูลไปยัง API
+        fetch('../api/product?case=TaskProduct', {
+                method: 'POST',
+                body: JSON.stringify({
+                    case: 'TaskProduct',
+                    cus_id: cus_id,
+                    Taskdatetime: $('#task_datetime').val(),
+                    product: findProduct,
+                    order_qty: findQty,
+                    product_type: findType,
+                    // price: findPrice,
+                    pay_status: $('#pay_status').val(),
+                    pay_type: $('#pay_type').val(),
+                    pay_total: $('#pay_total').val(),
+                    totalPrice: totalPrice // เพิ่มราคารวมของสินค้าในข้อมูลที่ส่งไปยัง API
+                }),
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -736,33 +792,58 @@ fetch('../api/product?case=TaskProduct', {
             })
             .then(products => {
                 const product_list_Div = document.getElementById('product_list');
+const product_list_Div_update = document.getElementById('product_list_update');
 
-                const filteredProducts = products.filter(item => !('status' in item));
-                if (filteredProducts.length > 0) {
-                    filteredProducts.forEach(product => {
-                        var newRow = document.createElement("tr");
-                        newRow.innerHTML = `
-                        <td id="${product.product_id}">
-                        <img src="../assets/img/product/${product.product_img}" alt="user-avatar" class="d-block rounded" height="70px" width="70px">${product.product_name}
-                        </td>
-                        <td>
-                            <input type="number" class="form-control" name="quantity${product.product_id}" id="quantity${product.product_id}" value="0">
-                        </td>
-                        <td>
-                        <select id="product_type" class="form-select form-control-sm color-dropdown">
-                            <option value="pack" data-price="${product.pack_price}">Pack (แพ็ค)</option>
-                            <option value="unit" data-price="${product.unit_price}">Unit (ชิ้น)</option>
-                        </select>
-                        </td>
-                                    `;
+const filteredProducts = products.filter(item => !('status' in item));
+if (filteredProducts.length > 0) {
+    filteredProducts.forEach(product => {
+        var newRow = document.createElement("tr");
+        newRow.innerHTML = `
+            <td id="${product.product_id}">
+                <img src="../assets/img/product/${product.product_img}" alt="user-avatar" class="d-block rounded" height="70px" width="70px">${product.product_name}
+            </td>
+            <td>
+                <input type="number" class="form-control" name="quantity${product.product_id}" id="quantity${product.product_id}" value="0">
+            </td>
+            <td>
+                <select id="product_type" class="form-select form-control-sm color-dropdown">
+                    <option value="pack" data-price="${product.pack_price}">Pack (แพ็ค)</option>
+                    <option value="unit" data-price="${product.unit_price}">Unit (ชิ้น)</option>
+                </select>
+            </td>
+        `;
+        product_list_Div.appendChild(newRow);
+    });
+}
 
-                        product_list_Div.appendChild(newRow);
-                    });
-                } else {
-                    product_list_Div.innerHTML = '<p>No products available.</p>';
-                }
+if (filteredProducts.length > 0) {
+    filteredProducts.forEach(product => {
+        var newRow = document.createElement("tr");
+        newRow.innerHTML = `
+            <td id="${product.product_id}">
+                <img src="../assets/img/product/${product.product_img}" alt="user-avatar" class="d-block rounded" height="70px" width="70px">${product.product_name}
+            </td>
+            <td>
+                <input type="number" class="form-control" name="quantity${product.product_id}" id="quantity${product.product_id}" value="0">
+            </td>
+            <td>
+                <select id="product_type" class="form-select form-control-sm color-dropdown">
+                    <option value="pack" data-price="${product.pack_price}">Pack (แพ็ค)</option>
+                    <option value="unit" data-price="${product.unit_price}">Unit (ชิ้น)</option>
+                </select>
+            </td>
+        `;
+        product_list_Div_update.appendChild(newRow);
+    });
+}
+
+            })
+            .catch(function(error) {
+                console.error('Error:', error);
             })
     }
+    
+
 
     function getTableRowData(btnElement, tableId) {
         var table = $('#' + tableId).DataTable();
