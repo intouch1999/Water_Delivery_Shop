@@ -242,7 +242,7 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 		$pay_type = $decode['pay_type'];
 
 		$pay_total = $decode['pay_total'];
-
+		$price_total = $decode['totalPrice'];
 
         
         if (empty($decode['product'])) {
@@ -280,8 +280,8 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 			}
 		}
         
-        $query_task = "INSERT INTO `delivery_task` (`task_id`, `cus_id`, `task_datetime`, `sale_user`, `task_status` , `pay_status`, `pay_type`, `pay_total`,`pay_datetime`)
-                    VALUES ('$taskId', '$customerId', '$taskDatetime', '$sivanat_user', '$taskStatus', '$pay_status', '$pay_type', '$pay_total', '$pay_datetime')";
+        $query_task = "INSERT INTO `delivery_task` (`task_id`, `cus_id`, `task_datetime`, `sale_user`, `task_status` , `pay_status`, `pay_type`, `price_total`, `pay_total`,`pay_datetime`)
+                    VALUES ('$taskId', '$customerId', '$taskDatetime', '$sivanat_user', '$taskStatus', '$pay_status', '$pay_type', '$price_total', '$pay_total', '$pay_datetime')";
 
         $stmt_task = $conn->query($query_task);
 

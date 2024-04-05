@@ -561,8 +561,8 @@
 
                     json.slice(1).forEach(product => {
                         if (product.product_id !== undefined && product.order_qty !== undefined && product.product_type !== undefined && product.price !== undefined) {
-                                const totalPrice = Math.ceil(product.price * product.order_qty); // ปัดเศษของ totalPrice
-
+                                // const totalPrice = Math.ceil(product.price * product.order_qty); // ปัดเศษของ totalPrice
+                                const totalPrice = product.price * product.order_qty;
                                 // Create a new row for each product
                                 let newRow = document.createElement("tr");
                                 newRow.innerHTML = `
@@ -606,12 +606,14 @@
             var quantityInput = row.cells[1].querySelector('input[type="number"]'); // Get quantity from the second cell
             var quantity = quantityInput.value;
             var productType = row.cells[2].querySelector('select').value; // Get product type from the select element
-
+            var productTypePrice = row.cells[2].querySelector('select').selectedOptions[0].getAttribute('data-price');
+            console.log(productTypePrice);
             if (quantity && parseInt(quantity) !== 0) {
                 productsAndQuantities.push({
                     id: productId,
                     quantity: quantity,
-                    type: productType
+                    type: productType,
+                    price: productTypePrice
                 });
             }
         });
@@ -620,21 +622,44 @@
         var findProduct = productsAndQuantities.map(item => item.id);
         var findQty = productsAndQuantities.map(item => item.quantity);
         var findType = productsAndQuantities.map(item => item.type);
+        var findPrice = productsAndQuantities.map(item => item.price);
 
-        // Make AJAX request to submit task data
-        fetch('../api/product?case=TaskProduct', {
-                method: 'POST',
-                body: JSON.stringify({
-                    case: 'TaskProduct',
-                    cus_id: cus_id, // Assuming get_cus_id is already defined
-                    Taskdatetime: $('#task_datetime').val(), // Get task datetime from the datetime input
-                    product: findProduct,
-                    order_qty: findQty,
-                    product_type: findType,
-                    pay_status: $('#pay_status').val(),
-                    pay_type: $('#pay_type').val(),
-                    pay_total: $('#pay_total').val()
-                }),
+        var totalPrice = 0; // สร้างตัวแปรเพื่อเก็บราคารวมของทุกสินค้า
+
+// วนลูปผ่านสินค้าแต่ละชิ้น
+productsAndQuantities.forEach(item => {
+    var productPrice = parseFloat(item.price); // แปลงราคาของสินค้าเป็นตัวเลขทศนิยม
+    var productQuantity = parseInt(item.quantity);
+
+    // คำนวณราคารวมของแต่ละสินค้า
+    var totalPricePerProduct = productPrice * productQuantity;
+
+    // เพิ่มราคารวมของสินค้าแต่ละชิ้นเข้าไปในราคารวมทั้งหมด
+    totalPrice += totalPricePerProduct;
+});
+
+// เพิ่มราคารวมลงในข้อมูลที่จะส่งไปยัง API
+var taskData = {
+    totalPrice: totalPrice, // เพิ่มราคารวมของสินค้าลงใน JSON object
+    // เพิ่มข้อมูลอื่น ๆ ตามที่ต้องการ
+};
+
+// ทำการ fetch เพื่อส่งข้อมูลไปยัง API
+fetch('../api/product?case=TaskProduct', {
+    method: 'POST',
+    body: JSON.stringify({
+        case: 'TaskProduct',
+        cus_id: cus_id,
+        Taskdatetime: $('#task_datetime').val(),
+        product: findProduct,
+        order_qty: findQty,
+        product_type: findType,
+        price: findPrice,
+        pay_status: $('#pay_status').val(),
+        pay_type: $('#pay_type').val(),
+        pay_total: $('#pay_total').val(),
+        totalPrice: totalPrice // เพิ่มราคารวมของสินค้าในข้อมูลที่ส่งไปยัง API
+    }),
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -651,7 +676,7 @@
                 } else {
                     alert_snackbar('success', "เพิ่มนัดหมายสำเร็จ");
                     setTimeout(function() {
-                        location.reload();
+                        // location.reload();
                     }, 1500);
                 }
             })
@@ -725,8 +750,8 @@
                         </td>
                         <td>
                         <select id="product_type" class="form-select form-control-sm color-dropdown">
-                            <option value="pack">Pack (แพ็ค)</option>
-                            <option value="unit">Unit (ชิ้น)</option>
+                            <option value="pack" data-price="${product.pack_price}">Pack (แพ็ค)</option>
+                            <option value="unit" data-price="${product.unit_price}">Unit (ชิ้น)</option>
                         </select>
                         </td>
                                     `;
