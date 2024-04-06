@@ -441,6 +441,21 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 		$pay_type = $decode['pay_type'];
 		$pay_total = $decode['pay_total'];
 		$task_datetime = $decode['task_datetime'];
+
+		foreach ($decode['product_id'] as $index => $product_id) {
+			$order_qty = $decode['order_qty'][$index];
+			$product_type = $decode['product_type'][$index];
+
+			$query_product = "UPDATE `delivery_task_product` SET `order_qty` = '$order_qty', `product_type` = '$product_type' WHERE `product_id` = '$product_id' AND `task_id` = '$task_id' ";
+	
+			$stmt_product = $conn->query($query_product);
+	
+			if (!$stmt_product) {
+				$data[0] = array('status' => 0);
+				echo json_encode($data);
+				exit;
+			}
+		}
 		$query = "UPDATE delivery_task SET pay_status = '{$pay_status}' , pay_type = '{$pay_type}' , pay_total = '{$pay_total}' , task_datetime = '{$task_datetime}' WHERE task_id = '{$task_id}' ";
 
 		$stmt = $conn->query($query);

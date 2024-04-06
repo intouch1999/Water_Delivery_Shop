@@ -68,6 +68,10 @@
             /* ให้สามารถเลื่อนแนวนอนในกรณีที่ตารางมีขนาดใหญ่เกินไป */
         }
     }
+
+    #product_detail_modal .card.mb-4 {
+        display: none;
+    }
 </style>
 <!-- Content wrapper -->
 <div class="content-wrapper">
@@ -218,23 +222,45 @@
                                     <option value="2">บัตรเครดิต</option>
                                 </select>
                             </div>
-                            <label class="form-label" for="pay_total_update" id="pay_total_update_label">จำนวนเงิน </label>
+                            <label class="form-label" for="pay_total_update" id="pay_total_update_label">จำนวนเงินที่ได้รับ </label>
                             <input type="number" class="form-control" id="pay_total_update" name="pay_total" placeholder="ระบุจำนวนเงิน">
-                <div class="row">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>สินค้า</th>
-                                <th>จำนวน</th>
-                                <th>ประเภท</th>
-                            </tr>
-                        </thead>
-                        <tbody id="product_list_update">
+                            <div class="row">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>สินค้า</th>
+                                            <th>จำนวน</th>
+                                            <th>ประเภท</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="product_list_update">
 
-                        </tbody>
-                    </table>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <button type="button" id="update_Task" class="btn btn-primary">บันทึก</button>
+                        </div>
+                    </div>
                 </div>
+                <div class="card mb-2">
+                    <div class="card-header">
+                        <h5>เพิ่มสินค้า
+                        </h5>
+                        <div class="row gx-3 gy-2 align-items-center">
+                            <div class="row">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>สินค้า</th>
+                                            <th>จำนวน</th>
+                                            <th>ประเภท</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="product_list_add">
 
+                                    </tbody>
+                                </table>
+                            </div>
                             <button type="button" id="update_Task" class="btn btn-primary">บันทึก</button>
                         </div>
                     </div>
@@ -254,6 +280,7 @@
                 </table>
             </div>
             <div class="modal-footer">
+                <button type="button" class="btn btn-primary fig_task" id="toggleCardBtn" data-dismiss="modal">แก้ไขข้อมูล</button>
                 <button type="button" class="btn btn-secondary" aria-hidden="true" data-dismiss="modal">Close</button>
             </div>
         </div>
@@ -316,13 +343,35 @@
 
 
         $('#customerData').on('click', '.btn-edit', task_button, task());
+
         $('#submit_Task').on('click', submitTask);
+
         $('#taskData').on('click', '.btn-success', tasklist_success);
+
         $('#taskData').on('click', '.btn-info', btn_info);
+
         $('#product_detail_modal').on('click', '[aria-hidden="true"]', function() {
             $('#product_detail_modal').modal('hide');
         });
+
         $('#update_Task').on('click', update_task);
+
+        $('#product_detail_modal').on('shown.bs.modal', function() {
+            $('#update_Task').off('click').on('click', update_task);
+        });
+
+        $('#product_detail_modal').on('click', '.fig_task', function() {
+            $('.card.mb-4', $(this).closest('.modal-content')).toggle();
+        });
+
+        document.querySelector('#product_detail_modal').addEventListener('hidden.bs.modal', function(event) {
+            var modalContent = event.target.querySelector('.modal-content');
+            var card = modalContent.querySelector('.card.mb-4');
+            card.style.display = 'none';
+        });
+
+
+
     });
 
     function customer_task() {
@@ -547,68 +596,71 @@
             })
             .then(function(json) {
                 document.getElementById('task_id_update').value = json[1].task_id;
-                // const pay_total = json[1].pay_total;
                 document.getElementById('datetime_update').value = json[1].task_datetime;
-
-                if (json[1].pay_status == '1') {
-                    document.getElementById('pay_status_update').value = '1';
-                } else {
-                    document.getElementById('pay_status_update').value = '0';
-                }
-
-
-                if (json[1].pay_type == '0') {
-                    document.getElementById('pay_type_update').value = '0';
-                } else if (json[1].pay_type == '1') {
-                    document.getElementById('pay_type_update').value = '1';
-                } else if (json[1].pay_type == '2') {
-                    document.getElementById('pay_type_update').value = '2';
-                }
-
+                document.getElementById('pay_status_update').value = json[1].pay_status;
+                document.getElementById('pay_type_update').value = json[1].pay_type;
                 document.getElementById('pay_total_update').value = json[1].pay_total;
 
-                if (json[0].status == '1') {
-                    const modalContentDiv = document.getElementById('modalContent');
-                    let productTableBody = document.getElementById('productTableBody');
+                if (json[0] && json[0].status == '1') {
+                    const productTableBody = document.getElementById('productTableBody');
+                    const product_list_Div_update = document.getElementById('product_list_update');
                     let total = 0;
 
-                    // Clear existing table body
+                    // Clear existing table body and product list
                     productTableBody.innerHTML = '';
+                    product_list_Div_update.innerHTML = '';
 
                     json.slice(1).forEach(product => {
                         if (product.product_id !== undefined && product.order_qty !== undefined && product.product_type !== undefined && product.price !== undefined) {
-                            // const totalPrice = Math.ceil(product.price * product.order_qty); // ปัดเศษของ totalPrice
                             const totalPrice = product.price * product.order_qty;
+
                             // Create a new row for each product
                             let newRow = document.createElement("tr");
                             newRow.innerHTML = `
-                                <td>${product.product_name}</td>
-                                <td>${product.order_qty}</td>
-                                <td>${totalPrice}</td> 
-                            `;
-
-                            // Append the new row to the table body
+                        <td>${product.product_name}</td>
+                        <td>${product.order_qty}</td>
+                        <td>${totalPrice}</td> 
+                    `;
                             productTableBody.appendChild(newRow);
 
-                            total += totalPrice; // บวกราคารวมของสินค้าแต่ละรายการ
+                            // Create a new row for the product list update
+                            let newRowUpdate = document.createElement("tr");
+                            newRowUpdate.innerHTML = `
+                        <td id="${product.product_id}">
+                           ${product.product_name}
+                        </td>
+                        <td>
+                            <input type="number" class="form-control" name="quantity${product.product_id}" id="${product.product_id}_update" value="${product.order_qty}">
+                        </td>
+                        <td>
+                            <select class="form-select form-control-sm color-dropdown product_type_update">
+                                <option value="pack" ${product.product_type === 'pack' ? 'selected' : ''}>Pack (แพ็ค)</option>
+                                <option value="unit" ${product.product_type === 'unit' ? 'selected' : ''}>Unit (ชิ้น)</option>
+                            </select>
+                        </td>
+                    `;
+                            product_list_Div_update.appendChild(newRowUpdate);
+
+                            // Set the product type for the current row
+                            newRowUpdate.querySelector('.product_type_update').value = product.product_type;
+
+                            total += totalPrice;
                         } else {
                             console.log('Undefined product details:', product);
                         }
                     });
-                    let totalCeil = Math.ceil(total); // ปัดเศษของผลรวมทั้งหมด
 
-                    // Display total price
+                    let totalCeil = Math.ceil(total);
                     let totalRow = document.createElement("tr");
                     totalRow.innerHTML = `
-                        <td colspan="2" class="text-end">รวมทั้งหมด</td>
-                        <td>${totalCeil}</td>
-                    `;
+                <td colspan="2" class="text-end">รวมทั้งหมด</td>
+                <td>${totalCeil}</td>
+            `;
                     productTableBody.appendChild(totalRow);
 
-                    // Show the modal
                     $('#product_detail_modal').modal('show');
                 } else {
-                    console.error('Error:', data.error_message);
+                    console.error('Error:', json.error_message);
                 }
             })
             .catch(function(error) {
@@ -616,11 +668,28 @@
             });
     }
 
-    $('#product_detail_modal').on('shown.bs.modal', function() {
-        $('#update_Task').off('click').on('click', update_task);
-    });
+
 
     function update_task() {
+        var productsAndQuantities = [];
+        document.querySelectorAll('#product_list_update tr').forEach(row => {
+            var productId = row.cells[0].id; // Get product ID from the first cell
+            var quantityInput = row.cells[1].querySelector('input[type="number"]'); // Get quantity from the second cell
+            var quantity = quantityInput.value;
+            var productType = row.cells[2].querySelector('select').value; // Get product type from the select element
+            // var productTypePrice = row.cells[2].querySelector('select').selectedOptions[0].getAttribute('data-price');
+            if (quantity && parseInt(quantity) !== 0) {
+                productsAndQuantities.push({
+                    id: productId,
+                    quantity: quantity,
+                    type: productType,
+                });
+            }
+        });
+
+        var findProduct = productsAndQuantities.map(item => item.id);
+        var findQty = productsAndQuantities.map(item => item.quantity);
+        var findType = productsAndQuantities.map(item => item.type);
 
         fetch('../api/product?case=update_task', {
                 method: 'POST',
@@ -631,6 +700,9 @@
                     pay_type: $('#pay_type_update').val(),
                     pay_total: $('#pay_total_update').val(),
                     task_datetime: $('#datetime_update').val(),
+                    product_id: findProduct,
+                    order_qty: findQty,
+                    product_type: findType
                 }),
                 headers: {
                     'Content-Type': 'application/json'
@@ -657,6 +729,7 @@
                 console.error('Error:', error);
             });
     }
+
 
     function submitTask() {
         var urlParams = new URLSearchParams(window.location.search);
@@ -732,7 +805,7 @@
                 } else {
                     alert_snackbar('success', "เพิ่มนัดหมายสำเร็จ");
                     setTimeout(function() {
-                        // location.reload();
+                        location.reload();
                     }, 1500);
                 }
             })
@@ -768,7 +841,7 @@
                 } else {
                     alert_snackbar('success', "จัดส่งสำเร็จ");
                     setTimeout(function() {
-                        window.location.href = "delivery_t.php";
+                        location.reload();
                     }, 1500);
                 }
             })
@@ -792,13 +865,13 @@
             })
             .then(products => {
                 const product_list_Div = document.getElementById('product_list');
-const product_list_Div_update = document.getElementById('product_list_update');
+                const product_list_Div_add = document.getElementById('product_list_add');
 
-const filteredProducts = products.filter(item => !('status' in item));
-if (filteredProducts.length > 0) {
-    filteredProducts.forEach(product => {
-        var newRow = document.createElement("tr");
-        newRow.innerHTML = `
+                const filteredProducts = products.filter(item => !('status' in item));
+                if (filteredProducts.length > 0) {
+                    filteredProducts.forEach(product => {
+                        var newRow = document.createElement("tr");
+                        newRow.innerHTML = `
             <td id="${product.product_id}">
                 <img src="../assets/img/product/${product.product_img}" alt="user-avatar" class="d-block rounded" height="70px" width="70px">${product.product_name}
             </td>
@@ -812,37 +885,38 @@ if (filteredProducts.length > 0) {
                 </select>
             </td>
         `;
-        product_list_Div.appendChild(newRow);
-    });
-}
+                        product_list_Div.appendChild(newRow);
+                    });
+                }
 
-if (filteredProducts.length > 0) {
-    filteredProducts.forEach(product => {
-        var newRow = document.createElement("tr");
-        newRow.innerHTML = `
+                if (filteredProducts.length > 0) {
+                    filteredProducts.forEach(product => {
+                        var newRow = document.createElement("tr");
+                        newRow.innerHTML = `
             <td id="${product.product_id}">
                 <img src="../assets/img/product/${product.product_img}" alt="user-avatar" class="d-block rounded" height="70px" width="70px">${product.product_name}
             </td>
             <td>
-                <input type="number" class="form-control" name="quantity${product.product_id}" id="quantity${product.product_id}" value="0">
+                <input type="number" class="form-control" name="quantity${product.product_id}" id="${product.product_id}_update" value="0">
             </td>
             <td>
-                <select id="product_type" class="form-select form-control-sm color-dropdown">
+                <select id="product_type_update" class="form-select form-control-sm color-dropdown">
+                <option selected>--เลือกประเภทการจ่าย--</option>
                     <option value="pack" data-price="${product.pack_price}">Pack (แพ็ค)</option>
                     <option value="unit" data-price="${product.unit_price}">Unit (ชิ้น)</option>
                 </select>
             </td>
         `;
-        product_list_Div_update.appendChild(newRow);
-    });
-}
+                        product_list_Div_add.appendChild(newRow);
+                    });
+                }
 
             })
             .catch(function(error) {
                 console.error('Error:', error);
             })
     }
-    
+
 
 
     function getTableRowData(btnElement, tableId) {
