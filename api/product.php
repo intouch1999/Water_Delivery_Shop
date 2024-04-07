@@ -437,6 +437,7 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 } else if (@$decode['case'] == 'update_task') {
 	try {
 		$task_id = $decode['task_id'];
+		$product_id = $decode['product_id'];
 		$pay_status = $decode['pay_status'];
 		$pay_type = $decode['pay_type'];
 		$pay_total = $decode['pay_total'];
@@ -458,6 +459,40 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 		}
 		$query = "UPDATE delivery_task SET pay_status = '{$pay_status}' , pay_type = '{$pay_type}' , pay_total = '{$pay_total}' , task_datetime = '{$task_datetime}' WHERE task_id = '{$task_id}' ";
 
+		$stmt = $conn->query($query);
+		if ($stmt) {
+			$data[0] = array('status' => 1);
+		} else {
+			$data[0] = array('status' => 0);
+		}
+
+	} catch (PDOException $e) {
+		$data[0] = array('status' => 0, 'error_message' => $e->getMessage());
+	}
+	echo json_encode(@$data);
+} else if (@$decode['case'] == 'more_product') {
+	try {
+		$task_id = $decode['task_id'];
+		$product_id = $decode['product_id'];
+		
+
+		foreach ($decode['product_id'] as $index => $product_id) {
+			$order_qty = $decode['order_qty'][$index];
+			$product_type = $decode['product_type'][$index];
+
+			$query_product = "UPDATE `delivery_task_product` SET `order_qty` = '$order_qty', `product_type` = '$product_type' WHERE `product_id` = '$product_id' AND `task_id` = '$task_id' ";
+	
+			$stmt_product = $conn->query($query_product);
+	
+			if (!$stmt_product) {
+				$data[0] = array('status' => 0);
+				echo json_encode($data);
+				exit;
+			}
+		}
+
+		$query = "INSERT INTO `delivery_task_product` (`task_id`, `product_id`, `product_active`, `order_qty`, `product_type`, `create_datetime`, `sale_user`) VALUES ('$task_id', '$product_id', '1', '$order_qty', '$product_type' , NOW(),'$sivanat_user') ";
+	
 		$stmt = $conn->query($query);
 		if ($stmt) {
 			$data[0] = array('status' => 1);
