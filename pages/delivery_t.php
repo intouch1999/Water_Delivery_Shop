@@ -880,7 +880,7 @@ function submitmoreproduct() {
                 } else {
                     alert_snackbar('success', "อัพเดทสำเร็จ");
                     setTimeout(function() {
-                        location.reload();
+                        // location.reload();
                     }, 1500);
                 }
             })

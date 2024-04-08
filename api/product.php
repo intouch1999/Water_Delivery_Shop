@@ -471,42 +471,45 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 	}
 	echo json_encode(@$data);
 } else if (@$decode['case'] == 'more_product') {
-	try {
-		$task_id = $decode['task_id'];
-		$product_id = $decode['product_id'];
-		
+    try {
+        $task_id = $decode['task_id'];
+        $product_id = $decode['product_id'];
+        
+        foreach ($decode['product_id'] as $index => $product_id) {
+            $order_qty = $decode['order_qty'][$index];
+            $product_type = $decode['product_type'][$index];
 
-		foreach ($decode['product_id'] as $index => $product_id) {
-			$order_qty = $decode['order_qty'][$index];
-			$product_type = $decode['product_type'][$index];
+            $query_product = "UPDATE `delivery_task_product` SET `order_qty` = '$order_qty', `product_type` = '$product_type' WHERE `product_id` = '$product_id' AND `task_id` = '$task_id' ";
+    
+            $stmt_product = $conn->query($query_product);
+    
+            if (!$stmt_product) {
+                $data[0] = array('status' => 0);
+                echo json_encode($data);
+                exit;
+            }
+        }
 
-			$query_product = "UPDATE `delivery_task_product` SET `order_qty` = '$order_qty', `product_type` = '$product_type' WHERE `product_id` = '$product_id' AND `task_id` = '$task_id' ";
-	
-			$stmt_product = $conn->query($query_product);
-	
-			if (!$stmt_product) {
-				$data[0] = array('status' => 0);
-				echo json_encode($data);
-				exit;
-			}
-		}
+        $query = "INSERT INTO `delivery_task_product` (`task_id`, `product_id`, `product_active`, `order_qty`, `product_type`, `create_datetime`, `sale_user`) VALUES ('$task_id', '$product_id', '1', '$order_qty', '$product_type' , NOW(),'$sivanat_user') ";
+    
+        $stmt = $conn->query($query);
+        if ($stmt) {
+            // เลือกข้อมูลทั้งหมดของ delivery_task_product
+            $query_select = "SELECT * FROM `delivery_task_product` WHERE `task_id` = '$task_id' AND `product_active` = '1' ";
+            $stmt_select = $conn->query($query_select);
+            $selected_data = $stmt_select->fetchAll(PDO::FETCH_ASSOC);
 
-		$query = "INSERT INTO `delivery_task_product` (`task_id`, `product_id`, `product_active`, `order_qty`, `product_type`, `create_datetime`, `sale_user`) VALUES ('$task_id', '$product_id', '1', '$order_qty', '$product_type' , NOW(),'$sivanat_user') ";
-	
-		$stmt = $conn->query($query);
-		if ($stmt) {
-			$data[0] = array('status' => 1);
-		} else {
-			$data[0] = array('status' => 0);
-		}
+            $data[0] = array('status' => 1);
+			$data[] = array('product' => $selected_data);
+        } else {
+            $data[0] = array('status' => 0);
+        }
 
-	} catch (PDOException $e) {
-		$data[0] = array('status' => 0, 'error_message' => $e->getMessage());
-	}
-	echo json_encode(@$data);
+    } catch (PDOException $e) {
+        $data[0] = array('status' => 0, 'error_message' => $e->getMessage());
+    }
+    echo json_encode(@$data);
 }
-
-
 
 
 
