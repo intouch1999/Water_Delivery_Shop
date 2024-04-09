@@ -51,7 +51,7 @@
     #product_detail_modal table td {
 
         overflow: hidden;
-        white-space: nowrap;
+        white-space: wrap;
 
     }
 
@@ -70,6 +70,9 @@
     }
 
     #product_detail_modal .card.mb-4 {
+        display: none;
+    }
+    #product_detail_modal .card.mb-2 {
         display: none;
     }
 </style>
@@ -280,6 +283,7 @@
                 </table>
             </div>
             <div class="modal-footer">
+                <button type="button" class="btn btn-primary add_task" id="toggleCardadd" data-dismiss="modal">เพิ่มสินค้า</button>
                 <button type="button" class="btn btn-primary fig_task" id="toggleCardBtn" data-dismiss="modal">แก้ไขข้อมูล</button>
                 <button type="button" class="btn btn-secondary" aria-hidden="true" data-dismiss="modal">Close</button>
             </div>
@@ -364,12 +368,22 @@
         $('#product_detail_modal').on('click', '.fig_task', function() {
             $('.card.mb-4', $(this).closest('.modal-content')).toggle();
         });
+        $('#product_detail_modal').on('click', '.add_task', function() {
+            $('.card.mb-2', $(this).closest('.modal-content')).toggle();
+        })
 
         document.querySelector('#product_detail_modal').addEventListener('hidden.bs.modal', function(event) {
             var modalContent = event.target.querySelector('.modal-content');
-            var card = modalContent.querySelector('.card.mb-4');
-            card.style.display = 'none';
+            var card_mb_2 = modalContent.querySelector('.card.mb-2');
+            if (card_mb_2) {
+                card_mb_2.style.display = 'none';
+            }
+            var card_mb_4 = modalContent.querySelector('.card.mb-4');
+            if (card_mb_4) {
+                card_mb_4.style.display = 'none';
+            }
         });
+
         $('#taskData').on('click', '.btn-info',  addMoreProduct);
 
         $('#add_Task').on('click', submitmoreproduct);
@@ -615,14 +629,14 @@
                     product_list_Div_update.innerHTML = '';
 
                     json.slice(1).forEach(product => {
-                        if (product.product_id !== undefined && product.order_qty !== undefined && product.product_type !== undefined && product.price !== undefined) {
-                            const totalPrice = product.price * product.order_qty;
+                        if (product.product_id !== undefined && product.QTY !== undefined && product.product_type !== undefined && product.price !== undefined) {
+                            const totalPrice = product.price * product.QTY;
 
                             // Create a new row for each product
                             let newRow = document.createElement("tr");
                             newRow.innerHTML = `
                         <td>${product.product_name}</td>
-                        <td>${product.order_qty}</td>
+                        <td>${product.QTY}</td>
                         <td>${totalPrice}</td> 
                     `;
                             productTableBody.appendChild(newRow);
@@ -634,7 +648,7 @@
                            ${product.product_name}
                         </td>
                         <td>
-                            <input type="number" class="form-control" name="quantity${product.product_id}" id="${product.product_id}_update" value="${product.order_qty}">
+                            <input type="number" class="form-control" name="quantity${product.product_id}" id="${product.product_id}_update" value="${product.QTY}">
                         </td>
                         <td>
                             <select class="form-select form-control-sm color-dropdown product_type_update">
@@ -705,7 +719,7 @@
                     pay_total: $('#pay_total_update').val(),
                     task_datetime: $('#datetime_update').val(),
                     product_id: findProduct,
-                    order_qty: findQty,
+                    order_true: findQty,
                     product_type: findType
                 }),
                 headers: {
@@ -811,7 +825,7 @@ function createProductRow(product) {
             ${product.product_name}
         </td>
         <td>
-            <input type="number" class="form-control" name="quantity${product.product_id}" id="${product.product_id}_update" value="${product.order_qty || 0}">
+            <input type="number" class="form-control" name="quantity${product.product_id}" id="${product.product_id}_update" value="${product.QTY || 0}">
         </td>
         <td>
             <select id="product_type_update" class="form-select form-control-sm color-dropdown">
@@ -949,7 +963,7 @@ function submitmoreproduct() {
                     case: 'more_product',
                     task_id: $('#task_id_update').val(),
                     product_id: findProduct,
-                    order_qty: findQty,
+                    order_true: findQty,
                     product_type: findType
 
                 }),
