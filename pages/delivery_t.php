@@ -733,103 +733,193 @@
                 console.error('Error:', error);
             });
     }
+// Function to fetch product data based on task_id
+function fetchProductTaskShow(task_id) {
+    return fetch('../api/product?case=product_task_show', {
+        method: 'POST',
+        body: JSON.stringify({
+            case: 'product_task_show'
+        }),
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    });
+}
 
-    function addMoreProduct() {
+// Function to fetch product details based on task_id
+function fetchProductDetails(task_id) {
+    return fetch('../api/product?case=product_details', {
+        method: 'POST',
+        body: JSON.stringify({
+            case: 'product_details',
+            task_id: task_id,
+        }),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    });
+}
+
+// Main function to add more product rows
+function addMoreProduct() {
     var rowData = getTableRowData($(this), 'taskData');
     var task_id = rowData.task_id;
 
-    // Fetch product data based on task_id
-    fetch('../api/product?case=product_task_show', {
-            method: 'POST',
-            body: JSON.stringify({
-                case: 'product_task_show'
-            }),
-        })
-        .then(function(response) {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
+    Promise.all([fetchProductTaskShow(task_id), fetchProductDetails(task_id)])
+    .then(([products1, products2]) => {
+        const product_list_Div_add = document.getElementById('product_list_add');
+        const productNames1 = products1.map(product => product.product_name);
+        const productNames2 = products2.map(product => product.product_name);
+        const commonProductNames = productNames1.filter(name => productNames2.includes(name));
+
+        // Remove existing product rows
+        product_list_Div_add.innerHTML = '';
+
+        products1.forEach(product => {
+            if (!commonProductNames.includes(product.product_name)) {
+                var newRow = createProductRow(product);
+                product_list_Div_add.appendChild(newRow);
             }
-            return response.json();
-        })
-        .then(products1 => {
-            // Fetch product details based on task_id
-            fetch('../api/product?case=product_details', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        case: 'product_details',
-                        task_id: task_id,
-                    }),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(function(response) {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(products2 => {
-                    const product_list_Div_add = document.getElementById('product_list_add');
-                    const productNames1 = products1.map(product => product.product_name);
-                    const productNames2 = products2.map(product => product.product_name);
-                    const commonProductNames = productNames1.filter(name => productNames2.includes(name));
-
-                    // Remove existing product rows
-                    product_list_Div_add.innerHTML = '';
-
-                    products1.forEach(product => {
-                        if (!commonProductNames.includes(product.product_name)) {
-                            var newRow = document.createElement("tr");
-                            newRow.innerHTML = `
-                                <td id="${product.product_id}">
-                                    ${product.product_name}
-                                </td>
-                                <td>
-                                    <input type="number" class="form-control" name="quantity${product.product_id}" id="${product.product_id}_update" value="0">
-                                </td>
-                                <td>
-                                    <select id="product_type_update" class="form-select form-control-sm color-dropdown">
-                                        <option selected>--เลือกประเภทการจ่าย--</option>
-                                        <option value="pack" data-price="${product.pack_price}">Pack (แพ็ค)</option>
-                                        <option value="unit" data-price="${product.unit_price}">Unit (ชิ้น)</option>
-                                    </select>
-                                </td>
-                            `;
-                            product_list_Div_add.appendChild(newRow);
-                        }
-                    });
-
-                    products2.forEach(product => {
-                        if (!commonProductNames.includes(product.product_name)) {
-                            var newRow = document.createElement("tr");
-                            newRow.innerHTML = `
-                                <td id="${product.product_id}">
-                                    ${product.product_name}
-                                </td>
-                                <td>
-                                    <input type="number" class="form-control" name="quantity${product.product_id}" id="${product.product_id}_update" value="${product.order_qty}">
-                                </td>
-                                <td>
-                                    <select id="product_type_update" class="form-select form-control-sm color-dropdown">
-                                        <option selected>--เลือกประเภทการจ่าย--</option>
-                                        <option value="pack" data-price="${product.pack_price}">Pack (แพ็ค)</option>
-                                        <option value="unit" data-price="${product.unit_price}">Unit (ชิ้น)</option>
-                                    </select>
-                                </td>
-                            `;
-                            product_list_Div_add.appendChild(newRow);
-                        }
-                    });
-                })
-                .catch(function(error) {
-                    console.error('Error fetching product details:', error);
-                });
-        })
-        .catch(function(error) {
-            console.error('Error fetching products:', error);
         });
+
+        products2.forEach(product => {
+            if (!commonProductNames.includes(product.product_name)) {
+                var newRow = createProductRow(product);
+                product_list_Div_add.appendChild(newRow);
+            }
+        });
+    })
+    .catch(error => {
+        console.error('Error adding more product:', error);
+    });
 }
+
+// Function to create a new product row
+function createProductRow(product) {
+    var newRow = document.createElement("tr");
+    newRow.innerHTML = `
+        <td id="${product.product_id}">
+            ${product.product_name}
+        </td>
+        <td>
+            <input type="number" class="form-control" name="quantity${product.product_id}" id="${product.product_id}_update" value="${product.order_qty || 0}">
+        </td>
+        <td>
+            <select id="product_type_update" class="form-select form-control-sm color-dropdown">
+                <option selected>--เลือกประเภทการจ่าย--</option>
+                <option value="pack" data-price="${product.pack_price}">Pack (แพ็ค)</option>
+                <option value="unit" data-price="${product.unit_price}">Unit (ชิ้น)</option>
+            </select>
+        </td>
+    `;
+    return newRow;
+}
+
+//     function addMoreProduct() {
+//     var rowData = getTableRowData($(this), 'taskData');
+//     var task_id = rowData.task_id;
+
+//     // Fetch product data based on task_id
+//     fetch('../api/product?case=product_task_show', {
+//             method: 'POST',
+//             body: JSON.stringify({
+//                 case: 'product_task_show'
+//             }),
+//         })
+//         .then(function(response) {
+//             if (!response.ok) {
+//                 throw new Error('Network response was not ok');
+//             }
+//             return response.json();
+//         })
+//         .then(products1 => {
+//             // Fetch product details based on task_id
+//             fetch('../api/product?case=product_details', {
+//                     method: 'POST',
+//                     body: JSON.stringify({
+//                         case: 'product_details',
+//                         task_id: task_id,
+//                     }),
+//                     headers: {
+//                         'Content-Type': 'application/json'
+//                     }
+//                 })
+//                 .then(function(response) {
+//                     if (!response.ok) {
+//                         throw new Error('Network response was not ok');
+//                     }
+//                     return response.json();
+//                 })
+//                 .then(products2 => {
+//                     const product_list_Div_add = document.getElementById('product_list_add');
+//                     const productNames1 = products1.map(product => product.product_name);
+//                     const productNames2 = products2.map(product => product.product_name);
+//                     const commonProductNames = productNames1.filter(name => productNames2.includes(name));
+
+//                     // Remove existing product rows
+//                     product_list_Div_add.innerHTML = '';
+
+//                     products1.forEach(product => {
+//                         if (!commonProductNames.includes(product.product_name)) {
+//                             var newRow = document.createElement("tr");
+//                             newRow.innerHTML = `
+//                                 <td id="${product.product_id}">
+//                                     ${product.product_name}
+//                                 </td>
+//                                 <td>
+//                                     <input type="number" class="form-control" name="quantity${product.product_id}" id="${product.product_id}_update" value="0">
+//                                 </td>
+//                                 <td>
+//                                     <select id="product_type_update" class="form-select form-control-sm color-dropdown">
+//                                         <option selected>--เลือกประเภทการจ่าย--</option>
+//                                         <option value="pack" data-price="${product.pack_price}">Pack (แพ็ค)</option>
+//                                         <option value="unit" data-price="${product.unit_price}">Unit (ชิ้น)</option>
+//                                     </select>
+//                                 </td>
+//                             `;
+//                             product_list_Div_add.appendChild(newRow);
+//                         }
+//                     });
+
+//                     products2.forEach(product => {
+//                         if (!commonProductNames.includes(product.product_name)) {
+//                             var newRow = document.createElement("tr");
+//                             newRow.innerHTML = `
+//                                 <td id="${product.product_id}">
+//                                     ${product.product_name}
+//                                 </td>
+//                                 <td>
+//                                     <input type="number" class="form-control" name="quantity${product.product_id}" id="${product.product_id}_update" value="${product.order_qty}">
+//                                 </td>
+//                                 <td>
+//                                     <select id="product_type_update" class="form-select form-control-sm color-dropdown">
+//                                         <option selected>--เลือกประเภทการจ่าย--</option>
+//                                         <option value="pack" data-price="${product.pack_price}">Pack (แพ็ค)</option>
+//                                         <option value="unit" data-price="${product.unit_price}">Unit (ชิ้น)</option>
+//                                     </select>
+//                                 </td>
+//                             `;
+//                             product_list_Div_add.appendChild(newRow);
+//                         }
+//                     });
+//                 })
+//                 .catch(function(error) {
+//                     console.error('Error fetching product details:', error);
+//                 });
+//         })
+//         .catch(function(error) {
+//             console.error('Error fetching products:', error);
+//         });
+// }
 
 function submitmoreproduct() {
     var productsAndQuantities = [];
