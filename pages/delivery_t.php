@@ -109,7 +109,7 @@
                 <div class="card-header">
                     <h5>เพิ่มนัดหมาย
                         <button id="backButton" class="btn btn-secondary mx-2">ย้อนกลับ</button>
-                        <button type="button" id="submit_Task" class="btn btn-primary">บันทึก</button>
+                        <button type="button" id="submit_Task" class="btn btn-primary" onclick="task_check();">บันทึก</button>
                     </h5>
                     <div class="row gx-3 gy-2 align-items-center">
                         <div class="mt-3 col-md-2">
@@ -348,7 +348,7 @@
 
         $('#customerData').on('click', '.btn-edit', task_button, task());
 
-        $('#submit_Task').on('click', submitTask);
+        // $('#submit_Task').on('click', submitTask);
 
         $('#taskData').on('click', '.btn-success', tasklist_success);
 
@@ -391,6 +391,110 @@
 
 
     });
+
+    function task_check(){
+                if ($("#task_datetime").val().length =="") {
+                  alert_snackbar("warning", "กรุณาระบุวันที่");  
+                  setTimeout(function(){
+                    $("#task_datetime").focus();
+                  },300);
+                  return false;
+                }
+                if ($("#pay_status").val().length > 1) {
+                alert_snackbar("warning", "กรุณาสถานะการจ่าย");  
+                setTimeout(function(){$("#pay_status").focus();
+                },300);
+                return false;
+                }
+
+
+                $("#modal_confirm_text").html("ยืนยันการนัดหมาย")
+                $("#modal_confirm_submit").attr("onclick","confirm_task();");
+                $("#modal_confirm").modal("show");
+              }
+        function confirm_task(){ 
+        var urlParams = new URLSearchParams(window.location.search);
+        var cus_id = urlParams.get('cus_id');
+        var productsAndQuantities = [];
+        document.querySelectorAll('#product_list tr').forEach(row => {
+            var productId = row.cells[0].id; // Get product ID from the first cell
+            var quantityInput = row.cells[1].querySelector('input[type="number"]'); // Get quantity from the second cell
+            var quantity = quantityInput.value;
+            var productType = row.cells[2].querySelector('select').value; // Get product type from the select element
+            var productTypePrice = row.cells[2].querySelector('select').selectedOptions[0].getAttribute('data-price');
+            if (quantity && parseInt(quantity) !== 0) {
+                productsAndQuantities.push({
+                    id: productId,
+                    quantity: quantity,
+                    type: productType,
+                    price: productTypePrice
+                });
+            }
+        });
+
+        var findProduct = productsAndQuantities.map(item => item.id);
+        var findQty = productsAndQuantities.map(item => item.quantity);
+        var findType = productsAndQuantities.map(item => item.type);
+        var findPrice = productsAndQuantities.map(item => item.price);
+
+        var totalPrice = 0;
+
+        productsAndQuantities.forEach(item => {
+            var productPrice = parseFloat(item.price);
+            var productQuantity = parseInt(item.quantity);
+
+
+            var totalPricePerProduct = productPrice * productQuantity;
+
+
+            totalPrice += totalPricePerProduct;
+        });
+
+        var taskData = {
+            totalPrice: totalPrice,
+        };
+
+        // ทำการ fetch เพื่อส่งข้อมูลไปยัง API
+        fetch('../api/product?case=TaskProduct', {
+                method: 'POST',
+                body: JSON.stringify({
+                    case: 'TaskProduct',
+                    cus_id: cus_id,
+                    Taskdatetime: $('#task_datetime').val(),
+                    product: findProduct,
+                    order_qty: findQty,
+                    product_type: findType,
+                    // price: findPrice,
+                    pay_status: $('#pay_status').val(),
+                    pay_type: $('#pay_type').val(),
+                    pay_total: $('#pay_total').val(),
+                    totalPrice: totalPrice // เพิ่มราคารวมของสินค้าในข้อมูลที่ส่งไปยัง API
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(function(response) {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(function(json) {
+                $("#modal_confirm").modal("hide");
+                if (json[0].status == '0') {
+                    alert_snackbar('error', json[0].error_message);
+                } else {
+                    alert_snackbar('success', "เพิ่มนัดหมายสำเร็จ");
+                    setTimeout(function() {
+                        // location.reload();
+                    }, 1500);
+                }
+            })
+            .catch(function(error) {
+                console.error('Error:', error);
+            });
+    }
 
     function customer_task() {
         $.ajax({
@@ -997,88 +1101,7 @@ function submitmoreproduct() {
 
 
 
-    function submitTask() {
-        var urlParams = new URLSearchParams(window.location.search);
-        var cus_id = urlParams.get('cus_id');
-        var productsAndQuantities = [];
-        document.querySelectorAll('#product_list tr').forEach(row => {
-            var productId = row.cells[0].id; // Get product ID from the first cell
-            var quantityInput = row.cells[1].querySelector('input[type="number"]'); // Get quantity from the second cell
-            var quantity = quantityInput.value;
-            var productType = row.cells[2].querySelector('select').value; // Get product type from the select element
-            var productTypePrice = row.cells[2].querySelector('select').selectedOptions[0].getAttribute('data-price');
-            if (quantity && parseInt(quantity) !== 0) {
-                productsAndQuantities.push({
-                    id: productId,
-                    quantity: quantity,
-                    type: productType,
-                    price: productTypePrice
-                });
-            }
-        });
-
-        var findProduct = productsAndQuantities.map(item => item.id);
-        var findQty = productsAndQuantities.map(item => item.quantity);
-        var findType = productsAndQuantities.map(item => item.type);
-        var findPrice = productsAndQuantities.map(item => item.price);
-
-        var totalPrice = 0;
-
-        productsAndQuantities.forEach(item => {
-            var productPrice = parseFloat(item.price);
-            var productQuantity = parseInt(item.quantity);
-
-
-            var totalPricePerProduct = productPrice * productQuantity;
-
-
-            totalPrice += totalPricePerProduct;
-        });
-
-        var taskData = {
-            totalPrice: totalPrice,
-        };
-
-        // ทำการ fetch เพื่อส่งข้อมูลไปยัง API
-        fetch('../api/product?case=TaskProduct', {
-                method: 'POST',
-                body: JSON.stringify({
-                    case: 'TaskProduct',
-                    cus_id: cus_id,
-                    Taskdatetime: $('#task_datetime').val(),
-                    product: findProduct,
-                    order_qty: findQty,
-                    product_type: findType,
-                    // price: findPrice,
-                    pay_status: $('#pay_status').val(),
-                    pay_type: $('#pay_type').val(),
-                    pay_total: $('#pay_total').val(),
-                    totalPrice: totalPrice // เพิ่มราคารวมของสินค้าในข้อมูลที่ส่งไปยัง API
-                }),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(function(response) {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(function(json) {
-                if (json[0].status == '0') {
-                    alert_snackbar('error', json[0].error_message);
-                } else {
-                    alert_snackbar('success', "เพิ่มนัดหมายสำเร็จ");
-                    setTimeout(function() {
-                        // location.reload();
-                    }, 1500);
-                }
-            })
-            .catch(function(error) {
-                console.error('Error:', error);
-            });
-    }
+    
 
 
     function tasklist_success() {
@@ -1142,10 +1165,11 @@ function submitmoreproduct() {
                 <img src="../assets/img/product/${product.product_img}" alt="user-avatar" class="d-block rounded" height="70px" width="70px">${product.product_name}
             </td>
             <td>
-                <input type="number" class="form-control" name="quantity${product.product_id}" id="quantity${product.product_id}" value="0">
+                <input type="number" class="form-control" name="quantity_${product.product_id}" id="quantity_${product.product_id}" value="0">
             </td>
             <td>
                 <select id="product_type" class="form-select form-control-sm color-dropdown">
+                    <option selected>--เลือกประเภทการจ่าย--</option>
                     <option value="pack" data-price="${product.pack_price}">Pack (แพ็ค)</option>
                     <option value="unit" data-price="${product.unit_price}">Unit (ชิ้น)</option>
                 </select>
@@ -1163,7 +1187,7 @@ function submitmoreproduct() {
         //         <img src="../assets/img/product/${product.product_img}" alt="user-avatar" class="d-block rounded" height="70px" width="70px">${product.product_name}
         //     </td>
         //     <td>
-        //         <input type="number" class="form-control" name="quantity${product.product_id}" id="${product.product_id}_update" value="0">
+        //         <input type="number" class="form-control" name="quantity${product.product_id}" id="${product.product_id}_update" placeholder="0">
         //     </td>
         //     <td>
         //         <select id="product_type_update" class="form-select form-control-sm color-dropdown">
