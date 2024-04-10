@@ -400,12 +400,48 @@
                   },300);
                   return false;
                 }
-                if ($("#pay_status").val().length > 1) {
+                if ($("#pay_status").val() == "0") {
                 alert_snackbar("warning", "กรุณาสถานะการจ่าย");  
                 setTimeout(function(){$("#pay_status").focus();
                 },300);
                 return false;
+                } else {
+                    
                 }
+
+                 let foundOne = false;
+    const quantityInputs = document.querySelectorAll('#product_list input[type="number"]');
+    const productTypes = document.querySelectorAll('#product_list select');
+    console.log(quantityInputs, productTypes);
+
+    // Check if any quantity input has a value greater than 0
+    quantityInputs.forEach(input => {
+        if (parseInt(input.value) > 0) {
+            foundOne = true;
+        }
+    });
+
+    // Check if any product type is selected
+    let productTypeSelected = false;
+productTypes.forEach(productType => {
+    if (productType.value === "pack" || productType.value === "unit") {
+        productTypeSelected = true;
+    }
+});
+
+    // If no product type is selected, show warning
+
+
+    // If no quantity input has a value greater than 0, show warning
+    if (!foundOne) {
+        alert_snackbar("warning", "กรุณาระบุจำนวนสินค้าอย่างน้อย 1 รายการ");
+        return false;
+    }
+
+    if (!productTypeSelected) {
+        alert_snackbar("warning", "กรุณาเลือกประเภทการจ่าย");
+        return false;
+    }
 
 
                 $("#modal_confirm_text").html("ยืนยันการนัดหมาย")
@@ -1165,7 +1201,7 @@ function submitmoreproduct() {
                 <img src="../assets/img/product/${product.product_img}" alt="user-avatar" class="d-block rounded" height="70px" width="70px">${product.product_name}
             </td>
             <td>
-                <input type="number" class="form-control" name="quantity_${product.product_id}" id="quantity_${product.product_id}" value="0">
+                <input type="number" class="form-control" name="quantity_${product.product_id}" id="quantity_${product.product_id}" placeholder="0">
             </td>
             <td>
                 <select id="product_type" class="form-select form-control-sm color-dropdown">
