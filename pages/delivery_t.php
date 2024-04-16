@@ -1061,6 +1061,13 @@
                         `;
                         productTableBody.appendChild(resule);
 
+                        // HTML
+                        // <div id="myElement"></div>
+
+                        // // JavaScript
+                        // var myElement = document.getElementById("myElement");
+                        // myElement.innerHTML = "<p>This is the new content.</p>";
+
                         // Create a new row for the product list update
                         let newRowUpdate = document.createElement("tr");
                         newRowUpdate.innerHTML = `
