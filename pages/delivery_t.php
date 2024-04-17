@@ -220,19 +220,10 @@
                             </div>
                             <label class="form-label" for="pay_total_update" id="pay_total_update_label">จำนวนเงินที่ได้รับ </label>
                             <input type="number" class="form-control" id="pay_total_update" name="pay_total" placeholder="ระบุจำนวนเงิน">
-                            <div class="row">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>สินค้า</th>
-                                            <th>จำนวน</th>
-                                            <th>ประเภท</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="product_list_update">
+                            <h5>รายการที่สั่ง
+                            </h5>
+                            <div id="product_list_update">
 
-                                    </tbody>
-                                </table>
                             </div>
                             <button type="button" id="update_Task" class="btn btn-primary" onclick="update_check()">บันทึก</button>
                         </div>
@@ -242,22 +233,13 @@
                     <div class="card-header">
                         <h5>เพิ่มสินค้า
                         </h5>
-                        <div class="row gx-3 gy-2 align-items-center">
-                            <div class="row">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>สินค้า</th>
-                                            <th>จำนวน</th>
-                                            <th>ประเภท</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="product_list_add">
+                        <div id="product_list_add">
 
-                                    </tbody>
-                                </table>
-                            </div>
-                            <button type="button" id="add_Task" class="btn btn-primary" onclick="add_check()">บันทึก</button>
+
+                            
+                        </div>
+                        <div class="row gx-3 gy-2 align-items-center">
+                        <button type="button" id="add_Task" class="btn btn-primary" onclick="add_check()">บันทึก</button>
                         </div>
                     </div>
                 </div>
@@ -343,7 +325,7 @@
 
         // $('#submit_Task').on('click', submitTask);
 
-        $('#taskData').on('click', '.btn-success', tasklist_success);
+        // $('#taskData').on('click', '.btn-success', tasklist_success);
 
 
         $('#product_detail_modal').on('click', '[aria-hidden="true"]', function() {
@@ -381,17 +363,17 @@
         // $('#add_Task').on('click', submitmoreproduct);
 
         $('#taskData').on('click', '.btn-info', function() {
-    var rowData = getTableRowData($(this), 'taskData');
-    var task_id = rowData.task_id;
+            var rowData = getTableRowData($(this), 'taskData');
+            var task_id = rowData.task_id;
 
-    fetchProductDetails(task_id)
-        .then(productDetails => {
-            btn_info(productDetails);
-        })
-        .catch(error => {
-            console.error('Error fetching product details:', error);
+            fetchProductDetails(task_id)
+                .then(productDetails => {
+                    btn_info(productDetails);
+                })
+                .catch(error => {
+                    console.error('Error fetching product details:', error);
+                });
         });
-});
 
 
     });
@@ -561,6 +543,22 @@
         $("#modal_confirm").modal("show");
     }
 
+    function confirm_check() {
+    // Set the confirmation message in the modal
+    $("#modal_confirm_text").html("ยืนยันการจัดส่ง");
+
+    // Attach a click event listener to the "confirm" button
+    $("#modal_confirm_submit").on("click", function() {
+    var rowData = task_list.row($(this).parents('tr')).data();
+    tasklist_success(rowData);
+    // Rest of your code...
+});
+
+    // Show the confirmation modal
+    $("#modal_confirm").modal("show");
+}
+
+
     function confirm_task() {
         var urlParams = new URLSearchParams(window.location.search);
         var cus_id = urlParams.get('cus_id');
@@ -645,15 +643,14 @@
             });
     }
 
-
     function update_task() {
         var productsAndQuantities = [];
-        document.querySelectorAll('#product_list_update tr').forEach(row => {
-            var productId = row.cells[0].id; // Get product ID from the first cell
-            var quantityInput = row.cells[1].querySelector('input[type="number"]'); // Get quantity from the second cell
-            var quantity = quantityInput.value;
-            var productType = row.cells[2].querySelector('select').value; // Get product type from the select element
-            // var productTypePrice = row.cells[2].querySelector('select').selectedOptions[0].getAttribute('data-price');
+        document.querySelectorAll('#product_list_update').forEach(row => {
+            var productId = document.getElementById("product_id_update").value;
+            // var quantityInput = document.getElementById("product_qty_update"); // Get quantity from the second cell
+            // var quantity = quantityInput.value;
+            var quantity = document.getElementById('product_qty_update').value;
+            var productType = document.querySelector('.product_type_update').value;
             if (quantity && parseInt(quantity) !== 0) {
                 productsAndQuantities.push({
                     id: productId,
@@ -709,12 +706,12 @@
 
     function submitmoreproduct() {
         var productsAndQuantities = [];
-        document.querySelectorAll('#product_list_add tr').forEach(row => {
-            var productId = row.cells[0].id; // Get product ID from the first cell
-            var quantityInput = row.cells[1].querySelector('input[type="number"]'); // Get quantity from the second cell
-            var quantity = quantityInput.value;
-            var productType = row.cells[2].querySelector('select').value; // Get product type from the select element
-            // var productTypePrice = row.cells[2].querySelector('select').selectedOptions[0].getAttribute('data-price');
+        document.querySelectorAll('#product_list_add').forEach(row => {
+            var productId = document.getElementById("product_id_add").value;
+            // var quantityInput = document.getElementById("product_qty_add");
+            // var quantity = quantityInput.value;
+            var quantity = document.getElementById('product_qty_add').value;
+            var productType = document.querySelector('.product_type_add').value;
             if (quantity && parseInt(quantity) !== 0) {
                 productsAndQuantities.push({
                     id: productId,
@@ -766,6 +763,7 @@
             });
     }
 
+    
 
     function customer_task() {
         $.ajax({
@@ -813,78 +811,7 @@
             }
         });
     }
-
-
-    // function task_button() {
-    //     var rowData = getTableRowData($(this) , 'customerData');
-    //     var cus_id = rowData.cus_id;
-    //     var cus_name = rowData.cus_name;
-    //     get_cus_id = cus_id;
-    //     $('#DataTable').hide();
-    //     $('#taskuserlist').show();
-    //     $('#tasklist').show();
-
-    //     $('#cus_id').text(cus_id);
-    //     // $('#cus_id').val(cus_id);
-    //     $('#cus_name').text(cus_name);
-
-
-    //     $.ajax({
-    //         url: '../api/product?case=main_task',
-    //         type: 'POST',
-    //         dataType: 'json',
-    //         contentType: 'application/json',
-    //         data: JSON.stringify({
-    //             case: 'main_task',
-    //             cus_id: cus_id
-    //         }),
-    //         success: function(response) {
-    //             console.log(response);
-    //             try {
-    //                 if (!response.error_message) {
-    //                     task_list = $('#taskData').DataTable({
-    //                         response: true,
-    //                         data: response.filter(function(item) {
-    //                             return !('status' in item);
-    //                         }),
-    //                         columns: [{
-    //                                 data: 'task_id'
-    //                             },
-    //                             {
-    //                                 data: 'cus_id'
-    //                             },
-    //                             {
-    //                                 data: 'task_datetime'
-    //                             },
-    //                             {
-    //                                 data: 'order_qty'
-    //                             },
-    //                             {
-    //                                 data: 'last_datetime'
-    //                             },
-    //                             {
-    //                                 data: null,
-    //                                 defaultContent: `<button class="btn btn-primary btn-sm btn-success">จัดส่งสำเร็จ</button>
-    //                                                     <button class="btn btn-primary btn-sm btn-info">รายละเอียด</button>`
-    //                             }
-    //                         ],
-    //                         order: [
-    //                         [0, 'desc'] 
-    //                     ]
-    //                     }); 
-
-    //                 } else {
-    //                     $('#taskData').text('Error: ' + response.error_message);
-    //                 }
-    //             } catch (error) {
-    //                 console.error('Error:', error);
-    //             }
-    //         },
-    //         error: function(xhr, status, error) {
-    //             console.error('Error: ' + error);
-    //         }
-    //     });
-    // };
+    
 
     function task_button() {
         var rowData = getTableRowData($(this), 'customerData');
@@ -944,7 +871,7 @@
                                     },
                                     {
                                         data: null,
-                                        defaultContent: `<button class="btn btn-primary btn-sm btn-success">จัดส่งสำเร็จ</button>
+                                        defaultContent: `<button class="btn btn-primary btn-sm btn-success" onclick="confirm_check()">จัดส่งสำเร็จ</button>
                                                     <button class="btn btn-primary btn-sm btn-info">รายละเอียด</button>`
                                     }
                                 ],
@@ -966,6 +893,8 @@
             });
         }
     }
+
+    
 
     // Function to fetch product data based on task_id
     function fetchProductTaskShow(task_id) {
@@ -1004,26 +933,26 @@
     }
 
     function addMoreProduct() {
-    var rowData = getTableRowData($(this), 'taskData');
-    var task_id = rowData.task_id;
+        var rowData = getTableRowData($(this), 'taskData');
+        var task_id = rowData.task_id;
 
-    Promise.all([fetchProductTaskShow(task_id), fetchProductDetails(task_id)])
-        .then(([products1, products2]) => {
-            const product_list_Div_add = document.getElementById('product_list_add');
-            const productNames1 = products1.map(product => product.product_name);
-            const productNames2 = products2.map(product => product.product_name);
-            const commonProductNames = productNames1.filter(name => productNames2.includes(name));
+        Promise.all([fetchProductTaskShow(task_id), fetchProductDetails(task_id)])
+            .then(([products1, products2]) => {
+                const product_list_Div_add = document.getElementById('product_list_add');
+                const productNames1 = products1.map(product => product.product_name);
+                const productNames2 = products2.map(product => product.product_name);
+                const commonProductNames = productNames1.filter(name => productNames2.includes(name));
 
-            // Remove existing product rows
-            product_list_Div_add.innerHTML = '';
+                // Remove existing product rows
+                product_list_Div_add.innerHTML = '';
 
-            products1.forEach(product => {
+                products1.forEach(product => {
                     if (!commonProductNames.includes(product.product_name)) {
                         var newRow = createProductRow(product);
                         product_list_Div_add.appendChild(newRow);
                     }
                 });
-            
+
                 products2.forEach(product => {
                     if (!commonProductNames.includes(product.product_name)) {
                         var newRow = createProductRow(product);
@@ -1031,106 +960,127 @@
                     }
                 });
 
-            const json = products1.concat(products2);
+                const json = products1.concat(products2);
 
-            document.getElementById('task_id_update').value = json[5].task_id;
-            document.getElementById('datetime_update').value = json[5].task_datetime;
-            document.getElementById('pay_status_update').value = json[5].pay_status;
-            document.getElementById('pay_type_update').value = json[5].pay_type;
-            document.getElementById('pay_total_update').value = json[5].pay_total;
+                document.getElementById('task_id_update').value = json[5].task_id;
+                document.getElementById('datetime_update').value = json[5].task_datetime;
+                document.getElementById('pay_status_update').value = json[5].pay_status;
+                document.getElementById('pay_type_update').value = json[5].pay_type;
+                document.getElementById('pay_total_update').value = json[5].pay_total;
 
-            if (json[0] && json[0].status == '1') {
-                const productTableBody = document.getElementById('productTableBody');
-                const product_list_Div_update = document.getElementById('product_list_update');
-                let total = 0;
+                if (json[0] && json[0].status == '1') {
+                    const productTableBody = document.getElementById('productTableBody');
+                    const product_list_Div_update = document.getElementById("product_list_update");
+                    let total = 0;
 
-                // Clear existing table body and product list
-                productTableBody.innerHTML = '';
-                product_list_Div_update.innerHTML = '';
+                    // Clear existing table body and product list
+                    productTableBody.innerHTML = '';
+                    product_list_Div_update.innerHTML = '';
 
-                json.slice(1).forEach(product => {
-                    if (product.product_id !== undefined && product.QTY !== undefined && product.product_type !== undefined && product.price !== undefined) {
-                        const totalPrice = product.price * product.QTY;
 
-                        // Create a new row for each product
-                        let resule = document.createElement("tr");
-                        resule.innerHTML = `
+                    json.slice(1).forEach(product => {
+                        if (product.product_id !== undefined && product.QTY !== undefined && product.product_type !== undefined && product.price !== undefined) {
+                            const totalPrice = product.price * product.QTY;
+
+                            // Create a new row for each product
+                            let resule = document.createElement("tr");
+                            resule.innerHTML = `
                             <td>${product.product_name}</td>
                             <td>${product.QTY}</td>
                             <td>${totalPrice}</td> 
                         `;
-                        productTableBody.appendChild(resule);
+                            productTableBody.appendChild(resule);
 
-                        // HTML
-                        // <div id="myElement"></div>
+                            let update = document.createElement("div");
+                            update.classList.add("row", "gx-3", "gy-2", "align-items-center"); // Add classes for Bootstrap styling
+                            update.innerHTML = `
+                        <input id="product_id_update" type="hidden" value="${product.product_id}">
+                                        <div class="col-md-6">
+                                        <label for="product_name_update" class="form-label"></label>
+                                            <p>${product.product_name}</p>
+                                        </div>
+                                        <div class="col-md-2 mb-3">
+                                        <label for="product_qty_update" class="form-label">จํานวน</label>
+                                        <input type="number" class="form-control" name="quantity${product.product_id}" id="product_qty_update" value="${product.QTY}">
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                        <label for="product_price_update" class="form-label">ราคา</label>
+                                        <select class="form-select form-control-sm color-dropdown product_type_update">
+                                                <option value="pack" ${product.product_type === 'pack' ? 'selected' : ''}>Pack (แพ็ค)</option>
+                                                <option value="unit" ${product.product_type === 'unit' ? 'selected' : ''}>Unit (ชิ้น)</option>
+                                            </select>
+                                            </div>
+                                        </select>
 
-                        // // JavaScript
-                        // var myElement = document.getElementById("myElement");
-                        // myElement.innerHTML = "<p>This is the new content.</p>";
-
-                        // Create a new row for the product list update
-                        let newRowUpdate = document.createElement("tr");
-                        newRowUpdate.innerHTML = `
-                            <td id="${product.product_id}">
-                                ${product.product_name}
-                            </td>
-                            <td>
-                                <input type="number" class="form-control" name="quantity${product.product_id}" id="${product.product_id}_update" value="${product.QTY}">
-                            </td>
-                            <td>
-                                <select class="form-select form-control-sm color-dropdown product_type_update">
-                                    <option value="pack" ${product.product_type === 'pack' ? 'selected' : ''}>Pack (แพ็ค)</option>
-                                    <option value="unit" ${product.product_type === 'unit' ? 'selected' : ''}>Unit (ชิ้น)</option>
-                                </select>
-                            </td>
                         `;
-                        product_list_Div_update.appendChild(newRowUpdate);
 
-                        // Set the product type for the current row
-                        newRowUpdate.querySelector('.product_type_update').value = product.product_type;
+                            product_list_update.appendChild(update);
 
-                        total += totalPrice;
-                    } else {
-                        console.log('Undefined product details:', product);
-                    }
-                });
-                
+                            total += totalPrice;
+                        } else {
+                            console.log('Undefined product details:', product);
+                        }
 
-                let totalCeil = Math.ceil(total);
-                let totalRow = document.createElement("tr");
-                totalRow.innerHTML = `
+                    });
+                    let totalCeil = Math.ceil(total);
+                    let totalRow = document.createElement("tr");
+                    totalRow.innerHTML = `
                     <td colspan="2" class="text-end">รวมทั้งหมด</td>
                     <td>${totalCeil}</td>
                 `;
-                productTableBody.appendChild(totalRow);
+                    productTableBody.appendChild(totalRow);
 
-                $('#product_detail_modal').modal('show');
-            } else {
-                console.error('Error:', json.error_message);
-            }
-        })
-        .catch(error => {
-            console.error('Error adding more product:', error);
-        });
-}
+
+
+                    $('#product_detail_modal').modal('show');
+                } else {
+                    console.error('Error:', json.error_message);
+                }
+            })
+            .catch(error => {
+                console.error('Error adding more product:', error);
+            });
+    }
     // Function to create a new product row
     function createProductRow(product) {
-        var newRow = document.createElement("tr");
+        //     var newRow = document.createElement("tr");
+        //     newRow.innerHTML = `
+        //     <td id="${product.product_id}">
+        //         ${product.product_name}
+        //     </td>
+        //     <td>
+        //         <input type="number" class="form-control" name="quantity${product.product_id}" id="${product.product_id}_update" value="${product.QTY || 0}">
+        //     </td>
+        //     <td>
+        //         <select id="product_type_add" class="form-select form-control-sm color-dropdown">
+        //             <option selected>--เลือกประเภทสินค้า--</option>
+        //             <option value="pack" data-price="${product.pack_price}">Pack (แพ็ค)</option>
+        //             <option value="unit" data-price="${product.unit_price}">Unit (ชิ้น)</option>
+        //         </select>
+        //     </td>
+        // `;
+        var newRow = document.createElement("div");
+        newRow.classList.add("row", "gx-3", "gy-2", "align-items-center"); // Add classes for Bootstrap styling
         newRow.innerHTML = `
-        <td id="${product.product_id}">
-            ${product.product_name}
-        </td>
-        <td>
-            <input type="number" class="form-control" name="quantity${product.product_id}" id="${product.product_id}_update" value="${product.QTY || 0}">
-        </td>
-        <td>
-            <select id="product_type_update" class="form-select form-control-sm color-dropdown">
-                <option selected>--เลือกประเภทสินค้า--</option>
-                <option value="pack" data-price="${product.pack_price}">Pack (แพ็ค)</option>
-                <option value="unit" data-price="${product.unit_price}">Unit (ชิ้น)</option>
-            </select>
-        </td>
-    `;
+                        <input id="product_id_add" type="hidden" value="${product.product_id}">
+                                        <div class="col-md-6">
+                                        <label for="product_name_add" class="form-label"></label>
+                                            <p>${product.product_name}</p>
+                                        </div>
+                                        <div class="col-md-2 mb-3">
+                                        <label for="product_qty_adde" class="form-label">จํานวน</label>
+                                        <input type="number" class="form-control" name="quantity${product.product_id}" id="product_qty_add" value="${product.QTY || 0}">
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                        <label for="product_price_add" class="form-label">ราคา</label>
+                                        <select class="form-select form-control-sm color-dropdown product_type_add">
+                                                <option value="pack" data-price="${product.pack_price}">Pack (แพ็ค)</option>
+                                                <option value="unit" data-price="${product.unit_price}">Unit (ชิ้น)</option>
+                                            </select>
+                                            </div>
+                                        </select>
+
+                        `;
         return newRow;
     }
 
@@ -1231,49 +1181,6 @@
     //         });
     // }
 
-
-
-
-
-
-
-
-
-    function tasklist_success() {
-        var timestamp = Date.now();
-        var localDateTime = new Date(timestamp);
-        localDateTime.setHours(localDateTime.getHours() + 7);
-        var datetimeNow = localDateTime.toISOString(); // Format: YYYY-MM-DDTHH:MM:SSZ
-        var rowData = task_list.row($(this).parents('tr')).data();
-        rowData.task_datetime = datetimeNow;
-
-
-        fetch('../api/product?case=task_success', {
-                method: 'POST',
-                body: JSON.stringify({
-                    case: 'task_success',
-                    taskID: rowData.task_id,
-                    last_datetime: datetimeNow
-                }),
-            })
-            .then(function(response) {
-                return response.json();
-            })
-            .then(function(json) {
-                if (json[0].status == '0') {
-                    alert_snackbar('error', json[0].error_message);
-                } else {
-                    alert_snackbar('success', "จัดส่งสำเร็จ");
-                    setTimeout(function() {
-                        location.reload();
-                    }, 1500);
-                }
-            })
-            .catch(function(error) {
-                console.error('Error:', error);
-            });
-    }
-
     function product_l() {
         fetch('../api/product?case=product_task_show', {
                 method: 'POST',
@@ -1342,7 +1249,41 @@
             })
     }
 
+    function tasklist_success(rowData) {
+        var timestamp = Date.now();
+        var localDateTime = new Date(timestamp);
+        localDateTime.setHours(localDateTime.getHours() + 7);
+        var datetimeNow = localDateTime.toISOString(); // Format: YYYY-MM-DDTHH:MM:SSZ
+        var rowData = task_list.row($(this).parents('tr')).data();
+        rowData.task_datetime = datetimeNow;
 
+
+        fetch('../api/product?case=task_success', {
+                method: 'POST',
+                body: JSON.stringify({
+                    case: 'task_success',
+                    taskID: rowData.task_id,
+                    last_datetime: datetimeNow
+                }),
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(json) {
+                $("#modal_confirm").modal("hide");
+                if (json[0].status == '0') {
+                    alert_snackbar('error', json[0].error_message);
+                } else {
+                    alert_snackbar('success', "จัดส่งสำเร็จ");
+                    setTimeout(function() {
+                        // location.reload();
+                    }, 1500);
+                }
+            })
+            .catch(function(error) {
+                console.error('Error:', error);
+            });
+    }
 
     function getTableRowData(btnElement, tableId) {
         var table = $('#' + tableId).DataTable();
