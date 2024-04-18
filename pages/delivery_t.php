@@ -147,7 +147,7 @@
                             <tr>
                                 <th>สินค้า</th>
                                 <th>จำนวน</th>
-                                <th>ประเภท</th>
+                                <!-- <th>ประเภท</th> -->
                             </tr>
                         </thead>
                         <tbody id="product_list">
@@ -381,7 +381,6 @@
 
     function task_check() {
 
-
         if ($("#task_datetime").val().length == "") {
             alert_snackbar("warning", "กรุณาระบุวันที่");
             setTimeout(function() {
@@ -467,14 +466,12 @@
         const productTypes = document.querySelectorAll('#product_list_update select');
         console.log(quantityInputs, productTypes);
 
-        // Check if any quantity input has a value greater than 0
         quantityInputs.forEach(input => {
             if (parseInt(input.value) > 0) {
                 foundOne = true;
             }
         });
 
-        // Check if any product type is selected
         let productTypeSelected = false;
         productTypes.forEach(productType => {
             if (productType.value === "pack" || productType.value === "unit") {
@@ -482,10 +479,6 @@
             }
         });
 
-        // If no product type is selected, show warning
-
-
-        // If no quantity input has a value greater than 0, show warning
         if (!foundOne) {
             alert_snackbar("warning", "กรุณาระบุจำนวนสินค้าอย่างน้อย 1 รายการ");
             return false;
@@ -509,14 +502,12 @@
         const productTypes = document.querySelectorAll('#product_list_add select');
         console.log(quantityInputs, productTypes);
 
-        // Check if any quantity input has a value greater than 0
         quantityInputs.forEach(input => {
             if (parseInt(input.value) > 0) {
                 foundOne = true;
             }
         });
 
-        // Check if any product type is selected
         let productTypeSelected = false;
         productTypes.forEach(productType => {
             if (productType.value === "pack" || productType.value === "unit") {
@@ -524,10 +515,6 @@
             }
         });
 
-        // If no product type is selected, show warning
-
-
-        // If no quantity input has a value greater than 0, show warning
         if (!foundOne) {
             alert_snackbar("warning", "กรุณาระบุจำนวนสินค้าอย่างน้อย 1 รายการ");
             return false;
@@ -537,7 +524,6 @@
             alert_snackbar("warning", "กรุณาระบุประเภทสินค้า");
             return false;
         }
-
 
         $("#modal_confirm_text").html("ยืนยันการแก้ไข")
         $("#modal_confirm_submit").attr("onclick", "submitmoreproduct();");
@@ -549,17 +535,28 @@
         var rowData = getTableRowData($(this), 'taskData');
         var task_id = rowData.task_id;
         
-    // Set the confirmation message in the modal
         $("#modal_confirm_text").html("ยืนยันการจัดส่ง");
         $("#modal_confirm_submit").on("click", function() {
             tasklist_success(task_id);
         });
   
+        $("#modal_confirm").modal("show");
+        });
+    }
 
-    // Show the confirmation modal
-    $("#modal_confirm").modal("show");
-  });
-}
+    function cancel_check() {
+        $('#taskData').on('click', '.btn-danger', function() {
+        var rowData = getTableRowData($(this), 'taskData');
+        var task_id = rowData.task_id;
+
+        $("#modal_confirm_text").html("ยืนยันการยกเลิก");
+        $("#modal_confirm_submit").on("click", function() {
+            tasklist_cancel(task_id);
+        });
+
+        $("#modal_confirm").modal("show");
+        })
+    }
 
 
     function confirm_task() {
@@ -821,7 +818,7 @@
         var cus_id = rowData.cus_id;
         var cus_name = rowData.cus_name;
         // get_cus_id = cus_id;
-        window.location.href = "delivery_t.php?cus_id=" + cus_id + "&cus_name=" + encodeURIComponent(cus_name);
+        window.location.href = "delivery_t.php?tasklist&cus_id=" + encodeURIComponent(cus_id) + "&cus_name=" + encodeURIComponent(cus_name);
     };
 
     function task() {
@@ -866,16 +863,17 @@
                                     {
                                         data: 'task_datetime'
                                     },
-                                    {
-                                        data: 'order_qty'
-                                    },
+                                    // {
+                                    //     data: 'order_qty'
+                                    // },
                                     {
                                         data: 'last_datetime'
                                     },
                                     {
                                         data: null,
                                         defaultContent: `<button class="btn btn-primary btn-sm btn-success" onclick="confirm_check()">จัดส่งสำเร็จ</button>
-                                                    <button class="btn btn-primary btn-sm btn-info">รายละเอียด</button>`
+                                                        <button class="btn btn-primary btn-sm btn-danger" onclick="cancel_check()">ยกเลิก</button>
+                                                        <button class="btn btn-primary btn-sm btn-info">รายละเอียด</button>`
                                     }
                                 ],
                                 order: [
@@ -1253,16 +1251,10 @@
     }
 
     function tasklist_success(task_id) {
-        console.log(task_id);
-        
         var timestamp = Date.now();
         var localDateTime = new Date(timestamp);
         localDateTime.setHours(localDateTime.getHours() + 7);
         var datetimeNow = localDateTime.toISOString(); // Format: YYYY-MM-DDTHH:MM:SSZ
-
-        
-        // rowData.task_datetime = datetimeNow;
-
 
         fetch('../api/product?case=task_success', {
                 method: 'POST',
@@ -1289,6 +1281,39 @@
             .catch(function(error) {
                 console.error('Error:', error);
             });
+    }
+
+    function tasklist_cancel(task_id) {
+        var timestamp = Date.now();
+        var localDateTime = new Date(timestamp);
+        localDateTime.setHours(localDateTime.getHours() + 7);
+        var datetimeNow = localDateTime.toISOString(); // Format: YYYY-MM-DDTHH:MM:SSZ
+        fetch('../api/product?case=task_cancel', {
+                method: 'POST',
+                body: JSON.stringify({
+                    case: 'task_cancel',
+                    taskID: task_id,
+                    last_datetime: datetimeNow
+                }),
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(json) {
+                $("#modal_confirm").modal("hide");
+                if (json[0].status == '0') {
+                    alert_snackbar('error', json[0].error_message);
+
+                } else {
+                    alert_snackbar('success', "ยกเลิกสำเร็จ");
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1500);
+                }
+            })
+            .catch(function(error) {
+                console.error('Error:', error);
+            })
     }
 
     function getTableRowData(btnElement, tableId) {

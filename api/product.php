@@ -317,7 +317,7 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 	LEFT JOIN 
 		product_info AS pi ON dtp.product_id = pi.product_id
 	WHERE 
-		dt.cus_id = '{$cusID}'
+		dt.cus_id = '{$cusID}' AND dt.task_status = 1 OR dt.task_status = 2
 	GROUP BY 
 		dtp.task_id
 	ORDER BY 
@@ -358,6 +358,32 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
         $data[0]['error_message'] = $e->getMessage();
 	}
     echo json_encode($data);
+
+} else if (@$decode['case'] == 'task_cancel') {
+	try {
+		$data[0] = array('status' => 0);
+        $taskID = $decode['taskID'];
+		$last_datetime = $decode['last_datetime'];
+        
+        // Update delivery_task table
+        $query_task = "UPDATE `delivery_task` SET `task_status` = 0 WHERE `task_id` = '{$taskID}'";
+        $stmt_task = $conn->query($query_task);
+
+        // Update delivery_task_product table
+        $query_product = "UPDATE `delivery_task_product` SET `product_active` = 0 , `last_datetime` = '{$last_datetime}' WHERE `task_id` = '{$taskID}'";
+        $stmt_product = $conn->query($query_product);
+
+        // Check if both queries were successful
+        if ($stmt_task && $stmt_product) {
+            $data[0] = array('status' => 1);
+        } else {
+			$data[0] = array('status' => 0);
+        }
+    } catch (PDOException $e) {
+        $data[0]['error_message'] = $e->getMessage();
+	}
+    echo json_encode($data);
+
 } else if (@$decode['case'] == 'product_task_show') {
 	try {
 		$data[0] = array('status' => 0);
