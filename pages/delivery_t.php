@@ -365,6 +365,7 @@
         $('#taskData').on('click', '.btn-info', function() {
             var rowData = getTableRowData($(this), 'taskData');
             var task_id = rowData.task_id;
+            console.log(task_id);
 
             fetchProductDetails(task_id)
                 .then(productDetails => {
@@ -544,18 +545,20 @@
     }
 
     function confirm_check() {
+        $('#taskData').on('click', '.btn-success', function() {
+        var rowData = getTableRowData($(this), 'taskData');
+        var task_id = rowData.task_id;
+        
     // Set the confirmation message in the modal
-    $("#modal_confirm_text").html("ยืนยันการจัดส่ง");
-
-    // Attach a click event listener to the "confirm" button
-    $("#modal_confirm_submit").on("click", function() {
-    var rowData = task_list.row($(this).parents('tr')).data();
-    tasklist_success(rowData);
-    // Rest of your code...
-});
+        $("#modal_confirm_text").html("ยืนยันการจัดส่ง");
+        $("#modal_confirm_submit").on("click", function() {
+            tasklist_success(task_id);
+        });
+  
 
     // Show the confirmation modal
     $("#modal_confirm").modal("show");
+  });
 }
 
 
@@ -1249,20 +1252,23 @@
             })
     }
 
-    function tasklist_success(rowData) {
+    function tasklist_success(task_id) {
+        console.log(task_id);
+        
         var timestamp = Date.now();
         var localDateTime = new Date(timestamp);
         localDateTime.setHours(localDateTime.getHours() + 7);
         var datetimeNow = localDateTime.toISOString(); // Format: YYYY-MM-DDTHH:MM:SSZ
-        var rowData = task_list.row($(this).parents('tr')).data();
-        rowData.task_datetime = datetimeNow;
+
+        
+        // rowData.task_datetime = datetimeNow;
 
 
         fetch('../api/product?case=task_success', {
                 method: 'POST',
                 body: JSON.stringify({
                     case: 'task_success',
-                    taskID: rowData.task_id,
+                    taskID: task_id,
                     last_datetime: datetimeNow
                 }),
             })
