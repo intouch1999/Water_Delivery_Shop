@@ -169,7 +169,7 @@
                                         <th>รหัสนัดหมาย</th>
                                         <th>รหัสลูกค้า</th>
                                         <th>วันที่นัดหมาย</th>
-                                        <th>จำนวน</th>
+                                        <th>จัดส่งสำเร็จ</th>
                                         <th>จัดส่งสำเร็จเวลา</th>
                                     </tr>
                                 </thead>
@@ -201,7 +201,7 @@
                             <input id="task_id_update" type="hidden"> </input>
                             <label class="form-label" for="task_datetime">วันเวลาจัดส่ง </label>
                             <input type="datetime-local" class="form-control" id="datetime_update" name="task_datetime">
-                            <div class="col-md-5">
+                            <div class="col-md">
                                 <label class="form-label" for="pay_status_update">สถานะการจ่าย </label>
                                 <select id="pay_status_update" class="form-select form-control-sm color-dropdown">
                                     <option selected>--เลือกสถานะการจ่าย--</option>
@@ -209,7 +209,7 @@
                                     <option value="1">จ่ายแล้ว</option>
                                 </select>
                             </div>
-                            <div class="col-md-5">
+                            <div class="col-md">
                                 <label id="pay_type_update_label" class="form-label" for="pay_type_update">รูปแบบการจ่าย </label>
                                 <select id="pay_type_update" class="form-select form-control-sm color-dropdown">
                                     <option selected>--เลือกรูปแบบการจ่าย--</option>
@@ -235,11 +235,9 @@
                         </h5>
                         <div id="product_list_add">
 
-
-                            
                         </div>
                         <div class="row gx-3 gy-2 align-items-center">
-                        <button type="button" id="add_Task" class="btn btn-primary" onclick="add_check()">บันทึก</button>
+                            <button type="button" id="add_Task" class="btn btn-primary" onclick="add_check()">บันทึก</button>
                         </div>
                     </div>
                 </div>
@@ -358,23 +356,24 @@
             }
         });
 
+        $('#taskData').on('click', '.btn-info', update_show);
         $('#taskData').on('click', '.btn-info', addMoreProduct);
 
         // $('#add_Task').on('click', submitmoreproduct);
 
-        $('#taskData').on('click', '.btn-info', function() {
-            var rowData = getTableRowData($(this), 'taskData');
-            var task_id = rowData.task_id;
-            console.log(task_id);
+        // $('#taskData').on('click', '.btn-info', function() {
+        //     var rowData = getTableRowData($(this), 'taskData');
+        //     var task_id = rowData.task_id;
+        //     console.log(task_id);
 
-            fetchProductDetails(task_id)
-                .then(productDetails => {
-                    btn_info(productDetails);
-                })
-                .catch(error => {
-                    console.error('Error fetching product details:', error);
-                });
-        });
+        //     fetchProductDetails(task_id)
+        //         .then(productDetails => {
+        //             btn_info(productDetails);
+        //         })
+        //         .catch(error => {
+        //             console.error('Error fetching product details:', error);
+        //         });
+        // });
 
 
     });
@@ -410,46 +409,17 @@
             return false;
         }
 
-        // if ($("#datetime_update").val().length == "") {
-        //     alert_snackbar("warning", "กรุณาระบุวันที่");
-        //     setTimeout(function() {
-        //         $("#task_datetime").focus();
-        //     }, 300);
-        //     return false;
-        // }
-
-
         let foundOne = false;
         const quantityInputs = document.querySelectorAll('#product_list input[type="number"]');
-        const productTypes = document.querySelectorAll('#product_list select');
-        console.log(quantityInputs, productTypes);
 
-        // Check if any quantity input has a value greater than 0
         quantityInputs.forEach(input => {
             if (parseInt(input.value) > 0) {
                 foundOne = true;
             }
         });
 
-        // Check if any product type is selected
-        let productTypeSelected = false;
-        productTypes.forEach(productType => {
-            if (productType.value === "pack" || productType.value === "unit") {
-                productTypeSelected = true;
-            }
-        });
-
-        // If no product type is selected, show warning
-
-
-        // If no quantity input has a value greater than 0, show warning
         if (!foundOne) {
             alert_snackbar("warning", "กรุณาระบุจำนวนสินค้าอย่างน้อย 1 รายการ");
-            return false;
-        }
-
-        if (!productTypeSelected) {
-            alert_snackbar("warning", "กรุณาระบุประเภทสินค้า");
             return false;
         }
 
@@ -472,23 +442,10 @@
             }
         });
 
-        let productTypeSelected = false;
-        productTypes.forEach(productType => {
-            if (productType.value === "pack" || productType.value === "unit") {
-                productTypeSelected = true;
-            }
-        });
-
         if (!foundOne) {
             alert_snackbar("warning", "กรุณาระบุจำนวนสินค้าอย่างน้อย 1 รายการ");
             return false;
         }
-
-        if (!productTypeSelected) {
-            alert_snackbar("warning", "กรุณาระบุประเภทสินค้า");
-            return false;
-        }
-
 
         $("#modal_confirm_text").html("ยืนยันการแก้ไข")
         $("#modal_confirm_submit").attr("onclick", "update_task();");
@@ -508,20 +465,8 @@
             }
         });
 
-        let productTypeSelected = false;
-        productTypes.forEach(productType => {
-            if (productType.value === "pack" || productType.value === "unit") {
-                productTypeSelected = true;
-            }
-        });
-
         if (!foundOne) {
             alert_snackbar("warning", "กรุณาระบุจำนวนสินค้าอย่างน้อย 1 รายการ");
-            return false;
-        }
-
-        if (!productTypeSelected) {
-            alert_snackbar("warning", "กรุณาระบุประเภทสินค้า");
             return false;
         }
 
@@ -532,29 +477,29 @@
 
     function confirm_check() {
         $('#taskData').on('click', '.btn-success', function() {
-        var rowData = getTableRowData($(this), 'taskData');
-        var task_id = rowData.task_id;
-        
-        $("#modal_confirm_text").html("ยืนยันการจัดส่ง");
-        $("#modal_confirm_submit").on("click", function() {
-            tasklist_success(task_id);
-        });
-  
-        $("#modal_confirm").modal("show");
+            var rowData = getTableRowData($(this), 'taskData');
+            var task_id = rowData.task_id;
+
+            $("#modal_confirm_text").html("ยืนยันการจัดส่ง");
+            $("#modal_confirm_submit").on("click", function() {
+                tasklist_success(task_id);
+            });
+
+            $("#modal_confirm").modal("show");
         });
     }
 
     function cancel_check() {
         $('#taskData').on('click', '.btn-danger', function() {
-        var rowData = getTableRowData($(this), 'taskData');
-        var task_id = rowData.task_id;
+            var rowData = getTableRowData($(this), 'taskData');
+            var task_id = rowData.task_id;
 
-        $("#modal_confirm_text").html("ยืนยันการยกเลิก");
-        $("#modal_confirm_submit").on("click", function() {
-            tasklist_cancel(task_id);
-        });
+            $("#modal_confirm_text").html("ยืนยันการยกเลิก");
+            $("#modal_confirm_submit").on("click", function() {
+                tasklist_cancel(task_id);
+            });
 
-        $("#modal_confirm").modal("show");
+            $("#modal_confirm").modal("show");
         })
     }
 
@@ -564,24 +509,21 @@
         var cus_id = urlParams.get('cus_id');
         var productsAndQuantities = [];
         document.querySelectorAll('#product_list tr').forEach(row => {
-            var productId = row.cells[0].id; // Get product ID from the first cell
-            var quantityInput = row.cells[1].querySelector('input[type="number"]'); // Get quantity from the second cell
+            var productId = row.cells[0].id;
+            var quantityInput = row.cells[1].querySelector('input[type="number"]');
             var quantity = quantityInput.value;
-            var productType = row.cells[2].querySelector('select').value; // Get product type from the select element
-            var productTypePrice = row.cells[2].querySelector('select').selectedOptions[0].getAttribute('data-price');
+            var productPrice = row.cells[0].querySelector('img').getAttribute('data-price');
             if (quantity && parseInt(quantity) !== 0) {
                 productsAndQuantities.push({
                     id: productId,
                     quantity: quantity,
-                    type: productType,
-                    price: productTypePrice
+                    price: productPrice
                 });
             }
         });
 
         var findProduct = productsAndQuantities.map(item => item.id);
         var findQty = productsAndQuantities.map(item => item.quantity);
-        var findType = productsAndQuantities.map(item => item.type);
         var findPrice = productsAndQuantities.map(item => item.price);
 
         var totalPrice = 0;
@@ -610,8 +552,6 @@
                     Taskdatetime: $('#task_datetime').val(),
                     product: findProduct,
                     order_qty: findQty,
-                    product_type: findType,
-                    // price: findPrice,
                     pay_status: $('#pay_status').val(),
                     pay_type: $('#pay_type').val(),
                     pay_total: $('#pay_total').val(),
@@ -634,7 +574,7 @@
                 } else {
                     alert_snackbar('success', "เพิ่มนัดหมายสำเร็จ");
                     setTimeout(function() {
-                        // location.reload();
+                        location.reload();
                     }, 1500);
                 }
             })
@@ -647,22 +587,17 @@
         var productsAndQuantities = [];
         document.querySelectorAll('#product_list_update').forEach(row => {
             var productId = document.getElementById("product_id_update").value;
-            // var quantityInput = document.getElementById("product_qty_update"); // Get quantity from the second cell
-            // var quantity = quantityInput.value;
             var quantity = document.getElementById('product_qty_update').value;
-            var productType = document.querySelector('.product_type_update').value;
             if (quantity && parseInt(quantity) !== 0) {
                 productsAndQuantities.push({
                     id: productId,
                     quantity: quantity,
-                    type: productType,
                 });
             }
         });
 
         var findProduct = productsAndQuantities.map(item => item.id);
         var findQty = productsAndQuantities.map(item => item.quantity);
-        var findType = productsAndQuantities.map(item => item.type);
 
         fetch('../api/product?case=update_task', {
                 method: 'POST',
@@ -675,7 +610,6 @@
                     task_datetime: $('#datetime_update').val(),
                     product_id: findProduct,
                     order_true: findQty,
-                    product_type: findType
                 }),
                 headers: {
                     'Content-Type': 'application/json'
@@ -708,23 +642,17 @@
         var productsAndQuantities = [];
         document.querySelectorAll('#product_list_add').forEach(row => {
             var productId = document.getElementById("product_id_add").value;
-            // var quantityInput = document.getElementById("product_qty_add");
-            // var quantity = quantityInput.value;
             var quantity = document.getElementById('product_qty_add').value;
-            var productType = document.querySelector('.product_type_add').value;
             if (quantity && parseInt(quantity) !== 0) {
                 productsAndQuantities.push({
                     id: productId,
                     quantity: quantity,
-                    type: productType,
                 });
             }
         });
 
         var findProduct = productsAndQuantities.map(item => item.id);
         var findQty = productsAndQuantities.map(item => item.quantity);
-        var findType = productsAndQuantities.map(item => item.type);
-        console.log(findProduct, findQty, findType);
 
         fetch('../api/product?case=more_product', {
                 method: 'POST',
@@ -733,8 +661,6 @@
                     task_id: $('#task_id_update').val(),
                     product_id: findProduct,
                     order_true: findQty,
-                    product_type: findType
-
                 }),
                 headers: {
                     'Content-Type': 'application/json'
@@ -762,8 +688,6 @@
                 console.error('Error:', error);
             });
     }
-
-    
 
     function customer_task() {
         $.ajax({
@@ -811,7 +735,6 @@
             }
         });
     }
-    
 
     function task_button() {
         var rowData = getTableRowData($(this), 'customerData');
@@ -895,8 +818,6 @@
         }
     }
 
-    
-
     // Function to fetch product data based on task_id
     function fetchProductTaskShow(task_id) {
         return fetch('../api/product?case=product_task_show', {
@@ -933,41 +854,110 @@
             });
     }
 
-    function addMoreProduct() {
+//     async function addMoreProduct() {
+//     try {
+//         const rowData = getTableRowData($(this), 'taskData');
+//         const task_id = rowData.task_id;
+
+//         const [products1, products2] = await Promise.all([fetchProductTaskShow(task_id), fetchProductDetails(task_id)]);
+
+//         const product_list_Div_add = document.getElementById('product_list_add');
+//         const productNames1 = products1.filter(product => product.product_name !== undefined).map(product => product.product_name);
+//         const productNames2 = products2.filter(product => product.product_name !== undefined).map(product => product.product_name);
+
+//         const commonProductNames = productNames1.filter(name => productNames2.includes(name));
+//         console.log(productNames1);
+//         console.log("productNames2" + productNames2);
+//         // Remove existing product rows
+//         product_list_Div_add.innerHTML = '';
+
+//         [...products1, ...products2].forEach(product => {
+//             if (!commonProductNames.includes(product.product_name)) {
+//                 var newRow = createProductRow(product);
+//                 product_list_Div_add.appendChild(newRow);
+//             }
+//         });
+
+//     } catch (error) {
+//         console.error('Error adding more product:', error);
+//     }
+// }
+
+async function addMoreProduct() {
+    try {
+        const rowData = getTableRowData($(this), 'taskData');
+        const task_id = rowData.task_id;
+
+        const [products1, products2] = await Promise.all([fetchProductTaskShow(task_id), fetchProductDetails(task_id)]);
+
+        const product_list_Div_add = document.getElementById('product_list_add');
+
+        const unaddedProducts = [];
+
+        products1.forEach(product1 => {
+            if (product1.product_active === 1) {
+                let isAdded = false;
+                products2.forEach(product2 => {
+                    if (product1.product_id === product2.product_id) {
+                        isAdded = true;
+                    }
+                });
+                if (!isAdded) {
+                    unaddedProducts.push(product1);
+                }
+            }
+        });
+
+        products2.forEach(product2 => {
+            if (product2.product_active === 1) {
+                let isAdded = false;
+                products1.forEach(product1 => {
+                    if (product2.product_id === product1.product_id) {
+                        isAdded = true;
+                    }
+                });
+                if (!isAdded) {
+                    unaddedProducts.push(product2);
+                }
+            }
+        });
+
+        product_list_Div_add.innerHTML = '';
+
+        unaddedProducts.forEach(product => {
+            var newRow = createProductRow(product);
+            product_list_Div_add.appendChild(newRow);
+        });
+
+    } catch (error) {
+        console.error('Error adding more product:', error);
+    }
+}
+
+    function createProductRow(product) {
+        var newRow = document.createElement("div");
+        newRow.classList.add("row", "justify-content-end"); 
+        newRow.innerHTML = `
+                        <input id="product_id_add" type="hidden" value="${product.product_id}">
+                                        <div class="col-md-9">
+                                        <label for="product_name_add" class="form-label"></label>
+                                            <p>${product.product_name}</p>
+                                        </div>
+                                        <div class="col-md-2 mb-3">
+                                        <label for="product_qty_adde" class="form-label">จํานวน</label>
+                                        <input type="number" class="form-control" name="quantity${product.product_id}" id="product_qty_add" value="${product.QTY || 0}">
+                                        </div>
+
+                        `;
+        return newRow;
+    }
+
+    function update_show() {
         var rowData = getTableRowData($(this), 'taskData');
         var task_id = rowData.task_id;
 
-        Promise.all([fetchProductTaskShow(task_id), fetchProductDetails(task_id)])
-            .then(([products1, products2]) => {
-                const product_list_Div_add = document.getElementById('product_list_add');
-                const productNames1 = products1.map(product => product.product_name);
-                const productNames2 = products2.map(product => product.product_name);
-                const commonProductNames = productNames1.filter(name => productNames2.includes(name));
-
-                // Remove existing product rows
-                product_list_Div_add.innerHTML = '';
-
-                products1.forEach(product => {
-                    if (!commonProductNames.includes(product.product_name)) {
-                        var newRow = createProductRow(product);
-                        product_list_Div_add.appendChild(newRow);
-                    }
-                });
-
-                products2.forEach(product => {
-                    if (!commonProductNames.includes(product.product_name)) {
-                        var newRow = createProductRow(product);
-                        product_list_Div_add.appendChild(newRow);
-                    }
-                });
-
-                const json = products1.concat(products2);
-
-                document.getElementById('task_id_update').value = json[5].task_id;
-                document.getElementById('datetime_update').value = json[5].task_datetime;
-                document.getElementById('pay_status_update').value = json[5].pay_status;
-                document.getElementById('pay_type_update').value = json[5].pay_type;
-                document.getElementById('pay_total_update').value = json[5].pay_total;
+        fetchProductDetails(task_id)
+            .then(json => {
 
                 if (json[0] && json[0].status == '1') {
                     const productTableBody = document.getElementById('productTableBody');
@@ -978,25 +968,30 @@
                     productTableBody.innerHTML = '';
                     product_list_Div_update.innerHTML = '';
 
-
                     json.slice(1).forEach(product => {
-                        if (product.product_id !== undefined && product.QTY !== undefined && product.product_type !== undefined && product.price !== undefined) {
-                            const totalPrice = product.price * product.QTY;
+
+                        document.getElementById('task_id_update').value = task_id;                                
+                        document.getElementById('datetime_update').value = product.task_datetime;
+                        document.getElementById('pay_status_update').value = product.pay_status;
+                        document.getElementById('pay_type_update').value = product.pay_type;
+                        document.getElementById('pay_total_update').value = product.pay_total;
+                        if (product.product_id !== undefined && product.QTY !== undefined) {
+                            const totalPrice = product.pack_price * product.QTY;
 
                             // Create a new row for each product
                             let resule = document.createElement("tr");
                             resule.innerHTML = `
                             <td>${product.product_name}</td>
                             <td>${product.QTY}</td>
-                            <td>${totalPrice}</td> 
-                        `;
+                            <td>${totalPrice.toFixed(2)}</td> 
+                            `;
                             productTableBody.appendChild(resule);
 
                             let update = document.createElement("div");
-                            update.classList.add("row", "gx-3", "gy-2", "align-items-center"); // Add classes for Bootstrap styling
+                            update.classList.add("row", "justify-content-end"); // Add classes for Bootstrap styling
                             update.innerHTML = `
-                        <input id="product_id_update" type="hidden" value="${product.product_id}">
-                                        <div class="col-md-6">
+                                        <input id="product_id_update" type="hidden" value="${product.product_id}">
+                                        <div class="col-md-9">
                                         <label for="product_name_update" class="form-label"></label>
                                             <p>${product.product_name}</p>
                                         </div>
@@ -1004,22 +999,13 @@
                                         <label for="product_qty_update" class="form-label">จํานวน</label>
                                         <input type="number" class="form-control" name="quantity${product.product_id}" id="product_qty_update" value="${product.QTY}">
                                         </div>
-                                        <div class="col-md-3 mb-3">
-                                        <label for="product_price_update" class="form-label">ราคา</label>
-                                        <select class="form-select form-control-sm color-dropdown product_type_update">
-                                                <option value="pack" ${product.product_type === 'pack' ? 'selected' : ''}>Pack (แพ็ค)</option>
-                                                <option value="unit" ${product.product_type === 'unit' ? 'selected' : ''}>Unit (ชิ้น)</option>
-                                            </select>
-                                            </div>
-                                        </select>
-
                         `;
 
                             product_list_update.appendChild(update);
 
                             total += totalPrice;
                         } else {
-                            console.log('Undefined product details:', product);
+
                         }
 
                     });
@@ -1030,157 +1016,15 @@
                     <td>${totalCeil}</td>
                 `;
                     productTableBody.appendChild(totalRow);
-
-
-
                     $('#product_detail_modal').modal('show');
                 } else {
                     console.error('Error:', json.error_message);
                 }
             })
             .catch(error => {
-                console.error('Error adding more product:', error);
+                console.error('Error fetching product details:', error);
             });
     }
-    // Function to create a new product row
-    function createProductRow(product) {
-        //     var newRow = document.createElement("tr");
-        //     newRow.innerHTML = `
-        //     <td id="${product.product_id}">
-        //         ${product.product_name}
-        //     </td>
-        //     <td>
-        //         <input type="number" class="form-control" name="quantity${product.product_id}" id="${product.product_id}_update" value="${product.QTY || 0}">
-        //     </td>
-        //     <td>
-        //         <select id="product_type_add" class="form-select form-control-sm color-dropdown">
-        //             <option selected>--เลือกประเภทสินค้า--</option>
-        //             <option value="pack" data-price="${product.pack_price}">Pack (แพ็ค)</option>
-        //             <option value="unit" data-price="${product.unit_price}">Unit (ชิ้น)</option>
-        //         </select>
-        //     </td>
-        // `;
-        var newRow = document.createElement("div");
-        newRow.classList.add("row", "gx-3", "gy-2", "align-items-center"); // Add classes for Bootstrap styling
-        newRow.innerHTML = `
-                        <input id="product_id_add" type="hidden" value="${product.product_id}">
-                                        <div class="col-md-6">
-                                        <label for="product_name_add" class="form-label"></label>
-                                            <p>${product.product_name}</p>
-                                        </div>
-                                        <div class="col-md-2 mb-3">
-                                        <label for="product_qty_adde" class="form-label">จํานวน</label>
-                                        <input type="number" class="form-control" name="quantity${product.product_id}" id="product_qty_add" value="${product.QTY || 0}">
-                                        </div>
-                                        <div class="col-md-3 mb-3">
-                                        <label for="product_price_add" class="form-label">ราคา</label>
-                                        <select class="form-select form-control-sm color-dropdown product_type_add">
-                                                <option value="pack" data-price="${product.pack_price}">Pack (แพ็ค)</option>
-                                                <option value="unit" data-price="${product.unit_price}">Unit (ชิ้น)</option>
-                                            </select>
-                                            </div>
-                                        </select>
-
-                        `;
-        return newRow;
-    }
-
-    //     function addMoreProduct() {
-    //     var rowData = getTableRowData($(this), 'taskData');
-    //     var task_id = rowData.task_id;
-
-    //     // Fetch product data based on task_id
-    //     fetch('../api/product?case=product_task_show', {
-    //             method: 'POST',
-    //             body: JSON.stringify({
-    //                 case: 'product_task_show'
-    //             }),
-    //         })
-    //         .then(function(response) {
-    //             if (!response.ok) {
-    //                 throw new Error('Network response was not ok');
-    //             }
-    //             return response.json();
-    //         })
-    //         .then(products1 => {
-    //             // Fetch product details based on task_id
-    //             fetch('../api/product?case=product_details', {
-    //                     method: 'POST',
-    //                     body: JSON.stringify({
-    //                         case: 'product_details',
-    //                         task_id: task_id,
-    //                     }),
-    //                     headers: {
-    //                         'Content-Type': 'application/json'
-    //                     }
-    //                 })
-    //                 .then(function(response) {
-    //                     if (!response.ok) {
-    //                         throw new Error('Network response was not ok');
-    //                     }
-    //                     return response.json();
-    //                 })
-    //                 .then(products2 => {
-    //                     const product_list_Div_add = document.getElementById('product_list_add');
-    //                     const productNames1 = products1.map(product => product.product_name);
-    //                     const productNames2 = products2.map(product => product.product_name);
-    //                     const commonProductNames = productNames1.filter(name => productNames2.includes(name));
-
-    //                     // Remove existing product rows
-    //                     product_list_Div_add.innerHTML = '';
-
-    //                     products1.forEach(product => {
-    //                         if (!commonProductNames.includes(product.product_name)) {
-    //                             var newRow = document.createElement("tr");
-    //                             newRow.innerHTML = `
-    //                                 <td id="${product.product_id}">
-    //                                     ${product.product_name}
-    //                                 </td>
-    //                                 <td>
-    //                                     <input type="number" class="form-control" name="quantity${product.product_id}" id="${product.product_id}_update" value="0">
-    //                                 </td>
-    //                                 <td>
-    //                                     <select id="product_type_update" class="form-select form-control-sm color-dropdown">
-    //                                         <option selected>--เลือกประเภทการจ่าย--</option>
-    //                                         <option value="pack" data-price="${product.pack_price}">Pack (แพ็ค)</option>
-    //                                         <option value="unit" data-price="${product.unit_price}">Unit (ชิ้น)</option>
-    //                                     </select>
-    //                                 </td>
-    //                             `;
-    //                             product_list_Div_add.appendChild(newRow);
-    //                         }
-    //                     });
-
-    //                     products2.forEach(product => {
-    //                         if (!commonProductNames.includes(product.product_name)) {
-    //                             var newRow = document.createElement("tr");
-    //                             newRow.innerHTML = `
-    //                                 <td id="${product.product_id}">
-    //                                     ${product.product_name}
-    //                                 </td>
-    //                                 <td>
-    //                                     <input type="number" class="form-control" name="quantity${product.product_id}" id="${product.product_id}_update" value="${product.order_qty}">
-    //                                 </td>
-    //                                 <td>
-    //                                     <select id="product_type_update" class="form-select form-control-sm color-dropdown">
-    //                                         <option selected>--เลือกประเภทการจ่าย--</option>
-    //                                         <option value="pack" data-price="${product.pack_price}">Pack (แพ็ค)</option>
-    //                                         <option value="unit" data-price="${product.unit_price}">Unit (ชิ้น)</option>
-    //                                     </select>
-    //                                 </td>
-    //                             `;
-    //                             product_list_Div_add.appendChild(newRow);
-    //                         }
-    //                     });
-    //                 })
-    //                 .catch(function(error) {
-    //                     console.error('Error fetching product details:', error);
-    //                 });
-    //         })
-    //         .catch(function(error) {
-    //             console.error('Error fetching products:', error);
-    //         });
-    // }
 
     function product_l() {
         fetch('../api/product?case=product_task_show', {
@@ -1205,45 +1049,15 @@
                         var newRow = document.createElement("tr");
                         newRow.innerHTML = `
             <td id="${product.product_id}">
-                <img src="../assets/img/product/${product.product_img}" alt="user-avatar" class="d-block rounded" height="70px" width="70px">${product.product_name}
+                <img src="../assets/img/product/${product.product_img}" data-price="${product.pack_price}" alt="user-avatar" class="d-block rounded" height="70px" width="70px" >${product.product_name}
             </td>
             <td>
                 <input type="number" class="form-control" name="quantity_${product.product_id}" id="quantity_${product.product_id}" placeholder="0">
-            </td>
-            <td>
-                <select id="product_type" class="form-select form-control-sm color-dropdown">
-                    <option selected>--เลือกประเภทสินค้า--</option>
-                    <option value="pack" data-price="${product.pack_price}">Pack (แพ็ค)</option>
-                    <option value="unit" data-price="${product.unit_price}">Unit (ชิ้น)</option>
-                </select>
             </td>
         `;
                         product_list_Div.appendChild(newRow);
                     });
                 }
-
-                //         if (filteredProducts.length > 0) {
-                //             filteredProducts.forEach(product => {
-                //                 var newRow = document.createElement("tr");
-                //                 newRow.innerHTML = `
-                //     <td id="${product.product_id}">
-                //         <img src="../assets/img/product/${product.product_img}" alt="user-avatar" class="d-block rounded" height="70px" width="70px">${product.product_name}
-                //     </td>
-                //     <td>
-                //         <input type="number" class="form-control" name="quantity${product.product_id}" id="${product.product_id}_update" placeholder="0">
-                //     </td>
-                //     <td>
-                //         <select id="product_type_update" class="form-select form-control-sm color-dropdown">
-                //         <option selected>--เลือกประเภทการจ่าย--</option>
-                //             <option value="pack" data-price="${product.pack_price}">Pack (แพ็ค)</option>
-                //             <option value="unit" data-price="${product.unit_price}">Unit (ชิ้น)</option>
-                //         </select>
-                //     </td>
-                // `;
-                //                 product_list_Div_add.appendChild(newRow);
-                //             });
-                //         }
-
             })
             .catch(function(error) {
                 console.error('Error:', error);
@@ -1274,7 +1088,7 @@
                 } else {
                     alert_snackbar('success', "จัดส่งสำเร็จ");
                     setTimeout(function() {
-                        // location.reload();
+                        location.reload();
                     }, 1500);
                 }
             })

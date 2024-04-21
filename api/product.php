@@ -265,10 +265,9 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 			foreach ($decode['product'] as $index => $product_id) {
 				$product_active = 1;
 				$order_qty = $decode['order_qty'][$index];
-				$product_type = $decode['product_type'][$index];
 
-				$query_product = "INSERT INTO `delivery_task_product` (`task_id`, `product_id`, `product_active`, `order_qty`,`product_type`, `create_datetime`, `sale_user`)
-						VALUES ('$taskId', '$product_id', '$product_active', '$order_qty', '$product_type', NOW(), '$sivanat_user')";
+				$query_product = "INSERT INTO `delivery_task_product` (`task_id`, `product_id`, `product_active`, `order_qty`, `create_datetime`, `sale_user`)
+						VALUES ('$taskId', '$product_id', '$product_active', '$order_qty', NOW(), '$sivanat_user')";
 		
 				$stmt_product = $conn->query($query_product);
 		
@@ -391,6 +390,7 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 		,(SELECT cat_name FROM product_category WHERE cat_id = t1.cat_id) AS cat_name
 		,(SELECT cat_sub_name FROM product_category_sub WHERE cat_sub_id = t1.cat_sub_id) AS cat_sub_name
 		,unit,`unit_price`,pack, `pack_price`, `product_active`, `create_user`, `create_date`, `edit_user`, `edit_date` FROM `product_info` AS t1
+		WHERE product_active = 1
 		 ORDER BY nIndex DESC
 		";
 		$stmt = $conn->query($query);
@@ -422,12 +422,12 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 							WHEN dtp.order_true IS NOT NULL AND dtp.order_true != 0 THEN dtp.order_true
 							ELSE dtp.order_qty
 						END AS QTY, 
-						dtp.product_type,
 						pi.product_name, 
 						pi.unit, 
 						pi.unit_price, 
 						pi.pack, 
-						pi.pack_price
+						pi.pack_price,
+						pi.product_active
 					FROM 
 						delivery_task AS dt
 					JOIN 
@@ -436,38 +436,13 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 						product_info AS pi ON dtp.product_id = pi.product_id
 					WHERE 
 						dt.task_id = '{$task_id}'
-;
-		";
-		
-
+					;
+							";
+	
         $stmt = $conn->query($query);
-        // if ($stmt->rowCount() > 0) {
-        //     $data = []; // สร้างอาร์เรย์ใหม่
-        //     $data[0] = array('status' => 1);
-
-        //     foreach ($stmt as $row) {
-        //         // คำนวณราคารวมของแต่ละแถว
-		// 		if ($row['product_type'] == 'unit') {
-        //             $row_total_price = ceil($row['unit_price']);
-        //         } elseif ($row['product_type'] == 'pack') {
-        //             $row_total_price = ceil($row['pack_price']);
-        //         }
-
-        //         // เพิ่มข้อมูลราคารวมของแถวนี้เข้าไปในอาร์เรย์ใหม่
-        //         $row['price'] = $row_total_price;
-        //         $data[] = $row;
-        //     }
-        // }
 		if ($stmt->rowCount() > 0) {
 			while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 				$data[0] = array('status' => 1);
-				if ($row['product_type'] == 'unit') {
-					$row_total_price = ($row['unit_price']);
-				} elseif ($row['product_type'] == 'pack') {
-					$row_total_price = ($row['pack_price']);
-				}
-				// เพิ่มข้อมูลราคารวมของแถวนี้เข้าไปในอาร์เรย์ใหม่
-				$row['price'] = $row_total_price;
 				$data[] = $row;
 			}
 		}
@@ -476,12 +451,7 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
         $data[0] = array('status' => 0, 'error_message' => $e->getMessage());
     }
 
-    // // เพิ่มข้อมูลราคารวมทั้งหมดในอาร์เรย์ใหม่
-    // $data[]['total_price'] = $total_price;
-
     echo json_encode($data);
-
-
 } else if (@$decode['case'] == 'update_task') {
 	try {
 		$task_id = $decode['task_id'];
@@ -493,10 +463,9 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 
 		foreach ($decode['product_id'] as $index => $product_id) {
 			$order_true = $decode['order_true'][$index];
-			$product_type = $decode['product_type'][$index];
 
 			$query_product = "UPDATE `delivery_task_product` 
-			SET `order_true` = '$order_true', `product_type` = '$product_type' WHERE `product_id` = '$product_id' AND `task_id` = '$task_id' ";
+			SET `order_true` = '$order_true' WHERE `product_id` = '$product_id' AND `task_id` = '$task_id' ";
 	
 			$stmt_product = $conn->query($query_product);
 	
@@ -515,8 +484,8 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
             // เลือกข้อมูลทั้งหมดของ delivery_task_product
             $query_select = "SELECT dtp.*, pi.unit_price, pi.pack_price, 
 			IF(dtp.order_true IS NOT NULL AND dtp.order_true != 0,
-			IF(dtp.product_type = 'unit', pi.unit_price * dtp.order_true, pi.pack_price * dtp.order_true),
-			IF(dtp.product_type = 'unit', pi.unit_price * dtp.order_qty, pi.pack_price * dtp.order_qty)
+			pi.pack_price * dtp.order_true,
+			pi.pack_price * dtp.order_qty
 			) AS total_price
 			FROM `delivery_task_product` AS dtp 
 			INNER JOIN `product_info` AS pi ON dtp.product_id = pi.product_id WHERE dtp.task_id = '$task_id' AND dtp.product_active = '1'";
@@ -528,8 +497,8 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 											SELECT CEILING(SUM(
 												IF(
                                                     dtp.`order_true` IS NOT NULL AND dtp.`order_true` != 0,
-                                                    IF(dtp.`product_type` = 'unit', pi.unit_price * dtp.order_true, pi.pack_price * dtp.order_true),
-                                                    IF(dtp.`product_type` = 'unit', pi.unit_price * dtp.order_qty, pi.pack_price * dtp.order_qty)
+                                                    pi.pack_price * dtp.order_true,
+                                                    pi.pack_price * dtp.order_qty
                                                 )
 											)) 
 											FROM `delivery_task_product` AS dtp 
@@ -542,8 +511,6 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 										WHERE dt.`task_id` = '$task_id' 
 										AND dt.`task_status` = 1;
 									";
-
-
 
             $stmt_update_total_price = $conn->query($query_update_total_price);
 
@@ -565,10 +532,9 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
         
         foreach ($decode['product_id'] as $index => $product_id) {
             $order_true = $decode['order_true'][$index];
-            $product_type = $decode['product_type'][$index];
 
             $query_product = "UPDATE `delivery_task_product` 
-			SET `order_true` = '$order_true', `product_type` = '$product_type' 
+			SET `order_true` = '$order_true' 
 			WHERE `product_id` = '$product_id' AND `task_id` = '$task_id' ";
     
             $stmt_product = $conn->query($query_product);
@@ -580,16 +546,16 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
             }
         }
 
-        $query = "INSERT INTO `delivery_task_product` (`task_id`, `product_id`, `product_active`, `order_true`, `product_type`, `create_datetime`, `sale_user`) 
-		VALUES ('$task_id', '$product_id', '1', '$order_true', '$product_type' , NOW(),'$sivanat_user') ";
+        $query = "INSERT INTO `delivery_task_product` (`task_id`, `product_id`, `product_active`, `order_true`, `create_datetime`, `sale_user`) 
+		VALUES ('$task_id', '$product_id', '1', '$order_true' , NOW(),'$sivanat_user') ";
     
         $stmt = $conn->query($query);
         if ($stmt) {
             // เลือกข้อมูลทั้งหมดของ delivery_task_product
             $query_select = "SELECT dtp.*, pi.unit_price, pi.pack_price, 
 			IF(dtp.order_true IS NOT NULL AND dtp.order_true != 0,
-			IF(dtp.product_type = 'unit', pi.unit_price * dtp.order_true, pi.pack_price * dtp.order_true),
-			IF(dtp.product_type = 'unit', pi.unit_price * dtp.order_qty, pi.pack_price * dtp.order_qty)
+			pi.pack_price * dtp.order_true,
+			pi.pack_price * dtp.order_qty
 			) AS total_price FROM `delivery_task_product` AS dtp 
 			INNER JOIN `product_info` AS pi ON dtp.product_id = pi.product_id WHERE dtp.task_id = '$task_id' AND dtp.product_active = '1'";
             $stmt_select = $conn->query($query_select);
@@ -600,8 +566,8 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 				SET `price_total` = (
 					SELECT CEILING(SUM(
 						IF(dtp.`order_true` IS NOT NULL AND dtp.`order_true` != 0,
-                        IF(dtp.`product_type` = 'unit', pi.unit_price * dtp.order_true, pi.pack_price * dtp.order_true),
-                        IF(dtp.`product_type` = 'unit', pi.unit_price * dtp.order_qty, pi.pack_price * dtp.order_qty)
+                        pi.pack_price * dtp.order_true,
+                        pi.pack_price * dtp.order_qty
                         )
 						)) 
 					FROM `delivery_task_product` AS dtp 
@@ -614,7 +580,6 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 				WHERE dt.`task_id` = '$task_id' 
 				AND dt.`task_status` = 1;
 			";
-
 
 $stmt_update_total_price = $conn->query($query_update_total_price);
 
@@ -629,52 +594,5 @@ $stmt_update_total_price = $conn->query($query_update_total_price);
     }
     echo json_encode(@$data);
 }
-
-// else if (@$decode['case'] == 'more_product') {
-//     try {
-//         $task_id = $decode['task_id'];
-//         $product_id = $decode['product_id'];
-        
-//         foreach ($decode['product_id'] as $index => $product_id) {
-//             $order_qty = $decode['order_qty'][$index];
-//             $product_type = $decode['product_type'][$index];
-
-//             $query_product = "UPDATE `delivery_task_product` SET `order_qty` = '$order_qty', `product_type` = '$product_type' WHERE `product_id` = '$product_id' AND `task_id` = '$task_id' ";
-    
-//             $stmt_product = $conn->query($query_product);
-    
-//             if (!$stmt_product) {
-//                 $data[0] = array('status' => 0);
-//                 echo json_encode($data);
-//                 exit;
-//             }
-//         }
-
-//         $query = "INSERT INTO `delivery_task_product` (`task_id`, `product_id`, `product_active`, `order_qty`, `product_type`, `create_datetime`, `sale_user`) VALUES ('$task_id', '$product_id', '1', '$order_qty', '$product_type' , NOW(),'$sivanat_user') ";
-    
-//         $stmt = $conn->query($query);
-//         if ($stmt) {
-//             // เลือกข้อมูลทั้งหมดของ delivery_task_product
-//             $query_select = "SELECT dtp.*, pi.unit_price, pi.pack_price, IF(dtp.product_type = 'unit', pi.unit_price * dtp.order_qty, pi.pack_price * dtp.order_qty) AS total_price FROM `delivery_task_product` AS dtp LEFT JOIN `product_info` AS pi ON dtp.product_id = pi.product_id WHERE dtp.`task_id` = '$task_id' AND dtp.`product_active` = '1' AND dtp.`product_id` = pi.product_id";
-//             $stmt_select = $conn->query($query_select);
-//             $selected_data = $stmt_select->fetchAll(PDO::FETCH_ASSOC);
-
-//             // อัปเดตราคารวมสินค้า
-//             $query_update_total_price = "UPDATE `delivery_task` SET `total_price` = (SELECT SUM(IF(`product_type` = 'unit', pi.unit_price * dtp.order_qty, pi.pack_price * dtp.order_qty)) FROM `delivery_task_product` AS dtp LEFT JOIN `product_info` AS pi ON dtp.product_id = pi.product_id WHERE dtp.`task_id` = '$task_id' AND dtp.`product_active` = '1') WHERE `task_id` = '$task_id'";
-//             $stmt_update_total_price = $conn->query($query_update_total_price);
-
-//             $data[0] = array('status' => 1);
-//             $data[] = array('product' => $selected_data);
-//         } else {
-//             $data[0] = array('status' => 0);
-//         }
-
-//     } catch (PDOException $e) {
-//         $data[0] = array('status' => 0, 'error_message' => $e->getMessage());
-//     }
-//     echo json_encode(@$data);
-// }
-
-
 
 ?>
