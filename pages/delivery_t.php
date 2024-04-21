@@ -357,7 +357,7 @@
         });
 
         $('#taskData').on('click', '.btn-info', update_show);
-        $('#taskData').on('click', '.btn-info', addMoreProduct);
+        // $('#taskData').on('click', '.btn-info', addMoreProduct);
 
         // $('#add_Task').on('click', submitmoreproduct);
 
@@ -883,9 +883,9 @@
 //     }
 // }
 
-async function addMoreProduct() {
+async function addMoreProduct(rowData) {
     try {
-        const rowData = getTableRowData($(this), 'taskData');
+        // const rowData = getTableRowData($(this), 'taskData');
         const task_id = rowData.task_id;
 
         const [products1, products2] = await Promise.all([fetchProductTaskShow(task_id), fetchProductDetails(task_id)]);
@@ -954,6 +954,7 @@ async function addMoreProduct() {
 
     function update_show() {
         var rowData = getTableRowData($(this), 'taskData');
+        console.log(rowData);
         var task_id = rowData.task_id;
 
         fetchProductDetails(task_id)
@@ -1015,6 +1016,11 @@ async function addMoreProduct() {
                     <td colspan="2" class="text-end">รวมทั้งหมด</td>
                     <td>${totalCeil}</td>
                 `;
+
+                $('#toggleCardadd').click(function() {
+                    addMoreProduct(rowData);
+                    // console.log('Row data:', rowData); // Pass rowData to addMoreProduct function
+                });
                     productTableBody.appendChild(totalRow);
                     $('#product_detail_modal').modal('show');
                 } else {

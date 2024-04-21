@@ -593,6 +593,41 @@ $stmt_update_total_price = $conn->query($query_update_total_price);
         $data[0] = array('status' => 0, 'error_message' => $e->getMessage());
     }
     echo json_encode(@$data);
+} else if (@$decode['case'] == 'table_branch') {
+    try {
+        $date = $decode['date'];
+        $data[0] = array('status' => 0);
+        $query = "SELECT dc.cus_id, dc.cus_name, dc.cus_address, dc.cus_tel,
+            dt.task_id, dt.task_datetime , GROUP_CONCAT(dtp.product_id) AS product_ids
+            FROM `delivery_customer` AS dc
+            INNER JOIN delivery_task AS dt ON dc.cus_id = dt.cus_id 
+            INNER JOIN delivery_task_product AS dtp ON dt.task_id = dtp.task_id
+            WHERE CAST(dt.task_datetime AS DATE) = '{$date}'
+        ";
+
+        $stmt = $conn->query($query);
+
+        if ($stmt->rowCount() > 0) {
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $data[0] = array('status' => 1);
+                // แยกแต่ละรหัสสินค้าออกจากกัน
+                $productIds = explode(',', $row['product_ids']);
+                // สร้าง array ของรหัสสินค้า
+                $productArray = array();
+                foreach ($productIds as $productId) {
+                    $productArray[] = array('product_id' => $productId);
+                }
+                // เพิ่ม array ของรหัสสินค้าลงใน $row
+                $row['products'] = $productArray;
+                $data[] = $row;
+            }
+        }
+    } catch (PDOException $e) {
+        $data[0]['error_message'] = $e->getMessage();
+    }
+    // console log
+    echo json_encode(@$data);
+
 }
 
 ?>

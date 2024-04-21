@@ -116,7 +116,7 @@
                 </div>
             </div>
             <div class="col-md-8 col-sm-8">
-                <input type="date" class="form-control" value="<?= $cur_date; ?>"> 
+                <input type="date" class="form-control" id="inp_date" value="<?= $cur_date; ?>"> 
             </div>
         </div>
         <div class="row">
@@ -197,3 +197,62 @@
     <button class="btn btn-info btn-rush-task"><i class="menu-icon tf-icons bx bx-message-square-add"></i></button>
 </div> 
 <?php include("foot.php"); ?>
+<script>
+$(document).ready(function() {
+    window.onload = function() {
+        if (location.href.endsWith('delivery_task')) {
+            table_branch($("#inp_date").val());
+        }
+    };
+
+    $('#inp_date').change(function() {
+        var selectedDate = $(this).val();
+        table_branch(selectedDate);
+    });
+});
+
+function table_branch(selectedDate) {
+    fetch('../api/product?case=table_branch', {
+            method: 'POST',
+            body: JSON.stringify({
+                case: 'table_branch',
+                date: selectedDate
+            }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            const table = document.getElementById('table_branch');
+
+            table.innerHTML = '';
+            data.slice(1).forEach(deli_t => {
+
+                const newRow = document.createElement("tr");
+                console.log(deli_t);
+                newRow.innerHTML = `
+                                        <td class="text-center"><span class="badge rounded-pill bg-warning">1</span></td> 
+                                        <td class="text-center">${deli_t.cus_name}</td>
+                                        <td class="text-center water-l">3</td>
+                                        <td class="text-center water-m">2</td>
+                                        <td class="text-center water-s">-</td>
+                                        <td >ลาดพร้าว 88 ตึกข้ามเจริญ ห้อง 48 D อาคารสีฟ้า</td>
+                                        <td class="text-center"><a href="javascript:void(0)"><i class="menu-icon tf-icons bx bx-map"></i></a></td>
+                                        <td class="text-center"><a href="tel:0896179535">0896179535</a></td>
+                                        <td ><span class="badge rounded-pill bg-warning" onclick="alert('คุณสนชัย ช่างชัยใหญ่');">คุณสนชัย ช่างชัยใหญ่</span></td>
+    
+                                    `
+
+                table.appendChild(newRow);
+            })
+           
+        })
+        .catch(function(error) {
+            console.error('Error fetching data:', error);
+        });
+}
+
+</script>
