@@ -213,46 +213,64 @@ $(document).ready(function() {
 
 function table_branch(selectedDate) {
     fetch('../api/product?case=table_branch', {
-            method: 'POST',
-            body: JSON.stringify({
-                case: 'table_branch',
-                date: selectedDate
-            }),
-            headers: {
-                'Content-Type': 'application/json'
+        method: 'POST',
+        body: JSON.stringify({
+            case: 'table_branch',
+            date: selectedDate
+        }),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(function(response) {
+        return response.json();
+    })
+    .then(function(data) {
+        const table = document.getElementById('table_branch');
+
+        table.innerHTML = '';
+        data.slice(1).forEach(deli_t => {
+            const newRow = document.createElement("tr");
+
+            // สร้างคอลัมน์สำหรับแสดงรายการสินค้า (จำกัดเพียงสามคอลัมน์)
+            let productColumns = '';
+            for (let i = 0; i < 3; i++) {
+                const product = (i < deli_t.products.length) ? deli_t.products[i] : { product_id: '0', order_quantity: '0' };
+                const productId = product.product_id;
+                const quantity = product.order_quantity;
+                const id = productId.replace('-', ''); // ลบอักขระพิเศษออก
+
+                // กำหนดคอลัมน์ตามลำดับ
+                let columnClass = '';
+                if (i === 0) {
+                    columnClass = 'water-l';
+                } else if (i === 1) {
+                    columnClass = 'water-m';
+                } else {
+                    columnClass = 'water-s';
+                }
+
+                productColumns += `<td class="text-center ${columnClass}" id="${id}">${productId} (${quantity})</td>`;
             }
-        })
-        .then(function(response) {
-            return response.json();
-        })
-        .then(function(data) {
-            const table = document.getElementById('table_branch');
 
-            table.innerHTML = '';
-            data.slice(1).forEach(deli_t => {
+            newRow.innerHTML = `
+                <td class="text-center"><span class="badge rounded-pill bg-warning">1</span></td> 
+                <td class="text-center">${deli_t.cus_name}</td>
+                ${productColumns}
+                <td class="text-center">-</td>
+                <td>${deli_t.address}</td>
+                <td class="text-center"><a href="javascript:void(0)"><i class="menu-icon tf-icons bx bx-map"></i></a></td>
+                <td class="text-center"><a href="tel:${deli_t.phone}">${deli_t.phone}</a></td>
+                <td><span class="badge rounded-pill bg-warning" onclick="alert('${deli_t.cus_name}');">${deli_t.cus_name}</span></td>
+            `;
 
-                const newRow = document.createElement("tr");
-                console.log(deli_t);
-                newRow.innerHTML = `
-                                        <td class="text-center"><span class="badge rounded-pill bg-warning">1</span></td> 
-                                        <td class="text-center">${deli_t.cus_name}</td>
-                                        <td class="text-center water-l">3</td>
-                                        <td class="text-center water-m">2</td>
-                                        <td class="text-center water-s">-</td>
-                                        <td >ลาดพร้าว 88 ตึกข้ามเจริญ ห้อง 48 D อาคารสีฟ้า</td>
-                                        <td class="text-center"><a href="javascript:void(0)"><i class="menu-icon tf-icons bx bx-map"></i></a></td>
-                                        <td class="text-center"><a href="tel:0896179535">0896179535</a></td>
-                                        <td ><span class="badge rounded-pill bg-warning" onclick="alert('คุณสนชัย ช่างชัยใหญ่');">คุณสนชัย ช่างชัยใหญ่</span></td>
-    
-                                    `
-
-                table.appendChild(newRow);
-            })
-           
+            table.appendChild(newRow);
         })
-        .catch(function(error) {
-            console.error('Error fetching data:', error);
-        });
+       
+    })
+    .catch(function(error) {
+        console.error('Error fetching data:', error);
+    });
 }
 
 </script>

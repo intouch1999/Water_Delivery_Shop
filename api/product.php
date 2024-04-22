@@ -316,7 +316,7 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 	LEFT JOIN 
 		product_info AS pi ON dtp.product_id = pi.product_id
 	WHERE 
-		dt.cus_id = '{$cusID}' AND dt.task_status = 1 OR dt.task_status = 2
+		dt.cus_id = '{$cusID}'
 	GROUP BY 
 		dtp.task_id
 	ORDER BY 
@@ -597,14 +597,29 @@ $stmt_update_total_price = $conn->query($query_update_total_price);
     try {
         $date = $decode['date'];
         $data[0] = array('status' => 0);
-        $query = "SELECT dc.cus_id, dc.cus_name, dc.cus_address, dc.cus_tel,
-            dt.task_id, dt.task_datetime , GROUP_CONCAT(dtp.product_id) AS product_ids
-            FROM `delivery_customer` AS dc
-            INNER JOIN delivery_task AS dt ON dc.cus_id = dt.cus_id 
-            INNER JOIN delivery_task_product AS dtp ON dt.task_id = dtp.task_id
-            WHERE CAST(dt.task_datetime AS DATE) = '{$date}'
-        ";
-
+        $query = "SELECT 
+                        dc.cus_id, 
+                        dc.cus_name, 
+                        dc.cus_address, 
+                        dc.cus_tel,
+                        dt.task_id, 
+                        dt.task_datetime , 
+                        GROUP_CONCAT(dtp.product_id) AS product_ids,
+                        GROUP_CONCAT(CASE 
+                                            WHEN dtp.order_true IS NOT NULL AND dtp.order_true != 0 THEN dtp.order_true
+                                            ELSE dtp.order_qty
+                                        END) AS order_quantities
+                    FROM 
+                        `delivery_customer` AS dc
+                    INNER JOIN 
+                        delivery_task AS dt ON dc.cus_id = dt.cus_id 
+                    INNER JOIN 
+                        delivery_task_product AS dtp ON dt.task_id = dtp.task_id
+                    WHERE 
+                        CAST(dt.task_datetime AS DATE) = '{$date}' AND dtp.task_id = dt.task_id
+                    GROUP BY 
+                        dt.task_id";
+            
         $stmt = $conn->query($query);
 
         if ($stmt->rowCount() > 0) {
@@ -612,12 +627,13 @@ $stmt_update_total_price = $conn->query($query_update_total_price);
                 $data[0] = array('status' => 1);
                 // แยกแต่ละรหัสสินค้าออกจากกัน
                 $productIds = explode(',', $row['product_ids']);
-                // สร้าง array ของรหัสสินค้า
+                $orderQuantities = explode(',', $row['order_quantities']);
+                // สร้าง array ของรหัสสินค้าและจำนวนสินค้า
                 $productArray = array();
-                foreach ($productIds as $productId) {
-                    $productArray[] = array('product_id' => $productId);
+                foreach ($productIds as $key => $productId) {
+                    $productArray[] = array('product_id' => $productId, 'order_quantity' => $orderQuantities[$key]);
                 }
-                // เพิ่ม array ของรหัสสินค้าลงใน $row
+                // เพิ่ม array ของรหัสสินค้าและจำนวนสินค้าลงใน $row
                 $row['products'] = $productArray;
                 $data[] = $row;
             }
@@ -627,7 +643,7 @@ $stmt_update_total_price = $conn->query($query_update_total_price);
     }
     // console log
     echo json_encode(@$data);
-
 }
+
 
 ?>
