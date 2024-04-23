@@ -125,7 +125,7 @@
                 <div class="card-body" style="padding:0px!important;">
                     <div class="table_unfit">
                         <div class="table-responsive">
-                            <table class="table table-bordered" id="table_branch">
+                            <table class="table table-bordered" >
                                 <thead>
                                     <tr class="text-center">
                                         <th>#</th>
@@ -139,7 +139,7 @@
                                         <th class="w-lm-200">ดำเนินการ</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="table_branch">
                                     <tr>
                                         <td class="text-center"><span class="badge rounded-pill bg-warning">1</span></td> 
                                         <td class="text-center">คุณสนชัย ช่างชัยใหญ่</td>
@@ -201,15 +201,37 @@
 $(document).ready(function() {
     window.onload = function() {
         if (location.href.endsWith('delivery_task')) {
-            table_branch($("#inp_date").val());
+            const selectedDate = $("#inp_date").val();
+            table_branch(selectedDate);
+            changeDateHeader(selectedDate); // เพิ่มบรรทัดนี้
         }
     };
 
     $('#inp_date').change(function() {
         var selectedDate = $(this).val();
         table_branch(selectedDate);
+        changeDateHeader(selectedDate); // เพิ่มบรรทัดนี้
     });
 });
+
+function changeDateHeader(selectedDate) {
+
+    const formattedDate = formatDate(selectedDate);
+
+    const header = `รายการการจัดส่งน้ำประจำวัน ${formattedDate}`;
+
+    $('.card-header').text(header);
+}
+
+
+function formatDate(selectedDate) {
+    const dateObj = new Date(selectedDate);
+    const day = dateObj.getDate();
+    const month = dateObj.getMonth() + 1;
+    const year = dateObj.getFullYear();
+    const formattedDate = `${day}/${month < 10 ? '0' : ''}${month}/${year}`;
+    return formattedDate;
+}
 
 function table_branch(selectedDate) {
     fetch('../api/product?case=table_branch', {
@@ -226,6 +248,9 @@ function table_branch(selectedDate) {
         return response.json();
     })
     .then(function(data) {
+      if (data[0].status == '1') {
+        
+  
         const table = document.getElementById('table_branch');
 
         table.innerHTML = '';
@@ -257,16 +282,22 @@ function table_branch(selectedDate) {
                 <td class="text-center"><span class="badge rounded-pill bg-warning">1</span></td> 
                 <td class="text-center">${deli_t.cus_name}</td>
                 ${productColumns}
-                <td class="text-center">-</td>
-                <td>${deli_t.address}</td>
+                <td class="text-center">${deli_t.cus_address}</td>
                 <td class="text-center"><a href="javascript:void(0)"><i class="menu-icon tf-icons bx bx-map"></i></a></td>
-                <td class="text-center"><a href="tel:${deli_t.phone}">${deli_t.phone}</a></td>
-                <td><span class="badge rounded-pill bg-warning" onclick="alert('${deli_t.cus_name}');">${deli_t.cus_name}</span></td>
+                <td class="text-center"><a href="tel:${deli_t.cus_tel}">${deli_t.cus_tel}</a></td>
+                <td><span class="badge rounded-pill bg-warning" onclick="alert('${deli_t.sale_user}');">${deli_t.sale_user}</span></td>
             `;
 
             table.appendChild(newRow);
         })
-       
+           } else {
+            const table = document.getElementById('table_branch');
+            table.innerHTML = `
+                <td colspan="9" class="text-center fs-1">ไม่มีรายการส่งในวันที่เลือก</td>
+            `;
+            table.appendChild(table);
+           }
+
     })
     .catch(function(error) {
         console.error('Error fetching data:', error);

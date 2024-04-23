@@ -509,7 +509,7 @@
         var cus_id = urlParams.get('cus_id');
         var productsAndQuantities = [];
         document.querySelectorAll('#product_list tr').forEach(row => {
-            var productId = row.cells[0].id;
+            var productId = row.cells[0].id; 
             var quantityInput = row.cells[1].querySelector('input[type="number"]');
             var quantity = quantityInput.value;
             var productPrice = row.cells[0].querySelector('img').getAttribute('data-price');
@@ -574,7 +574,7 @@
                 } else {
                     alert_snackbar('success', "เพิ่มนัดหมายสำเร็จ");
                     setTimeout(function() {
-                        location.reload();
+                        // location.reload();
                     }, 1500);
                 }
             })
@@ -585,9 +585,9 @@
 
     function update_task() {
         var productsAndQuantities = [];
-        document.querySelectorAll('#product_list_update').forEach(row => {
-            var productId = document.getElementById("product_id_update").value;
-            var quantity = document.getElementById('product_qty_update').value;
+        document.querySelectorAll('#product_list_update .product_update').forEach(product => {
+            var productId = product.querySelector(".product_id_update").value;
+            var quantity = product.querySelector('.product_qty_update').value;
             if (quantity && parseInt(quantity) !== 0) {
                 productsAndQuantities.push({
                     id: productId,
@@ -640,9 +640,9 @@
 
     function submitmoreproduct() {
         var productsAndQuantities = [];
-        document.querySelectorAll('#product_list_add').forEach(row => {
-            var productId = document.getElementById("product_id_add").value;
-            var quantity = document.getElementById('product_qty_add').value;
+        document.querySelectorAll('#product_list_add .product_add').forEach(product => {
+            var productId = product.querySelector(".product_id_add").value;
+            var quantity = product.querySelector('.product_qty_add').value;
             if (quantity && parseInt(quantity) !== 0) {
                 productsAndQuantities.push({
                     id: productId,
@@ -936,16 +936,16 @@ async function addMoreProduct(rowData) {
 
     function createProductRow(product) {
         var newRow = document.createElement("div");
-        newRow.classList.add("row", "justify-content-end"); 
+        newRow.classList.add("row", "justify-content-end" , "product_add"); 
         newRow.innerHTML = `
-                        <input id="product_id_add" type="hidden" value="${product.product_id}">
+                        <input id="product_id_add" type="hidden" class="product_id_add" value="${product.product_id}">
                                         <div class="col-md-9">
                                         <label for="product_name_add" class="form-label"></label>
                                             <p>${product.product_name}</p>
                                         </div>
                                         <div class="col-md-2 mb-3">
                                         <label for="product_qty_adde" class="form-label">จํานวน</label>
-                                        <input type="number" class="form-control" name="quantity${product.product_id}" id="product_qty_add" value="${product.QTY || 0}">
+                                        <input type="number" class="form-control product_qty_add" name="quantity${product.product_id}" id="product_qty_add" value="${product.QTY || 0}">
                                         </div>
 
                         `;
@@ -989,16 +989,16 @@ async function addMoreProduct(rowData) {
                             productTableBody.appendChild(resule);
 
                             let update = document.createElement("div");
-                            update.classList.add("row", "justify-content-end"); // Add classes for Bootstrap styling
+                            update.classList.add("row", "justify-content-end" , "product_update"); // Add classes for Bootstrap styling
                             update.innerHTML = `
-                                        <input id="product_id_update" type="hidden" value="${product.product_id}">
+                                        <input id="product_id_update" class="product_id_update" type="hidden" value="${product.product_id}">
                                         <div class="col-md-9">
                                         <label for="product_name_update" class="form-label"></label>
                                             <p>${product.product_name}</p>
                                         </div>
                                         <div class="col-md-2 mb-3">
                                         <label for="product_qty_update" class="form-label">จํานวน</label>
-                                        <input type="number" class="form-control" name="quantity${product.product_id}" id="product_qty_update" value="${product.QTY}">
+                                        <input type="number" class="form-control product_qty_update" name="quantity${product.product_id}" id="product_qty_update" value="${product.QTY}">
                                         </div>
                         `;
 

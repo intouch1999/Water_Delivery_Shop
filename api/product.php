@@ -530,27 +530,32 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
         $task_id = $decode['task_id'];
         $product_id = $decode['product_id'];
         
-        foreach ($decode['product_id'] as $index => $product_id) {
-            $order_true = $decode['order_true'][$index];
-
-            $query_product = "UPDATE `delivery_task_product` 
-			SET `order_true` = '$order_true' 
-			WHERE `product_id` = '$product_id' AND `task_id` = '$task_id' ";
-    
-            $stmt_product = $conn->query($query_product);
-    
-            if (!$stmt_product) {
-                $data[0] = array('status' => 0);
-                echo json_encode($data);
-                exit;
-            }
-        }
-
-        $query = "INSERT INTO `delivery_task_product` (`task_id`, `product_id`, `product_active`, `order_true`, `create_datetime`, `sale_user`) 
-		VALUES ('$task_id', '$product_id', '1', '$order_true' , NOW(),'$sivanat_user') ";
-    
-        $stmt = $conn->query($query);
-        if ($stmt) {
+		foreach ($decode['product_id'] as $index => $product_id) {
+			$order_true = $decode['order_true'][$index];
+		
+			$query_product = "UPDATE `delivery_task_product` 
+				SET `order_true` = '$order_true' 
+				WHERE `product_id` = '$product_id' AND `task_id` = '$task_id' ";
+			$stmt_product = $conn->query($query_product);
+		
+			if (!$stmt_product) {
+				$data[0] = array('status' => 0);
+				echo json_encode($data);
+				exit;
+			}
+		
+			$query = "INSERT INTO `delivery_task_product` (`task_id`, `product_id`, `product_active`, `order_true`, `create_datetime`, `sale_user`) 
+			VALUES ('$task_id', '$product_id', '1', '$order_true', NOW(), '$sivanat_user')";
+		$stmt_insert_product = $conn->query($query);
+	
+		if (!$stmt_insert_product) {
+			$data[0] = array('status' => 0);
+			echo json_encode($data);
+			exit;
+		}
+	}
+		
+        if ($stmt_insert_product) {
             // เลือกข้อมูลทั้งหมดของ delivery_task_product
             $query_select = "SELECT dtp.*, pi.unit_price, pi.pack_price, 
 			IF(dtp.order_true IS NOT NULL AND dtp.order_true != 0,
@@ -608,7 +613,9 @@ $stmt_update_total_price = $conn->query($query_update_total_price);
                         GROUP_CONCAT(CASE 
                                             WHEN dtp.order_true IS NOT NULL AND dtp.order_true != 0 THEN dtp.order_true
                                             ELSE dtp.order_qty
-                                        END) AS order_quantities
+                                        END) AS order_quantities,
+						dtp.sale_user,
+						dc.cus_tel
                     FROM 
                         `delivery_customer` AS dc
                     INNER JOIN 
@@ -625,15 +632,19 @@ $stmt_update_total_price = $conn->query($query_update_total_price);
         if ($stmt->rowCount() > 0) {
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $data[0] = array('status' => 1);
-                // แยกแต่ละรหัสสินค้าออกจากกัน
                 $productIds = explode(',', $row['product_ids']);
                 $orderQuantities = explode(',', $row['order_quantities']);
-                // สร้าง array ของรหัสสินค้าและจำนวนสินค้า
+
                 $productArray = array();
                 foreach ($productIds as $key => $productId) {
                     $productArray[] = array('product_id' => $productId, 'order_quantity' => $orderQuantities[$key]);
                 }
-                // เพิ่ม array ของรหัสสินค้าและจำนวนสินค้าลงใน $row
+
+                // เรียงลำดับสินค้าตามรหัสสินค้า
+                usort($productArray, function($a, $b) {
+                    return strcmp($a['product_id'], $b['product_id']);
+                });
+
                 $row['products'] = $productArray;
                 $data[] = $row;
             }
@@ -641,7 +652,6 @@ $stmt_update_total_price = $conn->query($query_update_total_price);
     } catch (PDOException $e) {
         $data[0]['error_message'] = $e->getMessage();
     }
-    // console log
     echo json_encode(@$data);
 }
 
