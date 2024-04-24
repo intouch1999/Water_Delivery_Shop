@@ -203,16 +203,76 @@ $(document).ready(function() {
         if (location.href.endsWith('delivery_task')) {
             const selectedDate = $("#inp_date").val();
             table_branch(selectedDate);
-            changeDateHeader(selectedDate); // เพิ่มบรรทัดนี้
+            changeDateHeader(selectedDate);
+            loadDataAndProgressBar(selectedDate);
+            
         }
     };
 
     $('#inp_date').change(function() {
-        var selectedDate = $(this).val();
-        table_branch(selectedDate);
-        changeDateHeader(selectedDate); // เพิ่มบรรทัดนี้
-    });
+    var selectedDate = $(this).val();
+    loadDataAndProgressBar(selectedDate); // เมื่อเปลี่ยนวันที่
+    table_branch(selectedDate); // โหลดข้อมูลตาราง branch ใหม่
+    changeDateHeader(selectedDate); // เปลี่ยนหัวข้อวันที่
 });
+
+});
+
+
+
+// ฟังก์ชันโหลดข้อมูลและอัปเดตหลอดโปรเกรส
+function loadDataAndProgressBar(selectedDate) {
+    fetch('../api/product?case=table_branch', {
+        method: 'POST',
+        body: JSON.stringify({
+            case: 'table_branch',
+            date: selectedDate
+        }),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(function(response) {
+        return response.json();
+    })
+    .then(function(data) {
+        if (data[0].status == '1') {
+
+    updateProgressBar(data.slice(1)); // เรียกใช้งาน updateProgressBar กับข้อมูลใหม่
+        } else {
+
+
+        }
+
+    })
+    .catch(function(error) {
+        // หากเกิดข้อผิดพลาดในการโหลดข้อมูล
+        console.error('Error fetching data:', error);
+    });
+}
+
+// ฟังก์ชันอัปเดตหลอดโปรเกรส
+function updateProgressBar(data) {
+    const sentCount = data.filter(item => item.task_status === 2).length;
+    const sendingCount = data.filter(item => item.task_status === 1).length;
+    const notSentCount = data.filter(item => item.task_status === 0).length;
+    const totalCount = data.length;
+
+    const sentPercentage = (sentCount / totalCount) * 100;
+    const sendingPercentage = (sendingCount / totalCount) * 100;
+    const notSentPercentage = (notSentCount / totalCount) * 100;
+
+
+    const progressBar = document.querySelector('.progress');
+
+    const sentBar = progressBar.querySelector('.bg-success');
+    const sendingBar = progressBar.querySelector('.bg-warning');
+    const notSentBar = progressBar.querySelector('.bg-secondary');
+
+    sentBar.style.width = `${sentPercentage}%`;
+    sendingBar.style.width = `${sendingPercentage}%`;
+    notSentBar.style.width = `${notSentPercentage}%`;
+}
 
 function changeDateHeader(selectedDate) {
 
@@ -233,6 +293,19 @@ function formatDate(selectedDate) {
     return formattedDate;
 }
 
+function getStatusClass(status) {
+    switch (status) {
+        case 0:
+            return 'bg-secondary';
+        case 1:
+            return 'bg-warning';
+        case 2:
+            return 'bg-success';
+        default:
+            return 'bg-light'; // หรือคลาสอื่นๆ ที่ต้องการกำหนดเอง
+    }
+}
+
 function table_branch(selectedDate) {
     fetch('../api/product?case=table_branch', {
         method: 'POST',
@@ -248,60 +321,70 @@ function table_branch(selectedDate) {
         return response.json();
     })
     .then(function(data) {
-      if (data[0].status == '1') {
-        
-  
-        const table = document.getElementById('table_branch');
+        if (data[0].status == '1') {
+            const table = document.getElementById('table_branch');
+            table.innerHTML = '';
+            let taskCounter = 0; // เก็บค่านับจำนวน task
+            let prevCusId = null; // เก็บค่า cus_id ก่อนหน้า
 
-        table.innerHTML = '';
-        data.slice(1).forEach(deli_t => {
-            const newRow = document.createElement("tr");
-
-            // สร้างคอลัมน์สำหรับแสดงรายการสินค้า (จำกัดเพียงสามคอลัมน์)
-            let productColumns = '';
-            for (let i = 0; i < 3; i++) {
-                const product = (i < deli_t.products.length) ? deli_t.products[i] : { product_id: '0', order_quantity: '0' };
-                const productId = product.product_id;
-                const quantity = product.order_quantity;
-                const id = productId.replace('-', ''); // ลบอักขระพิเศษออก
-
-                // กำหนดคอลัมน์ตามลำดับ
-                let columnClass = '';
-                if (i === 0) {
-                    columnClass = 'water-l';
-                } else if (i === 1) {
-                    columnClass = 'water-m';
+            data.slice(1).forEach(deli_t => {
+                // ตรวจสอบว่า cus_id เปลี่ยนหรือไม่
+                if (deli_t.cus_id !== prevCusId) {
+                    taskCounter = 1; // ถ้าเปลี่ยน cus_id ให้เริ่มนับใหม่
                 } else {
-                    columnClass = 'water-s';
+                    taskCounter++; // ถ้าไม่เปลี่ยน cus_id เพิ่มค่านับตามปกติ
                 }
 
-                productColumns += `<td class="text-center ${columnClass}" id="${id}">${productId} (${quantity})</td>`;
-            }
+                prevCusId = deli_t.cus_id;
+                console.log(prevCusId);
 
-            newRow.innerHTML = `
-                <td class="text-center"><span class="badge rounded-pill bg-warning">1</span></td> 
-                <td class="text-center">${deli_t.cus_name}</td>
-                ${productColumns}
-                <td class="text-center">${deli_t.cus_address}</td>
-                <td class="text-center"><a href="javascript:void(0)"><i class="menu-icon tf-icons bx bx-map"></i></a></td>
-                <td class="text-center"><a href="tel:${deli_t.cus_tel}">${deli_t.cus_tel}</a></td>
-                <td><span class="badge rounded-pill bg-warning" onclick="alert('${deli_t.sale_user}');">${deli_t.sale_user}</span></td>
-            `;
+                const newRow = document.createElement("tr");
 
-            table.appendChild(newRow);
-        })
-           } else {
+                // สร้างคอลัมน์สำหรับแสดงรายการสินค้า (จำกัดเพียงสามคอลัมน์)
+                let productColumns = '';
+                for (let i = 0; i < 3; i++) {
+                    const product = (i < deli_t.products.length) ? deli_t.products[i] : { product_id: '0', order_quantity: '0' };
+                    const productId = product.product_id;
+                    const quantity = product.order_quantity;
+                    const id = productId.replace('-', ''); // ลบอักขระพิเศษออก
+
+                    // กำหนดคอลัมน์ตามลำดับ
+                    let columnClass = '';
+                    if (i === 0) {
+                        columnClass = 'water-l';
+                    } else if (i === 1) {
+                        columnClass = 'water-m';
+                    } else {
+                        columnClass = 'water-s';
+                    }
+
+                    productColumns += `<td class="text-center ${columnClass}" id="${id}">${productId} (${quantity})</td>`;
+                }
+
+                newRow.innerHTML = `
+                    <td class="text-center"><span class="badge rounded-pill ${getStatusClass(deli_t.task_status)}">${taskCounter}</span></td> 
+                    <td class="text-center">${deli_t.cus_name}</td>
+                    ${productColumns}
+                    <td class="text-center">${deli_t.cus_address}</td>
+                    <td class="text-center"><a href="javascript:void(0)"><i class="menu-icon tf-icons bx bx-map"></i></a></td>
+                    <td class="text-center"><a href="tel:${deli_t.cus_tel}">${deli_t.cus_tel}</a></td>
+                    <td><span class="badge rounded-pill bg-warning" onclick="alert('${deli_t.sale_user}');">${deli_t.sale_user}</span></td>
+                `;
+
+                table.appendChild(newRow);
+            })
+        } else {
             const table = document.getElementById('table_branch');
             table.innerHTML = `
                 <td colspan="9" class="text-center fs-1">ไม่มีรายการส่งในวันที่เลือก</td>
             `;
             table.appendChild(table);
-           }
-
+        }
     })
     .catch(function(error) {
         console.error('Error fetching data:', error);
     });
 }
+
 
 </script>

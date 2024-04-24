@@ -574,7 +574,7 @@
                 } else {
                     alert_snackbar('success', "เพิ่มนัดหมายสำเร็จ");
                     setTimeout(function() {
-                        // location.reload();
+                        location.reload();
                     }, 1500);
                 }
             })
@@ -588,12 +588,13 @@
         document.querySelectorAll('#product_list_update .product_update').forEach(product => {
             var productId = product.querySelector(".product_id_update").value;
             var quantity = product.querySelector('.product_qty_update').value;
-            if (quantity && parseInt(quantity) !== 0) {
-                productsAndQuantities.push({
-                    id: productId,
-                    quantity: quantity,
-                });
-            }
+            if (quantity !== "" && parseInt(quantity) >= 0) {
+    productsAndQuantities.push({
+        id: productId,
+        quantity: quantity,
+    });
+}
+
         });
 
         var findProduct = productsAndQuantities.map(item => item.id);

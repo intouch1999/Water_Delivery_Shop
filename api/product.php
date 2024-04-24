@@ -435,8 +435,9 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 					JOIN 
 						product_info AS pi ON dtp.product_id = pi.product_id
 					WHERE 
-						dt.task_id = '{$task_id}'
-					;
+						dt.task_id = '{$task_id}' AND (dtp.product_active = '1' OR dtp.product_active = '2')
+					ORDER BY
+						dtp.product_id
 							";
 	
         $stmt = $conn->query($query);
@@ -463,18 +464,27 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 
 		foreach ($decode['product_id'] as $index => $product_id) {
 			$order_true = $decode['order_true'][$index];
-
-			$query_product = "UPDATE `delivery_task_product` 
-			SET `order_true` = '$order_true' WHERE `product_id` = '$product_id' AND `task_id` = '$task_id' ";
-	
+			if ($order_true == 0) {
+				// หาก order_true เป็น 0 กำหนดให้ order_qty เป็น 0 เช่นกัน
+				$query_product = "UPDATE `delivery_task_product` 
+					SET `order_true` = 0 , `order_qty` = 0 , product_active = 0
+					WHERE `product_id` = '$product_id' AND `task_id` = '$task_id'";
+			} else {
+				// หาก order_true ไม่เป็น 0 กำหนดค่าตามปกติ
+				$query_product = "UPDATE `delivery_task_product`
+					SET `order_true` = '$order_true' 
+					WHERE `product_id` = '$product_id' AND `task_id` = '$task_id' AND `product_active` = '1' ";
+			}
+		
 			$stmt_product = $conn->query($query_product);
-	
+		
 			if (!$stmt_product) {
 				$data[0] = array('status' => 0);
 				echo json_encode($data);
 				exit;
 			}
 		}
+		
 		$query = "UPDATE delivery_task 
 		SET pay_status = '{$pay_status}' , pay_type = '{$pay_type}' , pay_total = '{$pay_total}' , task_datetime = '{$task_datetime}' 
 		WHERE task_id = '{$task_id}' AND task_status = '1' ";
@@ -535,7 +545,7 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 		
 			$query_product = "UPDATE `delivery_task_product` 
 				SET `order_true` = '$order_true' 
-				WHERE `product_id` = '$product_id' AND `task_id` = '$task_id' ";
+				WHERE `product_id` = '$product_id' AND `task_id` = '$task_id' AND `product_active` = '1' ";
 			$stmt_product = $conn->query($query_product);
 		
 			if (!$stmt_product) {
@@ -615,7 +625,8 @@ $stmt_update_total_price = $conn->query($query_update_total_price);
                                             ELSE dtp.order_qty
                                         END) AS order_quantities,
 						dtp.sale_user,
-						dc.cus_tel
+						dc.cus_tel,
+						dt.task_status
                     FROM 
                         `delivery_customer` AS dc
                     INNER JOIN 
@@ -623,9 +634,13 @@ $stmt_update_total_price = $conn->query($query_update_total_price);
                     INNER JOIN 
                         delivery_task_product AS dtp ON dt.task_id = dtp.task_id
                     WHERE 
-                        CAST(dt.task_datetime AS DATE) = '{$date}' AND dtp.task_id = dt.task_id
+                        CAST(dt.task_datetime AS DATE) = '{$date}' AND dtp.task_id = dt.task_id AND (dtp.product_active = '1' OR dtp.product_active = '2')
                     GROUP BY 
-                        dt.task_id";
+                        dt.task_id
+					ORDER BY
+					 dt.cus_id ASC
+						
+						";
             
         $stmt = $conn->query($query);
 
