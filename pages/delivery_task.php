@@ -362,7 +362,7 @@ function table_branch(selectedDate) {
                 }
 
                 newRow.innerHTML = `
-                    <td class="text-center"><span class="badge rounded-pill ${getStatusClass(deli_t.task_status)}">${taskCounter}</span></td> 
+                    <td class="text-center"><span class="badge rounded-pill ${getStatusClass(deli_t.task_status)}">${deli_t.task_id}</span></td> 
                     <td class="text-center">${deli_t.cus_name}</td>
                     ${productColumns}
                     <td class="text-center">${deli_t.cus_address}</td>

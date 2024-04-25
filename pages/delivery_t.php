@@ -785,13 +785,54 @@
                                         data: 'cus_id'
                                     },
                                     {
-                                        data: 'task_datetime'
+                                        data: 'task_datetime',
+                                        render: function(data, type, row) {
+                                            // Format the date and time
+                                            var date = new Date(data);
+                                            var formattedDateTime = date.toLocaleTimeString('en-GB', {
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            }) + ' ' + date.toLocaleDateString('en-GB', {
+                                                day: '2-digit',
+                                                month: '2-digit',
+                                                year: 'numeric'
+                                            });
+                                            return formattedDateTime;
+                                        }
                                     },
                                     // {
                                     //     data: 'order_qty'
                                     // },
                                     {
-                                        data: 'last_datetime'
+                                        data: 'last_datetime',
+                                        render: function(data) {
+                                        // Check if the date is valid
+                                        if (data !== '0000-00-00 00:00:00') {
+                                            // Split date and time
+                                            var parts = data.split(' ');
+                                            var datePart = parts[0];
+                                            var timePart = parts[1];
+
+                                            // Split date into year, month, and day
+                                            var dateParts = datePart.split('-');
+                                            var year = dateParts[0];
+                                            var month = dateParts[1];
+                                            var day = dateParts[2];
+
+                                            // Split time into hours and minutes
+                                            var timeParts = timePart.split(':');
+                                            var hours = timeParts[0];
+                                            var minutes = timeParts[1];
+
+                                            // Format the date and time
+                                            var formattedDateTime = hours + ':' + minutes + ' ' + day + '/' + month + '/' + year;
+                                            
+                                            return formattedDateTime;
+                                        } else {
+                                            // Return '0000-00-00 00:00:00' for invalid date
+                                            return 'ยังไม่ได้จัดส่ง';
+                                        }
+                                    }
                                     },
                                     {
                                         data: null,
