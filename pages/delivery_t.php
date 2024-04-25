@@ -789,10 +789,7 @@
                                         render: function(data, type, row) {
                                             // Format the date and time
                                             var date = new Date(data);
-                                            var formattedDateTime = date.toLocaleTimeString('en-GB', {
-                                                hour: '2-digit',
-                                                minute: '2-digit'
-                                            }) + ' ' + date.toLocaleDateString('en-GB', {
+                                            var formattedDateTime = date.toLocaleDateString('en-GB', {
                                                 day: '2-digit',
                                                 month: '2-digit',
                                                 year: 'numeric'
