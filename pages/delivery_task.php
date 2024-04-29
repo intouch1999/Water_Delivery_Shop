@@ -108,7 +108,7 @@
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="row mb-2">
             <div class="col-md-4 col-sm-4 text-center">
-                <span class="text-success">ส่งแล้ว</span> / <span class="text-warning">กำลังส่ง</span> / <span class="text-secondary">ยังไม่ส่ง</span>
+                <span class="text-success">ส่งแล้ว</span> / <span class="text-warning">กำลังส่ง</span> / <span class="text-secondary">ยกเลิก</span>
                 <div class="progress mb-3">
                     <div class="progress-bar bg-success shadow-none" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
                     <div class="progress-bar bg-warning shadow-none" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
@@ -241,7 +241,7 @@ function loadDataAndProgressBar(selectedDate) {
     updateProgressBar(data.slice(1)); // เรียกใช้งาน updateProgressBar กับข้อมูลใหม่
         } else {
 
-
+            updateProgressBar(data);
         }
 
     })
@@ -253,25 +253,35 @@ function loadDataAndProgressBar(selectedDate) {
 
 // ฟังก์ชันอัปเดตหลอดโปรเกรส
 function updateProgressBar(data) {
-    const sentCount = data.filter(item => item.task_status === 2).length;
-    const sendingCount = data.filter(item => item.task_status === 1).length;
-    const notSentCount = data.filter(item => item.task_status === 0).length;
-    const totalCount = data.length;
+    if (data.length === 0) {
+        // หาก data ไม่มีข้อมูล
+        const progressBar = document.querySelector('.progress');
+        const bar = progressBar.querySelector('.progress-bar');
 
-    const sentPercentage = (sentCount / totalCount) * 100;
-    const sendingPercentage = (sendingCount / totalCount) * 100;
-    const notSentPercentage = (notSentCount / totalCount) * 100;
+        // กำหนดให้สีทั้งหมดเป็นสีเดียว 100%
+        bar.style.width = '100%';
+        bar.classList.add('bg-secondary'); // สีเท่ากับที่คุณต้องการสำหรับไม่ได้ส่ง
+    } else {
+        // หาก data มีข้อมูล
+        const sentCount = data.filter(item => item.task_status === 2).length;
+        const sendingCount = data.filter(item => item.task_status === 1).length;
+        const notSentCount = data.filter(item => item.task_status === 0).length;
+        const totalCount = data.length;
 
+        const sentPercentage = (sentCount / totalCount) * 100;
+        const sendingPercentage = (sendingCount / totalCount) * 100;
+        const notSentPercentage = (notSentCount / totalCount) * 100;
 
-    const progressBar = document.querySelector('.progress');
+        const progressBar = document.querySelector('.progress');
 
-    const sentBar = progressBar.querySelector('.bg-success');
-    const sendingBar = progressBar.querySelector('.bg-warning');
-    const notSentBar = progressBar.querySelector('.bg-secondary');
+        const sentBar = progressBar.querySelector('.bg-success');
+        const sendingBar = progressBar.querySelector('.bg-warning');
+        const notSentBar = progressBar.querySelector('.bg-secondary');
 
-    sentBar.style.width = `${sentPercentage}%`;
-    sendingBar.style.width = `${sendingPercentage}%`;
-    notSentBar.style.width = `${notSentPercentage}%`;
+        sentBar.style.width = `${sentPercentage}%`;
+        sendingBar.style.width = `${sendingPercentage}%`;
+        notSentBar.style.width = `${notSentPercentage}%`;
+    }
 }
 
 function changeDateHeader(selectedDate) {
@@ -337,7 +347,7 @@ function table_branch(selectedDate) {
 
                 prevCusId = deli_t.cus_id;
                 console.log(prevCusId);
-
+                console.log(deli_t.products[0].product_id);
                 const newRow = document.createElement("tr");
 
                 // สร้างคอลัมน์สำหรับแสดงรายการสินค้า (จำกัดเพียงสามคอลัมน์)
@@ -362,7 +372,7 @@ function table_branch(selectedDate) {
                 }
 
                 newRow.innerHTML = `
-                    <td class="text-center"><span class="badge rounded-pill ${getStatusClass(deli_t.task_status)}">${taskCounter}</span></td> 
+                    <td class="text-center"><span class="badge rounded-pill ${getStatusClass(deli_t.task_status)}">${deli_t.task_id}</span></td> 
                     <td class="text-center">${deli_t.cus_name}</td>
                     ${productColumns}
                     <td class="text-center">${deli_t.cus_address}</td>
