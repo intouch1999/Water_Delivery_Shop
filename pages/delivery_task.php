@@ -349,32 +349,46 @@ function table_branch(selectedDate) {
                 console.log(prevCusId);
                 console.log(deli_t.products[0].product_id);
                 const newRow = document.createElement("tr");
+                let productData = ''; // เริ่มต้นตัวแปรเป็นสตริงเปล่า
 
-                // สร้างคอลัมน์สำหรับแสดงรายการสินค้า (จำกัดเพียงสามคอลัมน์)
-                let productColumns = '';
-                for (let i = 0; i < 3; i++) {
-                    const product = (i < deli_t.products.length) ? deli_t.products[i] : { product_id: '0', order_quantity: '0' };
-                    const productId = product.product_id;
-                    const quantity = product.order_quantity;
-                    const id = productId.replace('-', ''); // ลบอักขระพิเศษออก
+// ใช้ forEach เพื่อวนลูปผ่านสินค้าใน deli_t.products
+deli_t.products.forEach((product, index) => {
+    const productId = product.product_id;
+    const quantity = product.order_quantity;
+    const id = productId.replace('-', ''); // ลบอักขระพิเศษออก
 
-                    // กำหนดคอลัมน์ตามลำดับ
-                    let columnClass = '';
-                    if (i === 0) {
-                        columnClass = 'water-l';
-                    } else if (i === 1) {
-                        columnClass = 'water-m';
-                    } else {
-                        columnClass = 'water-s';
-                    }
+    // เพิ่มข้อมูลสินค้าลงในตัวแปร productData
+    productData += `${productId} (${quantity})`; // ใช้ไฟล์ว่างเป็นตัวคั่น สำหรับแต่ละสินค้า
+});
 
-                    productColumns += `<td class="text-center ${columnClass}" id="${id}">${productId} (${quantity})</td>`;
-                }
+// สุดท้ายสร้างคอลัมน์เดียวสำหรับสินค้าทั้งหมดในตัวแปร productData
+const productColumn = `<td>${productData}</td>`;
+
+                // // สร้างคอลัมน์สำหรับแสดงรายการสินค้า (จำกัดเพียงสามคอลัมน์)
+                // let productColumns = '';
+                // for (let i = 0; i < 3; i++) {
+                //     const product = (i < deli_t.products.length) ? deli_t.products[i] : { product_id: '0', order_quantity: '0' };
+                //     const productId = product.product_id;
+                //     const quantity = product.order_quantity;
+                //     const id = productId.replace('-', ''); // ลบอักขระพิเศษออก
+
+                //     // กำหนดคอลัมน์ตามลำดับ
+                //     let columnClass = '';
+                //     if (i === 0) {
+                //         columnClass = 'water-l';
+                //     } else if (i === 1) {
+                //         columnClass = 'water-m';
+                //     } else {
+                //         columnClass = 'water-s';
+                //     }
+
+                //     productColumns = `<td class="text-center ${columnClass}" id="${id}">${productId} (${quantity})</td>`;
+                // }
 
                 newRow.innerHTML = `
                     <td class="text-center"><span class="badge rounded-pill ${getStatusClass(deli_t.task_status)}">${deli_t.task_id}</span></td> 
                     <td class="text-center">${deli_t.cus_name}</td>
-                    ${productColumns}
+                    ${productColumn}
                     <td class="text-center">${deli_t.cus_address}</td>
                     <td class="text-center"><a href="javascript:void(0)"><i class="menu-icon tf-icons bx bx-map"></i></a></td>
                     <td class="text-center"><a href="tel:${deli_t.cus_tel}">${deli_t.cus_tel}</a></td>
