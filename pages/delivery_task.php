@@ -130,9 +130,9 @@
                                     <tr class="text-center">
                                         <th>#</th>
                                         <th class="w-lm-200">ชื่อลูกค้า</th>
-                                        <th class="">ใหญ่ 55</th>
-                                        <th class="">กลาง 24</th>
-                                        <th class="">เล็ก 73</th>
+                                        <th class="w-lm-300">รายการสินค้า</th>
+                                        <!-- <th class="">กลาง 24</th>
+                                        <th class="">เล็ก 73</th> -->
                                         <th class="w-lm-300">สถานที่</th>
                                         <th>Map</th>
                                         <th>โทร.</th>
@@ -353,12 +353,15 @@ function table_branch(selectedDate) {
 
 // ใช้ forEach เพื่อวนลูปผ่านสินค้าใน deli_t.products
 deli_t.products.forEach((product, index) => {
-    const productId = product.product_id;
+    // const productId = product.product_id;
     const quantity = product.order_quantity;
-    const id = productId.replace('-', ''); // ลบอักขระพิเศษออก
+    const product_name = product.product_name;
+    // const id = productId.replace('-', ''); // ลบอักขระพิเศษออก
 
     // เพิ่มข้อมูลสินค้าลงในตัวแปร productData
-    productData += `${productId} (${quantity})`; // ใช้ไฟล์ว่างเป็นตัวคั่น สำหรับแต่ละสินค้า
+    productData += `${product_name} จำนวน : ${quantity}<br>`;
+
+
 });
 
 // สุดท้ายสร้างคอลัมน์เดียวสำหรับสินค้าทั้งหมดในตัวแปร productData

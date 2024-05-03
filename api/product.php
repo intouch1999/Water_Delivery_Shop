@@ -626,13 +626,16 @@ $stmt_update_total_price = $conn->query($query_update_total_price);
                                         END) AS order_quantities,
 						dtp.sale_user,
 						dc.cus_tel,
-						dt.task_status
+						dt.task_status,
+						Group_concat(pi.product_name) AS product_names
                     FROM 
                         `delivery_customer` AS dc
                     INNER JOIN 
                         delivery_task AS dt ON dc.cus_id = dt.cus_id 
                     INNER JOIN 
                         delivery_task_product AS dtp ON dt.task_id = dtp.task_id
+					INNER JOIN
+						product_info AS pi ON dtp.product_id = pi.product_id
                     WHERE 
                         CAST(dt.task_datetime AS DATE) = '{$date}' AND dtp.task_id = dt.task_id AND (dtp.product_active = '1' OR dtp.product_active = '2')
                     GROUP BY 
@@ -649,10 +652,10 @@ $stmt_update_total_price = $conn->query($query_update_total_price);
                 $data[0] = array('status' => 1);
                 $productIds = explode(',', $row['product_ids']);
                 $orderQuantities = explode(',', $row['order_quantities']);
-
+				$product_name = explode(',', $row['product_names']);
                 $productArray = array();
                 foreach ($productIds as $key => $productId) {
-                    $productArray[] = array('product_id' => $productId, 'order_quantity' => $orderQuantities[$key]);
+                    $productArray[] = array('product_name' => $product_name[$key],'product_id' => $productId, 'order_quantity' => $orderQuantities[$key]);
                 }
 
                 // เรียงลำดับสินค้าตามรหัสสินค้า
