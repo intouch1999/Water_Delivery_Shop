@@ -4,8 +4,6 @@ include('../server/connection.php');
 date_default_timezone_set('Asia/Bangkok');
 $decode = json_decode(file_get_contents('php://input'), true);
 
-$sivanat_user = $_SESSION['svn_fname'];
-
 if(@$decode['case']=='chk_login'){
 	try {
 			$data[0] = array("status" => '0','error_message' => 'ไม่พบข้อมูลผู้ใช้งาน โปรดตรวจสอบอีกครั้ง');
@@ -246,4 +244,6 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 
 	echo json_encode(@$data);
 }
+
+$sivanat_user = $_SESSION['svn_fname'];
 ?>

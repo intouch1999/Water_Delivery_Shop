@@ -1,4 +1,6 @@
+
 <?php include("head.php"); ?>
+
 <style>
 #card_content{
   min-height:70vh;
@@ -128,7 +130,8 @@
                             <table class="table table-bordered" >
                                 <thead>
                                     <tr class="text-center">
-                                        <th>#</th>
+                                        <th width="5%">#</th>
+                                        <th>ลําดับ</th>
                                         <th class="w-lm-200">ชื่อลูกค้า</th>
                                         <th class="w-lm-300">รายการสินค้า</th>
                                         <!-- <th class="">กลาง 24</th>
@@ -350,6 +353,7 @@ function table_branch(selectedDate) {
                 console.log(deli_t.products[0].product_id);
                 const newRow = document.createElement("tr");
                 let productData = ''; // เริ่มต้นตัวแปรเป็นสตริงเปล่า
+                let quantityData =  '';
 
 // ใช้ forEach เพื่อวนลูปผ่านสินค้าใน deli_t.products
 deli_t.products.forEach((product, index) => {
@@ -359,13 +363,29 @@ deli_t.products.forEach((product, index) => {
     // const id = productId.replace('-', ''); // ลบอักขระพิเศษออก
 
     // เพิ่มข้อมูลสินค้าลงในตัวแปร productData
-    productData += `${product_name} จำนวน : ${quantity}<br>`;
-
+    productData += `${product_name}`;
+    quantityData += `${quantity}`;
 
 });
 
-// สุดท้ายสร้างคอลัมน์เดียวสำหรับสินค้าทั้งหมดในตัวแปร productData
-const productColumn = `<td>${productData}</td>`;
+const productColumn = `
+                        <td>
+                            <table>
+                                <tbody>
+                                    <tr>
+
+                                    </tr>
+                                    ${deli_t.products.map(product => `
+                                        <tr>
+                                            <td class="text-center">${product.product_name}</td>
+                                            <td class="text-center">จำนวน : ${product.order_quantity}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                            </td>
+                            `;
+
 
                 // // สร้างคอลัมน์สำหรับแสดงรายการสินค้า (จำกัดเพียงสามคอลัมน์)
                 // let productColumns = '';
@@ -389,11 +409,12 @@ const productColumn = `<td>${productData}</td>`;
                 // }
 
                 newRow.innerHTML = `
+                    <td><button type="button" class="btn btn-primary btn-sm btn-success" onclick="submitCheck('${deli_t.task_id}')">ยืนยัน</button></td>
                     <td class="text-center"><span class="badge rounded-pill ${getStatusClass(deli_t.task_status)}">${deli_t.task_id}</span></td> 
                     <td class="text-center">${deli_t.cus_name}</td>
                     ${productColumn}
                     <td class="text-center">${deli_t.cus_address}</td>
-                    <td class="text-center"><a href="javascript:void(0)"><i class="menu-icon tf-icons bx bx-map"></i></a></td>
+                    <td class="text-center"><a href="https://maps.google.com/?q=${deli_t.lat},${deli_t.lon}" target="_blank"><i class="menu-icon tf-icons bx bx-map"></i></a></td>
                     <td class="text-center"><a href="tel:${deli_t.cus_tel}">${deli_t.cus_tel}</a></td>
                     <td><span class="badge rounded-pill bg-warning" onclick="alert('${deli_t.sale_user}');">${deli_t.sale_user}</span></td>
                 `;
@@ -410,6 +431,58 @@ const productColumn = `<td>${productData}</td>`;
     })
     .catch(function(error) {
         console.error('Error fetching data:', error);
+    });
+}
+
+submitCheck = (task_id) => {
+    $("#modal_confirm_text").html("ยืนยันการจัดส่ง");
+            $("#modal_confirm_submit").on("click", () => {
+                submitTask(task_id);
+            });
+
+            $("#modal_confirm").modal("show");
+    }
+
+getdatenow = () => {
+    var timestamp = Date.now();
+        var localDateTime = new Date(timestamp);
+        localDateTime.setHours(localDateTime.getHours() + 7);
+        var datetimeNow = localDateTime.toISOString(); // Format: YYYY-MM-DDTHH:MM:SSZ
+        return datetimeNow
+}
+
+submitTask = (task_id) => {
+    TimeNOW = getdatenow()
+    fetch('../api/product?case=task_success', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            case: 'task_success',
+            taskID: task_id,
+            last_datetime: TimeNOW
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to submit task. Server responded with ' + response.status);
+        }
+        return response.json();
+    })
+    .then(json => {
+        $("#modal_confirm").modal("hide");
+                if (json[0].status == '0') {
+                    alert_snackbar('error', json[0].error_message);
+                } else {
+                    alert_snackbar('success', "จัดส่งสำเร็จ");
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1500);
+                }
+    })
+    .catch(error => {
+        console.error('Error submitting task:', error);
     });
 }
 

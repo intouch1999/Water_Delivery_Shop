@@ -33,7 +33,12 @@
   <script async defer src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v13.0" nonce="YourNonceValue"></script>
   <script>
     $(document).ready(function() {
-      $('#calendar').evoCalendar({
+      
+    })
+
+calArray = (cal) => {
+  console.log(cal)
+  $('#calendar').evoCalendar({
   'theme': 'Midnight Blue',
   'language': 'en',
   'todayHighlight': true,
@@ -57,5 +62,43 @@
     },
   ]
 });
+}
+
+calArray();
+
+
+calEvent = (cal) => {
+  fetch('../api/product?case=calendarEvents', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      case: 'calendarEvents'
     })
+  })
+  .then(res => {
+    if (!res.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return res.json();
+  })
+  .then(data => {
+    // Map data to set id equal to cus_id
+    const calendarEvents = data.map(event => ({
+      id: event.cus_id, // Set id equal to cus_id
+      name: event.name, // Event name (required)
+      date: "may/7/2024 16:00", // Event date (required)
+      type: event.type, // Event type (required)
+    }));
+
+    return calendarEvents;
+  })
+  .catch(err => {
+    console.error('Error:', err);
+  });
+}
+
+calEvent();
+
   </script>

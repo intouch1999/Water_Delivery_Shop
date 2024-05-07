@@ -627,7 +627,9 @@ $stmt_update_total_price = $conn->query($query_update_total_price);
 						dtp.sale_user,
 						dc.cus_tel,
 						dt.task_status,
-						Group_concat(pi.product_name) AS product_names
+						Group_concat(pi.product_name) AS product_names,
+						dc.lat,
+						dc.lon
                     FROM 
                         `delivery_customer` AS dc
                     INNER JOIN 
@@ -671,6 +673,34 @@ $stmt_update_total_price = $conn->query($query_update_total_price);
         $data[0]['error_message'] = $e->getMessage();
     }
     echo json_encode(@$data);
+} else if (@$decode['case'] == 'calendarEvents') {
+	try {
+		$data[0] = array('status' => 0);
+		$query = "SELECT 
+						dc.cus_id, 
+						dc.cus_name, 
+						dt.task_id, 
+						dt.task_datetime
+					FROM 
+						`delivery_customer` AS dc
+					INNER JOIN 
+						delivery_task AS dt ON dc.cus_id = dt.cus_id
+					";
+
+		$stmt = $conn->query($query);
+
+		if ($stmt->rowCount() > 0) {
+			while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+				$data[0] = array('status' => 1);
+				$data[] = $row;
+			}
+		} else {
+			$data[0] = array('status' => 0);
+		}
+	} catch (PDOException $e) {
+		$data[0]['error_message'] = $e->getMessage();
+	}
+	echo json_encode(@$data);
 }
 
 
