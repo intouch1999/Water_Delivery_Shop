@@ -1,137 +1,142 @@
-
 <?php include("head.php"); ?>
 
 <style>
-#card_content{
-  min-height:70vh;
-}
-.btn_add{
-  color:white !important;
-}
-#table_type { 
-  overflow: hidden; /* Hide the overflow content */
-}
-.table-container { 
-    overflow-x: auto;
-    white-space:nowrap !important;
-    height:100vh;
-  }
+    #card_content {
+        min-height: 70vh;
+    }
 
-  /* Force the table to have a single row layout */
-  .table-responsive.table {
-    display: block;
-    white-space:nowrap !important;
-  }
+    .btn_add {
+        color: white !important;
+    }
 
-  /* Make each table cell behave like a table row */
-  .table-responsive.table tbody,
-  .table-responsive.table tr,
-  .table-responsive.table td {
-    display: block;
-    white-space:nowrap !important;
-  }
-  
-  td{
-    padding:0.2rem 0.75rem !important;
-  }
-  .w-lm-300{
-    min-width:100px !important;
-  }
+    #table_type {
+        overflow: hidden;
+        /* Hide the overflow content */
+    }
 
-  .w-lm-200{
-    min-width:200px !important;
-  }
+    .table-container {
+        overflow-x: auto;
+        white-space: nowrap !important;
+        height: 100vh;
+    }
 
-  .w-lm-300{
-    min-width:300px !important;
-  }
+    /* Force the table to have a single row layout */
+    .table-responsive.table {
+        display: block;
+        white-space: nowrap !important;
+    }
 
-  .w-lm-400{
-    min-width:300px !important;
-  }
+    /* Make each table cell behave like a table row */
+    .table-responsive.table tbody,
+    .table-responsive.table tr,
+    .table-responsive.table td {
+        display: block;
+        white-space: nowrap !important;
+    }
 
-  .rush-task .btn-rush-task{
-    position: fixed;
-    bottom: 4rem;
-    left: 1.625rem;
-    z-index: 999999;
-    height:45px;
-    box-shadow: 0 1px 7px 1px #1dbfff;
-  }
-  .mr-1{
-    margin-right:5px;
-  }
+    td {
+        padding: 0.2rem 0.75rem !important;
+    }
 
-  .water-l{
-    font-size:25px;
-    font-weight: bold;
-    color:navy;
-    background-color:rgba(29,141,222,0.1) !important;
-  }
+    .w-lm-300 {
+        min-width: 100px !important;
+    }
 
-  .water-h-l{
-    font-size:16px !important;
-    font-weight: bold;
-    color:navy;
-    background-color:rgba(29,141,222,0.1) !important;
-  }
+    .w-lm-200 {
+        min-width: 200px !important;
+    }
 
-  .water-m{
-    font-size:25px;
-    font-weight: bold;
-    color:red;
-    background-color:rgba(255,66,66,0.1) !important;
-  }
+    .w-lm-300 {
+        min-width: 300px !important;
+    }
 
-  .water-h-m{
-    font-size:16px !important;
-    font-weight: bold;
-    color:red;
-    background-color:rgba(255,66,66,0.1) !important;
-  }
+    .w-lm-400 {
+        min-width: 300px !important;
+    }
 
-  .water-s{
-    font-size:16px !important;
-    font-size:25px;
-    font-weight: bold;
-    color:purple;
-    background-color:rgba(129,66,255,0.1) !important;
-  }
+    .rush-task .btn-rush-task {
+        position: fixed;
+        bottom: 4rem;
+        left: 1.625rem;
+        z-index: 999999;
+        height: 45px;
+        box-shadow: 0 1px 7px 1px #1dbfff;
+    }
 
-  .water-h-s{
-    font-weight: bold;
-    color:purple;
-    background-color:rgba(129,66,255,0.1) !important;
-  }
+    .mr-1 {
+        margin-right: 5px;
+    }
+
+    .water-l {
+        font-size: 25px;
+        font-weight: bold;
+        color: navy;
+        background-color: rgba(29, 141, 222, 0.1) !important;
+    }
+
+    .water-h-l {
+        font-size: 16px !important;
+        font-weight: bold;
+        color: navy;
+        background-color: rgba(29, 141, 222, 0.1) !important;
+    }
+
+    .water-m {
+        font-size: 25px;
+        font-weight: bold;
+        color: red;
+        background-color: rgba(255, 66, 66, 0.1) !important;
+    }
+
+    .water-h-m {
+        font-size: 16px !important;
+        font-weight: bold;
+        color: red;
+        background-color: rgba(255, 66, 66, 0.1) !important;
+    }
+
+    .water-s {
+        font-size: 16px !important;
+        font-size: 25px;
+        font-weight: bold;
+        color: purple;
+        background-color: rgba(129, 66, 255, 0.1) !important;
+    }
+
+    .water-h-s {
+        font-weight: bold;
+        color: purple;
+        background-color: rgba(129, 66, 255, 0.1) !important;
+    }
 </style>
-    <!-- Content wrapper -->
-    <div class="content-wrapper">
+<!-- Content wrapper -->
+<div class="content-wrapper">
     <!-- Content -->
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="row mb-2">
             <div class="col-md-4 col-sm-4 text-center">
-                <span class="text-success">ส่งแล้ว</span> / <span class="text-warning">กำลังส่ง</span> / <span class="text-secondary">ยกเลิก</span>
+                <span class="text-success">ส่งแล้ว</span> / <span class="text-warning">กำลังส่ง</span> / <span class="text-danger">ยกเลิก</span>
                 <div class="progress mb-3">
                     <div class="progress-bar bg-success shadow-none" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
                     <div class="progress-bar bg-warning shadow-none" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-                    <div class="progress-bar bg-secondary shadow-none" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-danger shadow-none" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
             </div>
             <div class="col-md-8 col-sm-8">
-                <input type="date" class="form-control" id="inp_date" value="<?= $cur_date; ?>"> 
+                <input type="date" class="form-control" id="inp_date" value="<?= $cur_date; ?>">
             </div>
         </div>
         <div class="row">
             <div class="card mb-4">
-                <h5 class="card-header">รายการการจัดส่งน้ำประจำวัน <?= $cur_date_th; ?></h5>
+                <h5 class="card-header">รายการการจัดส่งน้ำประจำวัน</h5>
                 <div class="card-body" style="padding:0px!important;">
                     <div class="table_unfit">
                         <div class="table-responsive">
-                            <table class="table table-bordered" >
+                            <table class="table table-bordered">
                                 <thead>
                                     <tr class="text-center">
-                                        <th width="5%">#</th>
-                                        <th>ลําดับ</th>
+                                        <th width="5%">กระทำ</th>
+                                        <th>หมายเลข</th>
                                         <th class="w-lm-200">ชื่อลูกค้า</th>
                                         <th class="w-lm-300">รายการสินค้า</th>
                                         <!-- <th class="">กลาง 24</th>
@@ -143,7 +148,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="table_branch">
-                                    <tr>
+                                    <!-- <tr>
                                         <td class="text-center"><span class="badge rounded-pill bg-warning">1</span></td> 
                                         <td class="text-center">คุณสนชัย ช่างชัยใหญ่</td>
                                         <td class="text-center water-l">3</td>
@@ -186,7 +191,7 @@
                                         <td class="text-center"><a href="javascript:void(0)"><i class="menu-icon tf-icons bx bx-map"></i></a></td>
                                         <td class="text-center"><a href="tel:0896179535">0896179535</a></td>
                                         <td ><span class="badge rounded-pill bg-success">คุณสนชัย ช่างชัยใหญ่</span></td>
-                                    </tr> 
+                                    </tr>  -->
                                 </tbody>
                             </table>
                         </div>
@@ -198,177 +203,182 @@
 </div>
 <div class="rush-task">
     <button class="btn btn-info btn-rush-task"><i class="menu-icon tf-icons bx bx-message-square-add"></i></button>
-</div> 
+</div>
 <?php include("foot.php"); ?>
 <script>
-$(document).ready(function() {
-    window.onload = function() {
-        if (location.href.endsWith('delivery_task')) {
-            const selectedDate = $("#inp_date").val();
-            table_branch(selectedDate);
-            changeDateHeader(selectedDate);
-            loadDataAndProgressBar(selectedDate);
-            
-        }
-    };
+    $(document).ready(function() {
 
-    $('#inp_date').change(function() {
-    var selectedDate = $(this).val();
-    loadDataAndProgressBar(selectedDate); // เมื่อเปลี่ยนวันที่
-    table_branch(selectedDate); // โหลดข้อมูลตาราง branch ใหม่
-    changeDateHeader(selectedDate); // เปลี่ยนหัวข้อวันที่
-});
+        window.onload = function() {
 
-});
+            if (location.href.endsWith('delivery_task')) {
+                const selectedDate = $("#inp_date").val();
+                table_branch(selectedDate);
+                changeDateHeader(selectedDate);
+                loadDataAndProgressBar(selectedDate);
+            }
+        };
 
+        $('#inp_date').change(function() {
+            var selectedDate = $(this).val();
+            loadDataAndProgressBar(selectedDate); // เมื่อเปลี่ยนวันที่
+            table_branch(selectedDate); // โหลดข้อมูลตาราง branch ใหม่
+            changeDateHeader(selectedDate); // เปลี่ยนหัวข้อวันที่
 
+        });
 
-// ฟังก์ชันโหลดข้อมูลและอัปเดตหลอดโปรเกรส
-function loadDataAndProgressBar(selectedDate) {
-    fetch('../api/product?case=table_branch', {
-        method: 'POST',
-        body: JSON.stringify({
-            case: 'table_branch',
-            date: selectedDate
-        }),
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(function(response) {
-        return response.json();
-    })
-    .then(function(data) {
-        if (data[0].status == '1') {
-
-    updateProgressBar(data.slice(1)); // เรียกใช้งาน updateProgressBar กับข้อมูลใหม่
-        } else {
-
-            updateProgressBar(data);
-        }
-
-    })
-    .catch(function(error) {
-        // หากเกิดข้อผิดพลาดในการโหลดข้อมูล
-        console.error('Error fetching data:', error);
     });
-}
-
-// ฟังก์ชันอัปเดตหลอดโปรเกรส
-function updateProgressBar(data) {
-    if (data.length === 0) {
-        // หาก data ไม่มีข้อมูล
-        const progressBar = document.querySelector('.progress');
-        const bar = progressBar.querySelector('.progress-bar');
-
-        // กำหนดให้สีทั้งหมดเป็นสีเดียว 100%
-        bar.style.width = '100%';
-        bar.classList.add('bg-secondary'); // สีเท่ากับที่คุณต้องการสำหรับไม่ได้ส่ง
-    } else {
-        // หาก data มีข้อมูล
-        const sentCount = data.filter(item => item.task_status === 2).length;
-        const sendingCount = data.filter(item => item.task_status === 1).length;
-        const notSentCount = data.filter(item => item.task_status === 0).length;
-        const totalCount = data.length;
-
-        const sentPercentage = (sentCount / totalCount) * 100;
-        const sendingPercentage = (sendingCount / totalCount) * 100;
-        const notSentPercentage = (notSentCount / totalCount) * 100;
-
-        const progressBar = document.querySelector('.progress');
-
-        const sentBar = progressBar.querySelector('.bg-success');
-        const sendingBar = progressBar.querySelector('.bg-warning');
-        const notSentBar = progressBar.querySelector('.bg-secondary');
-
-        sentBar.style.width = `${sentPercentage}%`;
-        sendingBar.style.width = `${sendingPercentage}%`;
-        notSentBar.style.width = `${notSentPercentage}%`;
-    }
-}
-
-function changeDateHeader(selectedDate) {
-
-    const formattedDate = formatDate(selectedDate);
-
-    const header = `รายการการจัดส่งน้ำประจำวัน ${formattedDate}`;
-
-    $('.card-header').text(header);
-}
 
 
-function formatDate(selectedDate) {
-    const dateObj = new Date(selectedDate);
-    const day = dateObj.getDate();
-    const month = dateObj.getMonth() + 1;
-    const year = dateObj.getFullYear();
-    const formattedDate = `${day}/${month < 10 ? '0' : ''}${month}/${year}`;
-    return formattedDate;
-}
 
-function getStatusClass(status) {
-    switch (status) {
-        case 0:
-            return 'bg-secondary';
-        case 1:
-            return 'bg-warning';
-        case 2:
-            return 'bg-success';
-        default:
-            return 'bg-light'; // หรือคลาสอื่นๆ ที่ต้องการกำหนดเอง
-    }
-}
+    // ฟังก์ชันโหลดข้อมูลและอัปเดตหลอดโปรเกรส
+    function loadDataAndProgressBar(selectedDate) {
+        fetch('../api/product?case=table_branch', {
+                method: 'POST',
+                body: JSON.stringify({
+                    case: 'table_branch',
+                    date: selectedDate
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                if (data[0].status == '1') {
 
-function table_branch(selectedDate) {
-    fetch('../api/product?case=table_branch', {
-        method: 'POST',
-        body: JSON.stringify({
-            case: 'table_branch',
-            date: selectedDate
-        }),
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(function(response) {
-        return response.json();
-    })
-    .then(function(data) {
-        if (data[0].status == '1') {
-            const table = document.getElementById('table_branch');
-            table.innerHTML = '';
-            let taskCounter = 0; // เก็บค่านับจำนวน task
-            let prevCusId = null; // เก็บค่า cus_id ก่อนหน้า
-
-            data.slice(1).forEach(deli_t => {
-                // ตรวจสอบว่า cus_id เปลี่ยนหรือไม่
-                if (deli_t.cus_id !== prevCusId) {
-                    taskCounter = 1; // ถ้าเปลี่ยน cus_id ให้เริ่มนับใหม่
+                    updateProgressBar(data.slice(1)); // เรียกใช้งาน updateProgressBar กับข้อมูลใหม่
                 } else {
-                    taskCounter++; // ถ้าไม่เปลี่ยน cus_id เพิ่มค่านับตามปกติ
+
+                    updateProgressBar(data);
                 }
 
-                prevCusId = deli_t.cus_id;
-                console.log(prevCusId);
-                console.log(deli_t.products[0].product_id);
-                const newRow = document.createElement("tr");
-                let productData = ''; // เริ่มต้นตัวแปรเป็นสตริงเปล่า
-                let quantityData =  '';
+            })
+            .catch(function(error) {
+                // หากเกิดข้อผิดพลาดในการโหลดข้อมูล
+                console.error('Error fetching data:', error);
+            });
+    }
 
-// ใช้ forEach เพื่อวนลูปผ่านสินค้าใน deli_t.products
-deli_t.products.forEach((product, index) => {
-    // const productId = product.product_id;
-    const quantity = product.order_quantity;
-    const product_name = product.product_name;
-    // const id = productId.replace('-', ''); // ลบอักขระพิเศษออก
+    // ฟังก์ชันอัปเดตหลอดโปรเกรส
+    function updateProgressBar(data) {
+        if (data.length === 0) {
+            // หาก data ไม่มีข้อมูล
+            const progressBar = document.querySelector('.progress');
+            const bar = progressBar.querySelector('.progress-bar');
 
-    // เพิ่มข้อมูลสินค้าลงในตัวแปร productData
-    productData += `${product_name}`;
-    quantityData += `${quantity}`;
+            // กำหนดให้สีทั้งหมดเป็นสีเดียว 100%
+            bar.style.width = '100%';
+            bar.classList.add('bg-danger');
+        } else {
+            // หาก data มีข้อมูล
+            const sentCount = data.filter(item => item.task_status === 2).length;
+            const sendingCount = data.filter(item => item.task_status === 1).length;
+            const notSentCount = data.filter(item => item.task_status === 0).length;
+            const totalCount = data.length;
 
-});
+            const sentPercentage = (sentCount / totalCount) * 100;
+            const sendingPercentage = (sendingCount / totalCount) * 100;
+            const notSentPercentage = (notSentCount / totalCount) * 100;
 
-const productColumn = `
+            const progressBar = document.querySelector('.progress');
+
+            const sentBar = progressBar.querySelector('.bg-success');
+            const sendingBar = progressBar.querySelector('.bg-warning');
+            const notSentBar = progressBar.querySelector('.bg-danger');
+
+            sentBar.style.width = `${sentPercentage}%`;
+            sendingBar.style.width = `${sendingPercentage}%`;
+            notSentBar.style.width = `${notSentPercentage}%`;
+        }
+    }
+
+    function changeDateHeader(selectedDate) {
+
+        const formattedDate = formatDate(selectedDate);
+
+        const header = `รายการการจัดส่งน้ำประจำวัน ${formattedDate}`;
+
+        $('.card-header').html(header);
+    }
+
+    refresh = () => {
+        const selectedDate = $("#inp_date").val();
+        table_branch(selectedDate);
+        loadDataAndProgressBar(selectedDate);
+    }
+
+    function formatDate(selectedDate) {
+        const dateObj = new Date(selectedDate);
+        const day = dateObj.getDate();
+        const month = dateObj.getMonth() + 1;
+        const year = dateObj.getFullYear();
+        const formattedDate = `${day}/${month < 10 ? '0' : ''}${month}/${year}`;
+        return formattedDate;
+    }
+
+    function getStatusClass(status) {
+        switch (status) {
+            case 0:
+                return 'bg-danger';
+            case 1:
+                return 'bg-warning';
+            case 2:
+                return 'bg-success';
+            default:
+                return 'bg-light'; // หรือคลาสอื่นๆ ที่ต้องการกำหนดเอง
+        }
+    }
+
+    function table_branch(selectedDate) {
+        fetch('../api/product?case=table_branch', {
+                method: 'POST',
+                body: JSON.stringify({
+                    case: 'table_branch',
+                    date: selectedDate
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                if (data[0].status == '1') {
+                    const table = document.getElementById('table_branch');
+                    table.innerHTML = '';
+                    let taskCounter = 0; // เก็บค่านับจำนวน task
+                    let prevCusId = null; // เก็บค่า cus_id ก่อนหน้า
+
+                    data.slice(1).forEach(deli_t => {
+                        // ตรวจสอบว่า cus_id เปลี่ยนหรือไม่
+                        if (deli_t.cus_id !== prevCusId) {
+                            taskCounter = 1; // ถ้าเปลี่ยน cus_id ให้เริ่มนับใหม่
+                        } else {
+                            taskCounter++; // ถ้าไม่เปลี่ยน cus_id เพิ่มค่านับตามปกติ
+                        }
+
+                        prevCusId = deli_t.cus_id;
+                        const newRow = document.createElement("tr");
+                        let productData = ''; // เริ่มต้นตัวแปรเป็นสตริงเปล่า
+                        let quantityData = '';
+
+                        // ใช้ forEach เพื่อวนลูปผ่านสินค้าใน deli_t.products
+                        deli_t.products.forEach((product, index) => {
+                            // const productId = product.product_id;
+                            const quantity = product.order_quantity;
+                            const product_name = product.product_name;
+                            // const id = productId.replace('-', ''); // ลบอักขระพิเศษออก
+
+                            // เพิ่มข้อมูลสินค้าลงในตัวแปร productData
+                            productData += `${product_name}`;
+                            quantityData += `${quantity}`;
+
+                        });
+
+                        const productColumn = `
                         <td>
                             <table>
                                 <tbody>
@@ -387,30 +397,40 @@ const productColumn = `
                             `;
 
 
-                // // สร้างคอลัมน์สำหรับแสดงรายการสินค้า (จำกัดเพียงสามคอลัมน์)
-                // let productColumns = '';
-                // for (let i = 0; i < 3; i++) {
-                //     const product = (i < deli_t.products.length) ? deli_t.products[i] : { product_id: '0', order_quantity: '0' };
-                //     const productId = product.product_id;
-                //     const quantity = product.order_quantity;
-                //     const id = productId.replace('-', ''); // ลบอักขระพิเศษออก
+                        // // สร้างคอลัมน์สำหรับแสดงรายการสินค้า (จำกัดเพียงสามคอลัมน์)
+                        // let productColumns = '';
+                        // for (let i = 0; i < 3; i++) {
+                        //     const product = (i < deli_t.products.length) ? deli_t.products[i] : { product_id: '0', order_quantity: '0' };
+                        //     const productId = product.product_id;
+                        //     const quantity = product.order_quantity;
+                        //     const id = productId.replace('-', ''); // ลบอักขระพิเศษออก
 
-                //     // กำหนดคอลัมน์ตามลำดับ
-                //     let columnClass = '';
-                //     if (i === 0) {
-                //         columnClass = 'water-l';
-                //     } else if (i === 1) {
-                //         columnClass = 'water-m';
-                //     } else {
-                //         columnClass = 'water-s';
-                //     }
+                        //     // กำหนดคอลัมน์ตามลำดับ
+                        //     let columnClass = '';
+                        //     if (i === 0) {
+                        //         columnClass = 'water-l';
+                        //     } else if (i === 1) {
+                        //         columnClass = 'water-m';
+                        //     } else {
+                        //         columnClass = 'water-s';
+                        //     }
 
-                //     productColumns = `<td class="text-center ${columnClass}" id="${id}">${productId} (${quantity})</td>`;
-                // }
+                        //     productColumns = `<td class="text-center ${columnClass}" id="${id}">${productId} (${quantity})</td>`;
+                        // }
 
-                newRow.innerHTML = `
-                    <td><button type="button" class="btn btn-primary btn-sm btn-success" onclick="submitCheck('${deli_t.task_id}')">ยืนยัน</button></td>
-                    <td class="text-center"><span class="badge rounded-pill ${getStatusClass(deli_t.task_status)}">${deli_t.task_id}</span></td> 
+                        newRow.innerHTML = `
+                    <td>
+                    <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle bx bx-menu" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                        
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                        <li><a class="dropdown-item" onclick="submitCheck('${deli_t.task_id}')">ยืนยัน</a></a></li>
+                        <li><a class="dropdown-item" onclick="cancelCheck('${deli_t.task_id}')">ยกเลิก</a></li>
+                    </ul>
+                    </div>
+                    </td>
+                    <td class="text-center"><span class="badge rounded-pill status ${getStatusClass(deli_t.task_status)}">${deli_t.task_id}</span></td> 
                     <td class="text-center">${deli_t.cus_name}</td>
                     ${productColumn}
                     <td class="text-center">${deli_t.cus_address}</td>
@@ -419,72 +439,118 @@ const productColumn = `
                     <td><span class="badge rounded-pill bg-warning" onclick="alert('${deli_t.sale_user}');">${deli_t.sale_user}</span></td>
                 `;
 
-                table.appendChild(newRow);
-            })
-        } else {
-            const table = document.getElementById('table_branch');
-            table.innerHTML = `
+                        table.appendChild(newRow);
+                    })
+                } else {
+                    const table = document.getElementById('table_branch');
+                    table.innerHTML = `
                 <td colspan="9" class="text-center fs-1">ไม่มีรายการส่งในวันที่เลือก</td>
             `;
-            table.appendChild(table);
-        }
-    })
-    .catch(function(error) {
-        console.error('Error fetching data:', error);
-    });
-}
-
-submitCheck = (task_id) => {
-    $("#modal_confirm_text").html("ยืนยันการจัดส่ง");
-            $("#modal_confirm_submit").on("click", () => {
-                submitTask(task_id);
+                    table.appendChild(table);
+                }
+            })
+            .catch(function(error) {
+                console.error('Error fetching data:', error);
             });
-
-            $("#modal_confirm").modal("show");
     }
 
-getdatenow = () => {
-    var timestamp = Date.now();
+    submitCheck = (task_id) => {
+        $("#modal_confirm_text").html("ยืนยันการจัดส่ง");
+        $("#modal_confirm_submit").on("click", () => {
+            submitTask(task_id);
+            $("#modal_confirm_submit").off("click");
+        });
+
+        $("#modal_confirm").modal("show");
+    }
+
+    getdatenow = () => {
+        var timestamp = Date.now();
         var localDateTime = new Date(timestamp);
         localDateTime.setHours(localDateTime.getHours() + 7);
-        var datetimeNow = localDateTime.toISOString(); // Format: YYYY-MM-DDTHH:MM:SSZ
+        var datetimeNow = localDateTime.toISOString();
         return datetimeNow
-}
+    }
 
-submitTask = (task_id) => {
-    TimeNOW = getdatenow()
-    fetch('../api/product?case=task_success', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            case: 'task_success',
-            taskID: task_id,
-            last_datetime: TimeNOW
-        })
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Failed to submit task. Server responded with ' + response.status);
-        }
-        return response.json();
-    })
-    .then(json => {
-        $("#modal_confirm").modal("hide");
+    submitTask = (task_id) => {
+        TimeNOW = getdatenow()
+        fetch('../api/product?case=task_success', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    case: 'task_success',
+                    taskID: task_id,
+                    last_datetime: TimeNOW
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to submit task. Server responded with ' + response.status);
+                }
+                return response.json();
+            })
+            .then(json => {
+                $("#modal_confirm").modal("hide");
                 if (json[0].status == '0') {
                     alert_snackbar('error', json[0].error_message);
                 } else {
                     alert_snackbar('success', "จัดส่งสำเร็จ");
                     setTimeout(function() {
-                        location.reload();
+                        refresh()
                     }, 1500);
                 }
-    })
-    .catch(error => {
-        console.error('Error submitting task:', error);
+            })
+            .catch(error => {
+                console.error('Error submitting task:', error);
+            });
+    }
+
+    cancelCheck = (task_id) => {
+        $("#modal_confirm_text").html("ยืนยันการยกเลิก");
+        $("#modal_confirm_submit").on("click", () => {
+            cancelTask(task_id);
+            $("#modal_confirm_submit").off("click");
+        });
+
+        $("#modal_confirm").modal("show");
+    }
+
+    cancelTask = (task_id) => {
+        TimeNOW = getdatenow()
+        fetch('../api/product?case=task_cancel', {
+                method: 'POST',
+                body: JSON.stringify({
+                    case: 'task_cancel',
+                    taskID: task_id,
+                    last_datetime: TimeNOW
+                }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to submit task. Server responded with ' + response.status);
+                }
+                return response.json();
+            })
+            .then(json => {
+                $("#modal_confirm").modal("hide");
+                if (json[0].status == '0') {
+                    alert_snackbar('error', json[0].error_message);
+                } else {
+                    alert_snackbar('success', "ยกเลิกสำเร็จ");
+                    setTimeout(function() {
+                        refresh()
+                    }, 1500);
+                }
+            })
+            .catch(error => {
+                console.error('Error submitting task:', error);
+            });
+    }
+
+    $(document).on('click', '.btn-cancel-modal', () => {
+        $("#modal_confirm").modal("hide");
+        $("#modal_confirm_submit").off("click");
     });
-}
-
-
 </script>

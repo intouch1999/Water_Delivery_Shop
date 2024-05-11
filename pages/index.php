@@ -32,73 +32,68 @@
   <?php include("foot.php"); ?>
   <script async defer src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v13.0" nonce="YourNonceValue"></script>
   <script>
-    $(document).ready(function() {
-      
-    })
+//     $(document).ready(function() {
+//       $('#calendar').evoCalendar({
+//   'theme': 'Midnight Blue',
+//   'language': 'en',
+//   'todayHighlight': true,
+//   'format': 'dd/MM/yyyy', // This line sets the date format to dd/mm/yyyy
+//   calendarEvents: [
+//     {
+//       id: 'bHay68s', // Event's ID (required)
+//       name: "เฮียกูล (13:00)", // Event name (required)
+//       date: "May/16/2024 16:00", // Event date (required)
+//       type: "meeting", // Event type (required)
+//     },{
+//       id: 'bHay68s', // Event's ID (required)
+//       name: "เจ๊หน่อย (17:00)", // Event name (required)
+//       date: "September/16/2023 16:00", // Event date (required)
+//       type: "holiday", // Event type (required)
+//     },{
+//       id: 'bHay68s', // Event's ID (required)
+//       name: "เฮียแบงค์ (16:00)", // Event name (required)
+//       date: "September/17/2023 16:00", // Event date (required)
+//       type: "holiday", // Event type (required)
+//     },
+//   ]
+// });
+//     })
 
-calArray = (cal) => {
-  console.log(cal)
-  $('#calendar').evoCalendar({
-  'theme': 'Midnight Blue',
-  'language': 'en',
-  'todayHighlight': true,
-  'format': 'dd/MM/yyyy', // This line sets the date format to dd/mm/yyyy
-  calendarEvents: [
-    {
-      id: 'bHay68s', // Event's ID (required)
-      name: "เฮียกูล (13:00)", // Event name (required)
-      date: "September/16/2023 16:00", // Event date (required)
-      type: "meeting", // Event type (required)
-    },{
-      id: 'bHay68s', // Event's ID (required)
-      name: "เจ๊หน่อย (17:00)", // Event name (required)
-      date: "September/16/2023 16:00", // Event date (required)
-      type: "holiday", // Event type (required)
-    },{
-      id: 'bHay68s', // Event's ID (required)
-      name: "เฮียแบงค์ (16:00)", // Event name (required)
-      date: "September/17/2023 16:00", // Event date (required)
-      type: "holiday", // Event type (required)
-    },
-  ]
+calEvent = () => {
+  $.ajax({
+    url: '../api/product?case=calendarEvents',
+    type: 'POST', 
+    dataType: 'json', 
+    data: JSON.stringify( {
+        case: 'calendarEvents'
+    }),
+    success: function(data) {
+      let dataWithoutFirst = data.slice(1)
+      let dataArray = dataWithoutFirst
+      let NewData = []
+      dataArray.forEach((data) => {
+        let time = new Date(data.task_datetime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        let status = data.task_status == 1 ? "holiday" : "birthday";
+        NewData.push({id: data.cus_id, name: data.cus_name + " " + time, date: data.task_datetime, type: status})
+      })
+        try {
+            if (data[0].status == '1') {
+              $('#calendar').evoCalendar({
+                'theme': 'Midnight Blue',
+                'language': 'en',
+                'todayHighlight': true,
+                'format': 'dd/MM/yyyy', // This line sets the date format to dd/mm/yyyy
+                calendarEvents: NewData,
+                
+              })
+              
+            }
+        } catch(err) {
+            console.log(err); // ตรวจสอบข้อผิดพลาด (ถ้ามี)
+        }
+    }
 });
 }
-
-calArray();
-
-
-calEvent = (cal) => {
-  fetch('../api/product?case=calendarEvents', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      case: 'calendarEvents'
-    })
-  })
-  .then(res => {
-    if (!res.ok) {
-      throw new Error('Network response was not ok');
-    }
-    return res.json();
-  })
-  .then(data => {
-    // Map data to set id equal to cus_id
-    const calendarEvents = data.map(event => ({
-      id: event.cus_id, // Set id equal to cus_id
-      name: event.name, // Event name (required)
-      date: "may/7/2024 16:00", // Event date (required)
-      type: event.type, // Event type (required)
-    }));
-
-    return calendarEvents;
-  })
-  .catch(err => {
-    console.error('Error:', err);
-  });
-}
-
-calEvent();
-
+      
+document.addEventListener('DOMContentLoaded', calEvent);
   </script>

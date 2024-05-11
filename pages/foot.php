@@ -35,7 +35,7 @@
                   <h5 class="modal-title" id="backDropModalTitle">ยืนยันดำเนินการ</h5>
                   <button
                     type="button"
-                    class="btn-close"
+                    class="btn-close btn-cancel-modal"
                     data-bs-dismiss="modal"
                     aria-label="Close"
                   ></button>
@@ -48,7 +48,7 @@
                   </div>
                 </div>
                 <div class="modal-footer">
-                  <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                  <button type="button" class="btn btn-outline-secondary btn-cancel-modal" data-bs-dismiss="modal">
                     ยกเลิก
                   </button>
                   <button type="button" id="modal_confirm_submit" class="btn btn-primary">ยืนยัน</button>

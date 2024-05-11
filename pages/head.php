@@ -98,6 +98,8 @@ $cur_date_th = date('d/m/').(date('Y')+543);
       left: 50%;
       transform: translate(-50%, -50%);
     }
+
+    
   </style>
 
   <body>

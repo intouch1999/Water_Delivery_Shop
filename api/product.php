@@ -368,12 +368,13 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
         $query_task = "UPDATE `delivery_task` SET `task_status` = 0 WHERE `task_id` = '{$taskID}'";
         $stmt_task = $conn->query($query_task);
 
-        // Update delivery_task_product table
-        $query_product = "UPDATE `delivery_task_product` SET `product_active` = 0 , `last_datetime` = '{$last_datetime}' WHERE `task_id` = '{$taskID}'";
-        $stmt_product = $conn->query($query_product);
+        // // Update delivery_task_product table
+        // $query_product = "UPDATE `delivery_task_product` SET `product_active` = 0 , `last_datetime` = '{$last_datetime}' WHERE `task_id` = '{$taskID}'";
+        // $stmt_product = $conn->query($query_product);
 
         // Check if both queries were successful
-        if ($stmt_task && $stmt_product) {
+        // if ($stmt_task && $stmt_product) {
+			if ($stmt_task) {
             $data[0] = array('status' => 1);
         } else {
 			$data[0] = array('status' => 0);
@@ -680,11 +681,14 @@ $stmt_update_total_price = $conn->query($query_update_total_price);
 						dc.cus_id, 
 						dc.cus_name, 
 						dt.task_id, 
-						dt.task_datetime
+						dt.task_datetime,
+						dt.task_status
 					FROM 
 						`delivery_customer` AS dc
 					INNER JOIN 
 						delivery_task AS dt ON dc.cus_id = dt.cus_id
+					WHERE
+						dt.task_status = 1 OR dt.task_status = 2
 					";
 
 		$stmt = $conn->query($query);

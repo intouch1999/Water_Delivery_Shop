@@ -316,23 +316,13 @@
         $('#pay_total').hide();
         $('#pay_total_label').hide();
 
-
-
-
         $('#customerData').on('click', '.btn-edit', task_button, task());
-
-        // $('#submit_Task').on('click', submitTask);
-
-        // $('#taskData').on('click', '.btn-success', tasklist_success);
-
 
         $('#product_detail_modal').on('click', '[aria-hidden="true"]', function() {
             $('#product_detail_modal').modal('hide');
         });
 
-        // $('#update_Task').on('click', update_task);
-
-        $('#product_detail_modal').on('shown.bs.modal', function() {
+        $('#product_detail_modal').off('shown.bs.modal').on('shown.bs.modal', function() {
             // $('#update_Task').off('click').on('click', update_task);
             // $('#add_Task').off('click').on('click', submitmoreproduct);
         });
@@ -340,7 +330,7 @@
         $('#product_detail_modal').on('click', '.fig_task', function() {
             $('.card.mb-4', $(this).closest('.modal-content')).toggle();
         });
-        $('#product_detail_modal').on('click', '.add_task', function() {
+        $('#product_detail_modal').off('click', '.add_task').on('click', '.add_task', function() {
             $('.card.mb-2', $(this).closest('.modal-content')).toggle();
         })
 
@@ -356,25 +346,7 @@
             }
         });
 
-        $('#taskData').on('click', '.btn-info', update_show);
-        // $('#taskData').on('click', '.btn-info', addMoreProduct);
-
-        // $('#add_Task').on('click', submitmoreproduct);
-
-        // $('#taskData').on('click', '.btn-info', function() {
-        //     var rowData = getTableRowData($(this), 'taskData');
-        //     var task_id = rowData.task_id;
-        //     console.log(task_id);
-
-        //     fetchProductDetails(task_id)
-        //         .then(productDetails => {
-        //             btn_info(productDetails);
-        //         })
-        //         .catch(error => {
-        //             console.error('Error fetching product details:', error);
-        //         });
-        // });
-
+        $('#taskData').on('click', '.drop-info', update_show);
 
     });
 
@@ -476,12 +448,12 @@
     }
 
     function confirm_check() {
-        $('#taskData').on('click', '.btn-success', function() {
+        $('#taskData').off('click', '.drop-success').on('click', '.drop-success', function() {
             var rowData = getTableRowData($(this), 'taskData');
             var task_id = rowData.task_id;
 
             $("#modal_confirm_text").html("ยืนยันการจัดส่ง");
-            $("#modal_confirm_submit").on("click", function() {
+            $("#modal_confirm_submit").off("click").on("click", function() {
                 tasklist_success(task_id);
             });
 
@@ -490,26 +462,25 @@
     }
 
     function cancel_check() {
-        $('#taskData').on('click', '.btn-danger', function() {
+        $('#taskData').off('click', '.drop-danger').on('click', '.drop-danger', function() {
             var rowData = getTableRowData($(this), 'taskData');
             var task_id = rowData.task_id;
 
             $("#modal_confirm_text").html("ยืนยันการยกเลิก");
-            $("#modal_confirm_submit").on("click", function() {
+            $("#modal_confirm_submit").off("click").on("click", function() {
                 tasklist_cancel(task_id);
             });
 
             $("#modal_confirm").modal("show");
-        })
+        });
     }
-
 
     function confirm_task() {
         var urlParams = new URLSearchParams(window.location.search);
         var cus_id = urlParams.get('cus_id');
         var productsAndQuantities = [];
         document.querySelectorAll('#product_list tr').forEach(row => {
-            var productId = row.cells[0].id; 
+            var productId = row.cells[0].id;
             var quantityInput = row.cells[1].querySelector('input[type="number"]');
             var quantity = quantityInput.value;
             var productPrice = row.cells[0].querySelector('img').getAttribute('data-price');
@@ -589,11 +560,11 @@
             var productId = product.querySelector(".product_id_update").value;
             var quantity = product.querySelector('.product_qty_update').value;
             if (quantity !== "" && parseInt(quantity) >= 0) {
-    productsAndQuantities.push({
-        id: productId,
-        quantity: quantity,
-    });
-}
+                productsAndQuantities.push({
+                    id: productId,
+                    quantity: quantity,
+                });
+            }
 
         });
 
@@ -747,6 +718,7 @@
     };
 
     function task() {
+
         var urlParams = new URLSearchParams(window.location.search);
         var cus_id = urlParams.get('cus_id');
         if (cus_id) {
@@ -787,15 +759,33 @@
                                     },
                                     {
                                         data: 'task_datetime',
-                                        render: function(data, type, row) {
-                                            // Format the date and time
-                                            var date = new Date(data);
-                                            var formattedDateTime = date.toLocaleDateString('en-GB', {
-                                                day: '2-digit',
-                                                month: '2-digit',
-                                                year: 'numeric'
-                                            });
-                                            return formattedDateTime;
+                                        render: function(data) {
+                                            // Check if the date is valid
+                                            if (data !== '0000-00-00 00:00:00') {
+                                                // Split date and time
+                                                var parts = data.split(' ');
+                                                var datePart = parts[0];
+                                                var timePart = parts[1];
+
+                                                // Split date into year, month, and day
+                                                var dateParts = datePart.split('-');
+                                                var year = dateParts[0];
+                                                var month = dateParts[1];
+                                                var day = dateParts[2];
+
+                                                // Split time into hours and minutes
+                                                var timeParts = timePart.split(':');
+                                                var hours = timeParts[0];
+                                                var minutes = timeParts[1];
+
+                                                // Format the date and time
+                                                var formattedDateTime = hours + ':' + minutes + ' ' + day + '/' + month + '/' + year;
+
+                                                return formattedDateTime;
+                                            } else {
+                                                // Return '0000-00-00 00:00:00' for invalid date
+                                                return 'ยังไม่ได้จัดส่ง';
+                                            }
                                         }
                                     },
                                     // {
@@ -804,34 +794,34 @@
                                     {
                                         data: 'last_datetime',
                                         render: function(data) {
-                                        // Check if the date is valid
-                                        if (data !== '0000-00-00 00:00:00') {
-                                            // Split date and time
-                                            var parts = data.split(' ');
-                                            var datePart = parts[0];
-                                            var timePart = parts[1];
+                                            // Check if the date is valid
+                                            if (data !== '0000-00-00 00:00:00') {
+                                                // Split date and time
+                                                var parts = data.split(' ');
+                                                var datePart = parts[0];
+                                                var timePart = parts[1];
 
-                                            // Split date into year, month, and day
-                                            var dateParts = datePart.split('-');
-                                            var year = dateParts[0];
-                                            var month = dateParts[1];
-                                            var day = dateParts[2];
+                                                // Split date into year, month, and day
+                                                var dateParts = datePart.split('-');
+                                                var year = dateParts[0];
+                                                var month = dateParts[1];
+                                                var day = dateParts[2];
 
-                                            // Split time into hours and minutes
-                                            var timeParts = timePart.split(':');
-                                            var hours = timeParts[0];
-                                            var minutes = timeParts[1];
+                                                // Split time into hours and minutes
+                                                var timeParts = timePart.split(':');
+                                                var hours = timeParts[0];
+                                                var minutes = timeParts[1];
 
-                                            // Format the date and time
-                                            var formattedDateTime = hours + ':' + minutes + ' ' + day + '/' + month + '/' + year;
-                                            
-                                            return formattedDateTime;
-                                        } else {
-                                            // Return '0000-00-00 00:00:00' for invalid date
-                                            return 'ยังไม่ได้จัดส่ง';
+                                                // Format the date and time
+                                                var formattedDateTime = hours + ':' + minutes + ' ' + day + '/' + month + '/' + year;
+
+                                                return formattedDateTime;
+                                            } else {
+                                                // Return '0000-00-00 00:00:00' for invalid date
+                                                return 'ยังไม่ได้จัดส่ง';
+                                            }
                                         }
-                                    }
-                                    
+
                                     },
                                     {
                                         data: 'task_status',
@@ -847,9 +837,18 @@
                                     },
                                     {
                                         data: null,
-                                        defaultContent: `<button class="btn btn-primary btn-sm btn-success" onclick="confirm_check()">จัดส่งสำเร็จ</button>
-                                                        <button class="btn btn-primary btn-sm btn-danger" onclick="cancel_check()">ยกเลิก</button>
-                                                        <button class="btn btn-primary btn-sm btn-info">รายละเอียด</button>`,
+                                        defaultContent: `              
+                                                        <div class="dropdown">
+                                                        <button class="btn btn-secondary dropdown-toggle bx bx-menu" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            
+                                                        </button>
+                                                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                                            <li><a class="dropdown-item drop-success" onclick="confirm_check()">ยืนยัน</a></a></li>
+                                                            <li><a class="dropdown-item drop-danger" onclick="cancel_check()">ยกเลิก</a></li>
+                                                            <li><a class="dropdown-item drop-info">รายละเอียด</a></li>
+                                                        </ul>
+                                                        </div>
+                                                        `,
                                         searchable: false // ทำให้ไม่สามารถค้นหาได้
                                     }
                                 ],
@@ -908,89 +907,89 @@
             });
     }
 
-//     async function addMoreProduct() {
-//     try {
-//         const rowData = getTableRowData($(this), 'taskData');
-//         const task_id = rowData.task_id;
+    //     async function addMoreProduct() {
+    //     try {
+    //         const rowData = getTableRowData($(this), 'taskData');
+    //         const task_id = rowData.task_id;
 
-//         const [products1, products2] = await Promise.all([fetchProductTaskShow(task_id), fetchProductDetails(task_id)]);
+    //         const [products1, products2] = await Promise.all([fetchProductTaskShow(task_id), fetchProductDetails(task_id)]);
 
-//         const product_list_Div_add = document.getElementById('product_list_add');
-//         const productNames1 = products1.filter(product => product.product_name !== undefined).map(product => product.product_name);
-//         const productNames2 = products2.filter(product => product.product_name !== undefined).map(product => product.product_name);
+    //         const product_list_Div_add = document.getElementById('product_list_add');
+    //         const productNames1 = products1.filter(product => product.product_name !== undefined).map(product => product.product_name);
+    //         const productNames2 = products2.filter(product => product.product_name !== undefined).map(product => product.product_name);
 
-//         const commonProductNames = productNames1.filter(name => productNames2.includes(name));
-//         console.log(productNames1);
-//         console.log("productNames2" + productNames2);
-//         // Remove existing product rows
-//         product_list_Div_add.innerHTML = '';
+    //         const commonProductNames = productNames1.filter(name => productNames2.includes(name));
+    //         console.log(productNames1);
+    //         console.log("productNames2" + productNames2);
+    //         // Remove existing product rows
+    //         product_list_Div_add.innerHTML = '';
 
-//         [...products1, ...products2].forEach(product => {
-//             if (!commonProductNames.includes(product.product_name)) {
-//                 var newRow = createProductRow(product);
-//                 product_list_Div_add.appendChild(newRow);
-//             }
-//         });
+    //         [...products1, ...products2].forEach(product => {
+    //             if (!commonProductNames.includes(product.product_name)) {
+    //                 var newRow = createProductRow(product);
+    //                 product_list_Div_add.appendChild(newRow);
+    //             }
+    //         });
 
-//     } catch (error) {
-//         console.error('Error adding more product:', error);
-//     }
-// }
+    //     } catch (error) {
+    //         console.error('Error adding more product:', error);
+    //     }
+    // }
 
-async function addMoreProduct(rowData) {
-    try {
-        // const rowData = getTableRowData($(this), 'taskData');
-        const task_id = rowData.task_id;
+    async function addMoreProduct(rowData) {
+        try {
+            // const rowData = getTableRowData($(this), 'taskData');
+            const task_id = rowData.task_id;
 
-        const [products1, products2] = await Promise.all([fetchProductTaskShow(task_id), fetchProductDetails(task_id)]);
+            const [products1, products2] = await Promise.all([fetchProductTaskShow(task_id), fetchProductDetails(task_id)]);
 
-        const product_list_Div_add = document.getElementById('product_list_add');
+            const product_list_Div_add = document.getElementById('product_list_add');
 
-        const unaddedProducts = [];
+            const unaddedProducts = [];
 
-        products1.forEach(product1 => {
-            if (product1.product_active === 1) {
-                let isAdded = false;
-                products2.forEach(product2 => {
-                    if (product1.product_id === product2.product_id) {
-                        isAdded = true;
+            products1.forEach(product1 => {
+                if (product1.product_active === 1) {
+                    let isAdded = false;
+                    products2.forEach(product2 => {
+                        if (product1.product_id === product2.product_id) {
+                            isAdded = true;
+                        }
+                    });
+                    if (!isAdded) {
+                        unaddedProducts.push(product1);
                     }
-                });
-                if (!isAdded) {
-                    unaddedProducts.push(product1);
                 }
-            }
-        });
+            });
 
-        products2.forEach(product2 => {
-            if (product2.product_active === 1) {
-                let isAdded = false;
-                products1.forEach(product1 => {
-                    if (product2.product_id === product1.product_id) {
-                        isAdded = true;
+            products2.forEach(product2 => {
+                if (product2.product_active === 1) {
+                    let isAdded = false;
+                    products1.forEach(product1 => {
+                        if (product2.product_id === product1.product_id) {
+                            isAdded = true;
+                        }
+                    });
+                    if (!isAdded) {
+                        unaddedProducts.push(product2);
                     }
-                });
-                if (!isAdded) {
-                    unaddedProducts.push(product2);
                 }
-            }
-        });
+            });
 
-        product_list_Div_add.innerHTML = '';
+            product_list_Div_add.innerHTML = '';
 
-        unaddedProducts.forEach(product => {
-            var newRow = createProductRow(product);
-            product_list_Div_add.appendChild(newRow);
-        });
+            unaddedProducts.forEach(product => {
+                var newRow = createProductRow(product);
+                product_list_Div_add.appendChild(newRow);
+            });
 
-    } catch (error) {
-        console.error('Error adding more product:', error);
+        } catch (error) {
+            console.error('Error adding more product:', error);
+        }
     }
-}
 
     function createProductRow(product) {
         var newRow = document.createElement("div");
-        newRow.classList.add("row", "justify-content-end" , "product_add"); 
+        newRow.classList.add("row", "justify-content-end", "product_add");
         newRow.innerHTML = `
                         <input id="product_id_add" type="hidden" class="product_id_add" value="${product.product_id}">
                                         <div class="col-md-9">
@@ -1025,7 +1024,7 @@ async function addMoreProduct(rowData) {
 
                     json.slice(1).forEach(product => {
 
-                        document.getElementById('task_id_update').value = task_id;                                
+                        document.getElementById('task_id_update').value = task_id;
                         document.getElementById('datetime_update').value = product.task_datetime;
                         document.getElementById('pay_status_update').value = product.pay_status;
                         document.getElementById('pay_type_update').value = product.pay_type;
@@ -1043,7 +1042,7 @@ async function addMoreProduct(rowData) {
                             productTableBody.appendChild(resule);
 
                             let update = document.createElement("div");
-                            update.classList.add("row", "justify-content-end" , "product_update"); // Add classes for Bootstrap styling
+                            update.classList.add("row", "justify-content-end", "product_update"); // Add classes for Bootstrap styling
                             update.innerHTML = `
                                         <input id="product_id_update" class="product_id_update" type="hidden" value="${product.product_id}">
                                         <div class="col-md-9">
@@ -1071,10 +1070,9 @@ async function addMoreProduct(rowData) {
                     <td>${totalCeil}</td>
                 `;
 
-                $('#toggleCardadd').click(function() {
-                    addMoreProduct(rowData);
-                    // console.log('Row data:', rowData); // Pass rowData to addMoreProduct function
-                });
+                    $('#toggleCardadd').off("click").on("click", () => {
+                        addMoreProduct(rowData);
+                    });
                     productTableBody.appendChild(totalRow);
                     $('#product_detail_modal').modal('show');
                 } else {
@@ -1195,4 +1193,11 @@ async function addMoreProduct(rowData) {
         var data = table.row(btnElement.parents('tr')).data();
         return data;
     }
+
+
+    $(document).on('click', '.btn-cancel-modal', () => {
+        $("#modal_confirm").modal("hide");
+        console.log("cancel");
+        $("#modal_confirm_submit").off("click");
+    });
 </script>
