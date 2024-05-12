@@ -108,6 +108,9 @@
         color: purple;
         background-color: rgba(129, 66, 255, 0.1) !important;
     }
+    .table-responsive{
+    min-height: 200px;
+    }
 </style>
 <!-- Content wrapper -->
 <div class="content-wrapper">
@@ -128,6 +131,7 @@
         </div>
         <div class="row">
             <div class="card mb-4">
+                
                 <h5 class="card-header">รายการการจัดส่งน้ำประจำวัน</h5>
                 <div class="card-body" style="padding:0px!important;">
                     <div class="table_unfit">
@@ -141,6 +145,7 @@
                                         <th class="w-lm-300">รายการสินค้า</th>
                                         <!-- <th class="">กลาง 24</th>
                                         <th class="">เล็ก 73</th> -->
+                                        <th class="w-lm-200">จำนวนเงิน</th>
                                         <th class="w-lm-300">สถานที่</th>
                                         <th>Map</th>
                                         <th>โทร.</th>
@@ -349,30 +354,27 @@
                 if (data[0].status == '1') {
                     const table = document.getElementById('table_branch');
                     table.innerHTML = '';
-                    let taskCounter = 0; // เก็บค่านับจำนวน task
-                    let prevCusId = null; // เก็บค่า cus_id ก่อนหน้า
+                    let taskCounter = 0;
+                    let prevCusId = null;
 
                     data.slice(1).forEach(deli_t => {
-                        // ตรวจสอบว่า cus_id เปลี่ยนหรือไม่
+                        
                         if (deli_t.cus_id !== prevCusId) {
-                            taskCounter = 1; // ถ้าเปลี่ยน cus_id ให้เริ่มนับใหม่
+                            taskCounter = 1;
                         } else {
-                            taskCounter++; // ถ้าไม่เปลี่ยน cus_id เพิ่มค่านับตามปกติ
+                            taskCounter++;
                         }
 
                         prevCusId = deli_t.cus_id;
                         const newRow = document.createElement("tr");
-                        let productData = ''; // เริ่มต้นตัวแปรเป็นสตริงเปล่า
+                        let productData = ''; 
                         let quantityData = '';
 
-                        // ใช้ forEach เพื่อวนลูปผ่านสินค้าใน deli_t.products
                         deli_t.products.forEach((product, index) => {
-                            // const productId = product.product_id;
+                            
                             const quantity = product.order_quantity;
+                            console.log(quantity);
                             const product_name = product.product_name;
-                            // const id = productId.replace('-', ''); // ลบอักขระพิเศษออก
-
-                            // เพิ่มข้อมูลสินค้าลงในตัวแปร productData
                             productData += `${product_name}`;
                             quantityData += `${quantity}`;
 
@@ -395,7 +397,7 @@
                             </table>
                             </td>
                             `;
-
+                        
 
                         // // สร้างคอลัมน์สำหรับแสดงรายการสินค้า (จำกัดเพียงสามคอลัมน์)
                         // let productColumns = '';
@@ -433,6 +435,8 @@
                     <td class="text-center"><span class="badge rounded-pill status ${getStatusClass(deli_t.task_status)}">${deli_t.task_id}</span></td> 
                     <td class="text-center">${deli_t.cus_name}</td>
                     ${productColumn}
+                    <td class="text-center">จำนวนเงินที่ต้องจ่าย : ${Math.ceil(deli_t.price_total.toFixed(2))}
+                                            จำนวนเงินที่ได้รับ : ${Math.ceil(deli_t.pay_total.toFixed(2))}</td>
                     <td class="text-center">${deli_t.cus_address}</td>
                     <td class="text-center"><a href="https://maps.google.com/?q=${deli_t.lat},${deli_t.lon}" target="_blank"><i class="menu-icon tf-icons bx bx-map"></i></a></td>
                     <td class="text-center"><a href="tel:${deli_t.cus_tel}">${deli_t.cus_tel}</a></td>
@@ -455,9 +459,27 @@
     }
 
     submitCheck = (task_id) => {
-        $("#modal_confirm_text").html("ยืนยันการจัดส่ง");
+        $("#modal_confirm_text").html(`
+                                        ยืนยันการจัดส่ง
+                                        
+                                        <div class="mt-3 col-md-6">
+                                            <label id="modal_pay_type_label" class="form-label" for="modal_pay_type">รูปแบบการจ่าย </label>
+                                            <select id="modal_pay_type" class="form-select form-control-sm color-dropdown">
+                                                <option selected>--เลือกรูปแบบการจ่าย--</option>
+                                                <option value="0">เงินสด</option>
+                                                <option value="1">เงินโอน</option>
+                                                <option value="2">บัตรเครดิต</option>
+                                            </select>
+                                        </div>
+                                        <div class="mt-3 col-md-6">
+                                        <label class="form-label" for="modal_confirm_input">จำนวนเงิน</label>
+                                        <input type="text" id="modal_confirm_input" placeholder="ระบุจำนวนเงิน" class="form-control">
+                                        </div>
+                                        `);
         $("#modal_confirm_submit").on("click", () => {
-            submitTask(task_id);
+            const pay_type = $("#modal_pay_type").val();
+            const amount = $("#modal_confirm_input").val();
+            submitTask(task_id, pay_type, amount);
             $("#modal_confirm_submit").off("click");
         });
 
@@ -472,7 +494,7 @@
         return datetimeNow
     }
 
-    submitTask = (task_id) => {
+    submitTask = (task_id, pay_type, amount) => {
         TimeNOW = getdatenow()
         fetch('../api/product?case=task_success', {
                 method: 'POST',
@@ -482,6 +504,8 @@
                 body: JSON.stringify({
                     case: 'task_success',
                     taskID: task_id,
+                    pay_type: pay_type,
+                    amount: amount,
                     last_datetime: TimeNOW
                 })
             })
