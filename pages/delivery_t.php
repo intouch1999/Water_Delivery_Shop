@@ -745,7 +745,8 @@
                                 },
                                 {
                                     data: null,
-                                    defaultContent: `<button class="btn btn-primary btn-sm btn-edit">นัดหมาย</button>`
+                                    defaultContent: `<button class="btn btn-primary btn-sm btn-edit">นัดหมาย</button>`,
+                                    searchable: false
                                 }
                             ]
                         });
