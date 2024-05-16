@@ -136,15 +136,15 @@
                 <div class="card-body" style="padding:0px!important;">
                     <div class="table_unfit">
                         <div class="table-responsive">
-                            <table class="table table-bordered">
-                                <thead>
+                            <table class="table table-bordered" id="main_table">
+                                <thead id ="table_head">
                                     <tr class="text-center">
                                         <th width="5%">กระทำ</th>
                                         <th>หมายเลข</th>
                                         <th class="w-lm-200">ชื่อลูกค้า</th>
-                                        <th class="w-lm-300">รายการสินค้า</th>
-                                        <!-- <th class="">กลาง 24</th>
-                                        <th class="">เล็ก 73</th> -->
+                                        <th class="">ใหญ่ </th>
+                                        <th class="">กลาง 24</th>
+                                        <th class="">เล็ก 73</th>
                                         <th class="w-lm-200">จำนวนเงิน</th>
                                         <th class="w-lm-300">สถานที่</th>
                                         <th>Map</th>
@@ -352,111 +352,122 @@
             })
             .then(function(data) {
                 if (data[0].status == '1') {
-                    const table = document.getElementById('table_branch');
-                    table.innerHTML = '';
+                    const table = document.getElementById('main_table');
+                    const table_body = document.getElementById('table_branch');
+                    table.querySelector('thead').innerHTML = '';
+                    table_body.innerHTML = '';
+
                     let taskCounter = 0;
-                    let prevCusId = null;
+
+                    const productSet = new Map();
+                    data.slice(1).forEach(deli_t => {
+                        deli_t.products.forEach(product => {
+                            productSet.set(product.product_name, product.product_id);
+                        });
+                    });
+
+                    const productHeaders = Array.from(productSet.entries());
+                    const productOrder = ['P00001', 'P00002', 'P00003'];
+
+                    // Sort productHeaders based on the custom order
+                    const sortedProductHeaders = productHeaders.sort(([, idA], [, idB]) => {
+                        return productOrder.indexOf(idA) - productOrder.indexOf(idB);
+                    });
+
+                    const thead = table.querySelector('thead');
+                    const headerRow = document.createElement('tr');
+                    headerRow.classList.add('text-center');
+                    headerRow.innerHTML = `
+                        <th width="5%">กระทำ</th>
+                        <th>หมายเลข</th>
+                        <th class="w-lm-200">ชื่อลูกค้า</th>
+                        ${sortedProductHeaders.map(([product, productId]) => {
+                            if (productId === 'P00003') {
+                                return `<th class="text-center w-lm-100">เล็ก</th>`;
+                            } else if (productId === 'P00002') {
+                                return `<th class="text-center w-lm-100">กลาง</th>`;
+                            } else if (productId === 'P00001') {
+                                return `<th class="text-center w-lm-100">ใหญ่</th>`;
+                            } else {
+                                return `<th class="text-center w-lm-200">${product}</th>`;
+                            }
+                        }).join('')}
+                        <th class="w-lm-200">จำนวนเงิน</th>
+                        <th class="w-lm-300">สถานที่</th>
+                        <th>Map</th>
+                        <th>ติดต่อ</th>
+                        <th class="w-lm-200">ดำเนินการ</th>
+                    `;
+                    thead.appendChild(headerRow);
 
                     data.slice(1).forEach(deli_t => {
-                        
-                        if (deli_t.cus_id !== prevCusId) {
-                            taskCounter = 1;
-                        } else {
-                            taskCounter++;
-                        }
-
-                        prevCusId = deli_t.cus_id;
                         const newRow = document.createElement("tr");
-                        let productData = ''; 
-                        let quantityData = '';
 
-                        deli_t.products.forEach((product, index) => {
-                            
-                            const quantity = product.order_quantity;
-                            console.log(quantity);
-                            const product_name = product.product_name;
-                            productData += `${product_name}`;
-                            quantityData += `${quantity}`;
+                        const productColumns = productHeaders.map(([productName, productId]) => {
+                            const product = deli_t.products.find(p => p.product_name === productName);
+                            if (product) {
+                                if (product.product_id === 'P00001') {
+                                    return `<td class="text-center water-l ${product.product_id} ">${product.order_quantity}</td>`;
+                                } else if (product.product_id === 'P00002') {
+                                    return `<td class="text-center water-m ${product.product_id}">${product.order_quantity}</td>`;
+                                } else if (product.product_id === 'P00003') {
+                                    return `<td class="text-center water-s ${product.product_id}">${product.order_quantity}</td>`;
+                                } else {
+                                    return `<td class="text-center">${product.order_quantity}</td>`;
+                                }
+                            } else {
 
-                        });
-
-                        const productColumn = `
-                        <td>
-                            <table>
-                                <tbody>
-                                    <tr>
-
-                                    </tr>
-                                    ${deli_t.products.map(product => `
-                                        <tr>
-                                            <td class="text-center">${product.product_name}</td>
-                                            <td class="text-center">จำนวน : ${product.order_quantity}</td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                            </td>
-                            `;
-                        
-
-                        // // สร้างคอลัมน์สำหรับแสดงรายการสินค้า (จำกัดเพียงสามคอลัมน์)
-                        // let productColumns = '';
-                        // for (let i = 0; i < 3; i++) {
-                        //     const product = (i < deli_t.products.length) ? deli_t.products[i] : { product_id: '0', order_quantity: '0' };
-                        //     const productId = product.product_id;
-                        //     const quantity = product.order_quantity;
-                        //     const id = productId.replace('-', ''); // ลบอักขระพิเศษออก
-
-                        //     // กำหนดคอลัมน์ตามลำดับ
-                        //     let columnClass = '';
-                        //     if (i === 0) {
-                        //         columnClass = 'water-l';
-                        //     } else if (i === 1) {
-                        //         columnClass = 'water-m';
-                        //     } else {
-                        //         columnClass = 'water-s';
-                        //     }
-
-                        //     productColumns = `<td class="text-center ${columnClass}" id="${id}">${productId} (${quantity})</td>`;
-                        // }
+                                if (productId === 'P00003') {
+                                    return `<td class="text-center water-s ${productId}">0</td>`;
+                                } else if (productId === 'P00002') {
+                                    return `<td class="text-center water-m ${productId}">0</td>`;
+                                } else if (productId === 'P00001') {
+                                    return `<td class="text-center water-l ${productId}">0</td>`;
+                                } else {
+                                    return `<td class="text-center">0</td>`;
+                                }
+                            }
+                        }).join('');
 
                         newRow.innerHTML = `
-                    <td>
-                    <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle bx bx-menu" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                        
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                        <li><a class="dropdown-item" onclick="submitCheck('${deli_t.task_id}')">ยืนยัน</a></a></li>
-                        <li><a class="dropdown-item" onclick="cancelCheck('${deli_t.task_id}')">ยกเลิก</a></li>
-                    </ul>
-                    </div>
-                    </td>
-                    <td class="text-center"><span class="badge rounded-pill status ${getStatusClass(deli_t.task_status)}">${deli_t.task_id}</span></td> 
-                    <td class="text-center">${deli_t.cus_name}</td>
-                    ${productColumn}
-                    <td class="text-center">จำนวนเงินที่ต้องจ่าย : ${Math.ceil(deli_t.price_total.toFixed(2))}
-                                            จำนวนเงินที่ได้รับ : ${Math.ceil(deli_t.pay_total.toFixed(2))}</td>
-                    <td class="text-center">${deli_t.cus_address}</td>
-                    <td class="text-center"><a href="https://maps.google.com/?q=${deli_t.lat},${deli_t.lon}" target="_blank"><i class="menu-icon tf-icons bx bx-map"></i></a></td>
-                    <td class="text-center"><a href="tel:${deli_t.cus_tel}">${deli_t.cus_tel}</a></td>
-                    <td><span class="badge rounded-pill bg-warning" onclick="alert('${deli_t.sale_user}');">${deli_t.sale_user}</span></td>
-                `;
+                            <td class="text-center"><button class="btn btn-primary btn-sm" onclick="submitCheck('${deli_t.task_id}')">ยืนยัน</button> </td>
+                            <td class="text-center"><span class="badge rounded-pill status ${getStatusClass(deli_t.task_status)}">${deli_t.task_id}</span></td>
+                            <td class="text-center">${deli_t.cus_name}</td>
+                            ${productColumns}
+                            <td class="text-center">จำนวนเงินที่ต้องจ่าย : ${Math.ceil(deli_t.price_total.toFixed(2))}<br>จำนวนเงินที่ได้รับ : ${Math.ceil(deli_t.pay_total.toFixed(2))}</td>
+                            <td class="text-center">${deli_t.cus_address}</td>
+                            <td class="text-center"><a href="https://maps.google.com/?q=${deli_t.lat},${deli_t.lon}" target="_blank"><i class="menu-icon tf-icons bx bx-map"></i></a></td>
+                            <td class="text-center"><a href="tel:${deli_t.cus_tel}">${deli_t.cus_tel}</a></td>
+                            <td class="text-center"><span class="badge rounded-pill bg-warning" onclick="alert('${deli_t.sale_user}');">${deli_t.sale_user}</span></td>
+                        `;
 
-                        table.appendChild(newRow);
-                    })
-                } else {
-                    const table = document.getElementById('table_branch');
-                    table.innerHTML = `
-                <td colspan="9" class="text-center fs-1">ไม่มีรายการส่งในวันที่เลือก</td>
-            `;
-                    table.appendChild(table);
-                }
-            })
-            .catch(function(error) {
-                console.error('Error fetching data:', error);
-            });
-    }
+                        table_body.appendChild(newRow);
+
+                                    });
+                                } else {
+                                    table_head = document.querySelector('#main_table thead');
+                                    table_body = document.querySelector('#table_branch');
+
+
+                                    table_head.innerHTML = `                    
+                                        <th width="5%">กระทำ</th>
+                                        <th>หมายเลข</th>
+                                        <th class="w-lm-200">ชื่อลูกค้า</th>
+                                        <th class="w-lm-200">จำนวนเงิน</th>
+                                        <th class="w-lm-300">สถานที่</th>
+                                        <th>Map</th>
+                                        <th>ติดต่อ</th>
+                                        <th class="w-lm-200">ดำเนินการ</th>
+                                        `;
+
+                                    table_body.innerHTML = '<tr><td colspan="9" class="text-center">ไม่พบข้อมูล</td></tr>';
+                                }
+                            
+                                })
+                                .catch(function(error) {
+                                    console.error('Error fetching data:', error);
+                                });
+                        }
 
     submitCheck = (task_id) => {
         $("#modal_confirm_text").html(`
@@ -475,15 +486,30 @@
                                         <label class="form-label" for="modal_confirm_input">จำนวนเงิน</label>
                                         <input type="text" id="modal_confirm_input" placeholder="ระบุจำนวนเงิน" class="form-control">
                                         </div>
+                                        <div class="mt-3 col-md-6">
+                                        <label class="form-label" for="modal_confirm_file"></label>
+                                        <img id="modal_confirm_img" class="w-100" src="#" alt="">
+                                        <input type="file" id="modal_confirm_file" accept="image/*" placeholder="ภาพ" class="form-control" capture="camera" onclick="previewImg()"/>
+                                        </div>
                                         `);
         $("#modal_confirm_submit").on("click", () => {
             const pay_type = $("#modal_pay_type").val();
             const amount = $("#modal_confirm_input").val();
-            submitTask(task_id, pay_type, amount);
+            const img = $("#modal_confirm_file")[0].files[0];
+            submitTask(task_id, pay_type, amount, img);
             $("#modal_confirm_submit").off("click");
         });
 
         $("#modal_confirm").modal("show");
+    }
+
+    previewImg = () => {
+        modal_confirm_file.onchange = evt => {
+        const [file] = modal_confirm_file.files
+        if (file) {
+            modal_confirm_img.src = URL.createObjectURL(file)
+        }
+        }
     }
 
     getdatenow = () => {
@@ -494,7 +520,7 @@
         return datetimeNow
     }
 
-    submitTask = (task_id, pay_type, amount) => {
+    submitTask = (task_id, pay_type, amount, img) => {
         TimeNOW = getdatenow()
         fetch('../api/product?case=task_success', {
                 method: 'POST',
@@ -506,7 +532,9 @@
                     taskID: task_id,
                     pay_type: pay_type,
                     amount: amount,
-                    last_datetime: TimeNOW
+                    last_datetime: TimeNOW,
+                    img: img
+
                 })
             })
             .then(response => {
@@ -521,48 +549,6 @@
                     alert_snackbar('error', json[0].error_message);
                 } else {
                     alert_snackbar('success', "จัดส่งสำเร็จ");
-                    setTimeout(function() {
-                        refresh()
-                    }, 1500);
-                }
-            })
-            .catch(error => {
-                console.error('Error submitting task:', error);
-            });
-    }
-
-    cancelCheck = (task_id) => {
-        $("#modal_confirm_text").html("ยืนยันการยกเลิก");
-        $("#modal_confirm_submit").on("click", () => {
-            cancelTask(task_id);
-            $("#modal_confirm_submit").off("click");
-        });
-
-        $("#modal_confirm").modal("show");
-    }
-
-    cancelTask = (task_id) => {
-        TimeNOW = getdatenow()
-        fetch('../api/product?case=task_cancel', {
-                method: 'POST',
-                body: JSON.stringify({
-                    case: 'task_cancel',
-                    taskID: task_id,
-                    last_datetime: TimeNOW
-                }),
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to submit task. Server responded with ' + response.status);
-                }
-                return response.json();
-            })
-            .then(json => {
-                $("#modal_confirm").modal("hide");
-                if (json[0].status == '0') {
-                    alert_snackbar('error', json[0].error_message);
-                } else {
-                    alert_snackbar('success', "ยกเลิกสำเร็จ");
                     setTimeout(function() {
                         refresh()
                     }, 1500);
