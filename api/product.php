@@ -290,12 +290,20 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 		$pay_type = $decode['pay_type'];
 		$pay_total = $decode['amount'];
 		$last_datetime = $decode['last_datetime'];
+		$image = $decode['img'];
+
+		$base64img = base64_decode($image);
+
+		$image_name = $base64img. '.jpg';
+		$image_path = '../assets/img/task/' . $image_name;
+
+		file_put_contents($image_path, $base64img);
         
 		if (empty($pay_total)) {
-			$query_task = "UPDATE `delivery_task` SET `task_status` = 2  WHERE `task_id` = '{$taskID}'";
+			$query_task = "UPDATE `delivery_task` SET `task_status` = 2 , `suc_img` = '{$image_name}'  WHERE `task_id` = '{$taskID}'";
 			$stmt_task = $conn->query($query_task);
 		} else {
-			$query_task = "UPDATE `delivery_task` SET `task_status` = 2 , `pay_type` = '{$pay_type}' , `pay_total` = '{$pay_total}' , `pay_datetime` = '{$last_datetime}' WHERE `task_id` = '{$taskID}'  ";
+			$query_task = "UPDATE `delivery_task` SET `task_status` = 2 , `pay_type` = '{$pay_type}' , `pay_total` = '{$pay_total}' , `pay_datetime` = '{$last_datetime}' , `suc_img` = '{$image_name}' WHERE `task_id` = '{$taskID}'  ";
 			$stmt_task = $conn->query($query_task);
 		}
 
@@ -387,7 +395,8 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 						pi.product_active,
 						dt.pay_total,
 						dt.price_total,
-						dtp.product_price
+						dtp.product_price,
+						dt.suc_img
 					FROM 
 						delivery_task AS dt
 					JOIN 
@@ -403,6 +412,7 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
         $stmt = $conn->query($query);
 		if ($stmt->rowCount() > 0) {
 			while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+				// $row['suc_img'] = base64_encode($row['suc_img']);
 				$data[0] = array('status' => 1);
 				$data[] = $row;
 			}
@@ -433,7 +443,7 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 			} else {
 				$query_product = "UPDATE `delivery_task_product`
 					SET `order_true` = '$order_true' , `product_price` = '$product_price'
-					WHERE `product_id` = '$product_id' AND `task_id` = '$task_id' AND `product_active` = '1' ";
+					WHERE `product_id` = '$product_id' AND `task_id` = '$task_id' AND (`product_active` = '1' OR `product_active` = '2')";
 			}
 		
 			$stmt_product = $conn->query($query_product);
@@ -447,13 +457,14 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 		
 		$query = "UPDATE delivery_task 
 		SET pay_status = '{$pay_status}' , pay_type = '{$pay_type}' , pay_total = '{$pay_total}' , task_datetime = '{$task_datetime}' , price_total = '{$price_total}'
-		WHERE task_id = '{$task_id}' AND task_status = '1' ";
+		WHERE task_id = '{$task_id}' AND (task_status = '1' OR task_status = '2')";
 
 		$stmt = $conn->query($query);
 		if ($stmt) {
             $query_select = "SELECT dtp.task_id, dtp.product_id, dtp.product_price
 			FROM `delivery_task_product` AS dtp 
- 			WHERE dtp.task_id = '$task_id' AND dtp.product_active = '1'";
+			WHERE dtp.task_id = '{$task_id}' AND (dtp.product_active = '1' OR dtp.product_active = '2')
+ 		";
             $stmt_select = $conn->query($query_select);
             $selected_data = $stmt_select->fetchAll(PDO::FETCH_ASSOC);
 			
@@ -472,12 +483,43 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
         $task_id = $decode['task_id'];
         $product_id = $decode['product_id'];
         
+		// $query_check_status = "SELECT task_status FROM `delivery_task` WHERE task_id = '$task_id'";
+        // $stmt_check_status = $conn->query($query_check_status);
+        // $task_status_row = $stmt_check_status->fetch(PDO::FETCH_ASSOC);
+        // $task_status = $task_status_row['task_status'];
+
+		// if ($task_status != 2) {
+        //     // กรณี task_status ไม่เป็น 2 ให้ทำการเพิ่มสินค้า
+        //     foreach ($decode['product_id'] as $index => $product_id) {
+        //         $order_true = $decode['order_true'][$index];
+        //         $product_price = $decode['product_price'][$index];
+            
+        //         $query = "INSERT INTO `delivery_task_product` (`task_id`, `product_id`, `product_active`, `product_price`, `order_true`, `create_datetime`, `sale_user`) 
+        //         VALUES ('$task_id', '$product_id', '1', '$product_price', '$order_true', NOW(), '$sivanat_user')
+        //         ";
+                
+        //         $stmt_insert_product = $conn->query($query);
+        
+        //         if (!$stmt_insert_product) {
+        //             $data[0] = array('status' => 0);
+        //             echo json_encode($data);
+        //             exit;
+        //         }
+        //     }
+		// } else {
+		// 	// กรณี task_status เป็น 2 ให้ทำการเพิ่มสินค้า
+		// 	$data[0] = array('status' => 0);
+		// 	echo json_encode($data);
+		// 	exit;
+		// }
+
 		foreach ($decode['product_id'] as $index => $product_id) {
 			$order_true = $decode['order_true'][$index];
 			$product_price = $decode['product_price'][$index];
 		
 			$query = "INSERT INTO `delivery_task_product` (`task_id`, `product_id`, `product_active`, `product_price`, `order_true`, `create_datetime`, `sale_user`) 
-			VALUES ('$task_id', '$product_id', '1', '$product_price', '$order_true', NOW(), '$sivanat_user')";
+			VALUES ('$task_id', '$product_id', '1', '$product_price', '$order_true', NOW(), '$sivanat_user')
+			";
 			
 			$stmt_insert_product = $conn->query($query);
 	
@@ -489,30 +531,31 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 		}
 		
         if ($stmt_insert_product) {
-            // เลือกข้อมูลทั้งหมดของ delivery_task_product
-            $query_select = "SELECT dtp.task_id, dtp.product_id, dtp.product_price,
-			IF (dtp.order_true IS NOT NULL AND dtp.order_true != 0, dtp.order_true, dtp.order_qty) AS QTY
-			FROM `delivery_task_product` AS dtp 
-			WHERE dtp.task_id = '$task_id' AND dtp.product_active = '1'";
-            $stmt_select = $conn->query($query_select);
-            $selected_data = $stmt_select->fetchAll(PDO::FETCH_ASSOC);
+		// เลือกข้อมูลทั้งหมดของ delivery_task_product
+		$query_select = "SELECT dtp.task_id, dtp.product_id, dtp.product_price,
+		IF (dtp.order_true IS NOT NULL AND dtp.order_true != 0, dtp.order_true, dtp.order_qty) AS QTY
+		FROM `delivery_task_product` AS dtp 
+		WHERE dtp.task_id = '$task_id' AND (dtp.product_active = '1' OR dtp.product_active = '2')";
+		$stmt_select = $conn->query($query_select);
+		$selected_data = $stmt_select->fetchAll(PDO::FETCH_ASSOC);
 
-            // อัปเดตราคารวมสินค้า
-			$query_update_total_price = "UPDATE `delivery_task` AS dt 
-				SET `price_total` = (
-					SELECT SUM(dtp.product_price)
-					FROM `delivery_task_product` AS dtp 
-					INNER JOIN `product_info` AS pi ON dtp.product_id = pi.product_id 
-					WHERE 
-						dtp.`task_id` = '$task_id' 
-						AND dtp.`product_active` = '1' 
-						AND dtp.`product_id` = pi.product_id
-				)
-				WHERE dt.`task_id` = '$task_id' 
-				AND dt.`task_status` = 1;
-			";
+		// อัปเดตราคารวมสินค้า
+		$query_update_total_price = "UPDATE `delivery_task` AS dt 
+			SET `price_total` = (
+				SELECT SUM(dtp.product_price)
+				FROM `delivery_task_product` AS dtp 
+				INNER JOIN `product_info` AS pi ON dtp.product_id = pi.product_id 
+				WHERE 
+					dtp.`task_id` = '$task_id' 
+					AND (dtp.`product_active` = '1' OR dtp.`product_active` ='2')
+					AND dtp.`product_id` = pi.product_id
+			)
+			WHERE dt.`task_id` = '$task_id' 
+			;
+		";
 
-            $stmt_update_total_price = $conn->query($query_update_total_price);
+		$stmt_update_total_price = $conn->query($query_update_total_price);
+
 
             $data[0] = array('status' => 1);
             $data[] = array('product' => $selected_data);
@@ -562,7 +605,7 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
                     GROUP BY 
                         dt.task_id
 					ORDER BY
-					 dt.cus_id ASC
+					 dt.task_id DESC
 						
 						";
             

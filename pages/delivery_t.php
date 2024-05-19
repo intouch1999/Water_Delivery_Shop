@@ -68,6 +68,9 @@
     #product_detail_modal .card.mb-2 {
         display: none;
     }
+    .need{
+    color:red;
+  }
 </style>
 <!-- Content wrapper -->
 <div class="content-wrapper">
@@ -199,8 +202,9 @@
                         </h5>
                         <div class="row gx-3 gy-2 align-items-center">
                             <input id="task_id_update" type="hidden"> </input>
-                            <label class="form-label" for="task_datetime">วันเวลาจัดส่ง </label>
-                            <input type="datetime-local" class="form-control" id="datetime_update" name="task_datetime">
+                            <img id="img_update" class="w-100" src="" alt="">
+                            <label class="form-label" for="datetime_update">วันเวลาจัดส่ง </label>
+                            <input type="datetime-local" class="form-control" id="datetime_update" name="datetime_update">
                             <div class="col-md">
                                 <label class="form-label" for="pay_status_update">สถานะการจ่าย </label>
                                 <select id="pay_status_update" class="form-select form-control-sm color-dropdown">
@@ -355,7 +359,7 @@
         if ($("#task_datetime").val().length == "") {
             alert_snackbar("warning", "กรุณาระบุวันที่");
             setTimeout(function() {
-                $("#task_datetime" + i).focus();
+                $("#task_datetime").focus();
             }, 300);
             return false;
         }
@@ -458,6 +462,8 @@
             $("#modal_confirm_text").html(`
                                         ยืนยันการจัดส่ง
                                         
+                                        ยืนยันการจัดส่ง
+                                        
                                         <div class="mt-3 col-md-6">
                                             <label id="modal_pay_type_label" class="form-label" for="modal_pay_type">รูปแบบการจ่าย </label>
                                             <select id="modal_pay_type" class="form-select form-control-sm color-dropdown">
@@ -471,15 +477,40 @@
                                         <label class="form-label" for="modal_confirm_input">จำนวนเงิน</label>
                                         <input type="text" id="modal_confirm_input" placeholder="ระบุจำนวนเงิน" class="form-control">
                                         </div>
+                                        <div class="mt-3 col-md-6">
+                                        <label class="form-label" for="modal_confirm_file">
+                                        หลักฐาน
+                                        <span class="need">*</span>
+                                        </label>
+                                        <img id="modal_confirm_img" class="w-100" src="#" alt="">
+                                        <input type="file" id="modal_confirm_file" accept="image/*" class="form-control" capture="camera" onclick="previewImg()"/>
+                                        </div>
                                         `);
             $("#modal_confirm_submit").off("click").on("click", function() {
+                if($("#modal_confirm_file").val().length == "" ){
+                alert_snackbar("warning", "ถ่ายภาพก่อนอ้าย");
+                setTimeout(function() {
+                    $("#modal_confirm_file").focus();
+                }, 300)
+                return false
+            }
                 var pay_type = $("#modal_pay_type").val();
                 var amount = $("#modal_confirm_input").val();
-                tasklist_success(task_id , pay_type, amount);
+                var img = $("#modal_confirm_file")[0].files[0].name;
+                tasklist_success(task_id , pay_type, amount , img);
             });
 
             $("#modal_confirm").modal("show");
         });
+    }
+
+    previewImg = () => {
+        modal_confirm_file.onchange = evt => {
+        const [file] = modal_confirm_file.files
+        if (file) {
+            modal_confirm_img.src = URL.createObjectURL(file)
+        }
+        }
     }
 
     function cancel_check() {
@@ -533,7 +564,7 @@
         totalPrice: totalPrice,
         
     };
-    console.log(totalPrice)
+
     fetch('../api/product?case=TaskProduct', {
             method: 'POST',
             body: JSON.stringify({
@@ -707,7 +738,7 @@
                 } else {
                     alert_snackbar('success', "อัพเดทสำเร็จ");
                     setTimeout(function() {
-                        // location.reload();
+                        location.reload();
                     }, 1500);
                 }
             })
@@ -1024,7 +1055,7 @@
                     product_list_Div_update.innerHTML = '';
 
                     json.slice(1).forEach(product => {
-
+                        document.getElementById('img_update').src = 'data:image/jpeg;base64,' + json[0].suc_img; // here img
                         document.getElementById('task_id_update').value = task_id;
                         document.getElementById('datetime_update').value = product.task_datetime;
                         document.getElementById('pay_status_update').value = product.pay_status;
@@ -1053,6 +1084,7 @@
                                         <div class="col-md-2 mb-3">
                                         <label for="product_qty_update" class="form-label">จํานวน</label>
                                         <input type="number" class="form-control product_qty_update" name="quantity${product.product_id}" id="product_qty_update" value="${product.QTY}">
+                                        
                                         </div>
                         `;
 
@@ -1131,7 +1163,7 @@
             })
     }
 
-    function tasklist_success(task_id , pay_type, amount) {
+    function tasklist_success(task_id , pay_type, amount , img) {
         var timestamp = Date.now();
         var localDateTime = new Date(timestamp);
         localDateTime.setHours(localDateTime.getHours() + 7);
@@ -1144,7 +1176,8 @@
                     taskID: task_id,
                     pay_type: pay_type,
                     amount: amount,
-                    last_datetime: datetimeNow
+                    last_datetime: datetimeNow,
+                    img: img
                 }),
             })
             .then(function(response) {

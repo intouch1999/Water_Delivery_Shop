@@ -59,6 +59,20 @@
 // });
 //     })
 
+$('#calendar').on('click', '.event-info', function() {  
+  const date = document.querySelector('.event-header').textContent
+  const formattedDate = col_date(date)  
+  url = 'delivery_task?date=' + formattedDate
+  window.location.href = url
+})
+
+col_date = (date) => {
+  const DateFormate = new Date(date)
+  const formatter = new Intl.DateTimeFormat('fr-CA', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const formattedDate = formatter.format(DateFormate);
+  return formattedDate
+}
+
 calEvent = () => {
   $.ajax({
     url: '../api/product?case=calendarEvents',

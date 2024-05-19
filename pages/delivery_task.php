@@ -111,6 +111,10 @@
     .table-responsive{
     min-height: 200px;
     }
+
+    .need{
+    color:red;
+  }
 </style>
 <!-- Content wrapper -->
 <div class="content-wrapper">
@@ -126,7 +130,7 @@
                 </div>
             </div>
             <div class="col-md-8 col-sm-8">
-                <input type="date" class="form-control" id="inp_date" value="<?= $cur_date; ?>">
+                <input type="date" class="form-control" id="inp_date" value="">
             </div>
         </div>
         <div class="row">
@@ -211,65 +215,124 @@
 </div>
 <?php include("foot.php"); ?>
 <script>
-    $(document).ready(function() {
+//     $(document).ready(function() {
+//     const col_date_GB = () => {
+//         const date = new Date();
+//         const formatter_enGB = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+//         const formattedDate_GB = formatter_enGB.format(date); 
+//         return formattedDate_GB; 
+//     };
 
-        window.onload = function() {
+//     const col_date_CA = () => {
+//         const date = new Date();
+//         const formatter_frCA = new Intl.DateTimeFormat('fr-CA', { day: '2-digit', month: '2-digit', year: 'numeric' });
+//         const formattedDate_CA = formatter_frCA.format(date);
+//         return formattedDate_CA;
+//     }
 
-            if (location.href.endsWith('delivery_task')) {
-                const selectedDate = $("#inp_date").val();
-                table_branch(selectedDate);
-                changeDateHeader(selectedDate);
-                loadDataAndProgressBar(selectedDate);
-            }
-        };
-
-        $('#inp_date').change(function() {
-            var selectedDate = $(this).val();
-            loadDataAndProgressBar(selectedDate); // เมื่อเปลี่ยนวันที่
-            table_branch(selectedDate); // โหลดข้อมูลตาราง branch ใหม่
-            changeDateHeader(selectedDate); // เปลี่ยนหัวข้อวันที่
-
-        });
-
-    });
+//     window.onload = function() {
+//         const selectedDate_CA = col_date_CA(); 
+//         const selectedDate_GB = col_date_GB(); 
 
 
+//         $('#inp_date').val(selectedDate_CA);
 
-    // ฟังก์ชันโหลดข้อมูลและอัปเดตหลอดโปรเกรส
-    function loadDataAndProgressBar(selectedDate) {
-        fetch('../api/product?case=table_branch', {
-                method: 'POST',
-                body: JSON.stringify({
-                    case: 'table_branch',
-                    date: selectedDate
-                }),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(function(response) {
-                return response.json();
-            })
-            .then(function(data) {
-                if (data[0].status == '1') {
+//         table_branch(selectedDate_CA); 
+//         changeDateHeader(selectedDate_GB);
+//         // loadDataAndProgressBar(selectedDate); 
+//     };
 
-                    updateProgressBar(data.slice(1)); // เรียกใช้งาน updateProgressBar กับข้อมูลใหม่
-                } else {
+//     // On date input change
+//     $('#inp_date').change(function() {
+//         var selectedDate = $(this).val();
 
-                    updateProgressBar(data);
-                }
+//         const formattedDate = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(selectedDate));
+//         // loadDataAndProgressBar(formattedDate);te
+//         table_branch(selectedDate); 
+//         changeDateHeader(formattedDate); 
+//     });
+// });
 
-            })
-            .catch(function(error) {
-                // หากเกิดข้อผิดพลาดในการโหลดข้อมูล
-                console.error('Error fetching data:', error);
-            });
+$(document).ready(function() {
+
+    const getDateFromURL = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const dateParam = urlParams.get('date');
+        return dateParam ? dateParam : null;
+    };
+
+    window.onload = function() {
+    const urlDate = getDateFromURL();
+    let selectedDate_CA;
+    let selectedDate_GB;
+
+    if (urlDate) {
+
+        selectedDate_CA = urlDate;
+        selectedDate_GB = urlDate;
+    } else {
+        const date = new Date();
+        const formatter_enGB = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        const formattedDate_GB = formatter_enGB.format(date); 
+        const formatter_frCA = new Intl.DateTimeFormat('fr-CA', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        const formattedDate_CA = formatter_frCA.format(date);
+        selectedDate_CA = formattedDate_CA;
+        selectedDate_GB = formattedDate_GB;
     }
 
-    // ฟังก์ชันอัปเดตหลอดโปรเกรส
+    const formatter_frCA = new Intl.DateTimeFormat('fr-CA', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const formattedDateForDisplay = formatter_frCA.format(new Date(selectedDate_CA));
+
+    const selectedDate = $('#inp_date').val(selectedDate_CA);
+
+    table_branch(selectedDate_CA); 
+    changeDateHeader(formattedDateForDisplay);
+    // loadDataAndProgressBar(selectedDate); 
+};
+
+    $('#inp_date').change(function() {
+        var selectedDate = $(this).val();
+
+        const formattedDate = new Intl.DateTimeFormat('fr-CA', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(selectedDate));
+        // loadDataAndProgressBar(formattedDate);
+        table_branch(selectedDate); 
+        changeDateHeader(formattedDate); 
+    });
+});
+
+    // // // ฟังก์ชันโหลดข้อมูลและอัปเดตหลอดโปรเกรส
+    // function loadDataAndProgressBar(selectedDate) {
+    //     fetch('../api/product?case=table_branch', {
+    //             method: 'POST',
+    //             body: JSON.stringify({
+    //                 case: 'table_branch',
+    //                 date: selectedDate
+    //             }),
+    //             headers: {
+    //                 'Content-Type': 'application/json'
+    //             }
+    //         })
+    //         .then(function(response) {
+    //             return response.json();
+    //         })
+    //         .then(function(data) {
+    //             if (data[0].status == '1') {
+
+    //                 updateProgressBar(data.slice(1)); // เรียกใช้งาน updateProgressBar กับข้อมูลใหม่
+    //             } else {
+
+    //                 updateProgressBar(data);
+    //             }
+
+    //         })
+    //         .catch(function(error) {
+    //             // หากเกิดข้อผิดพลาดในการโหลดข้อมูล
+    //             console.error('Error fetching data:', error);
+    //         });
+    // }
+
     function updateProgressBar(data) {
         if (data.length === 0) {
-            // หาก data ไม่มีข้อมูล
             const progressBar = document.querySelector('.progress');
             const bar = progressBar.querySelector('.progress-bar');
 
@@ -300,28 +363,32 @@
     }
 
     function changeDateHeader(selectedDate) {
+    const formattedDate = selectedDate;
+    const formate = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(selectedDate));
+    const header = `รายการการจัดส่งน้ำประจำวัน ${formate}`;
+    $('.card-header').html(header);
+        
+    const url = `./delivery_task?date=${formattedDate}`;
+    history.pushState({}, '', url);
+}
 
-        const formattedDate = formatDate(selectedDate);
-
-        const header = `รายการการจัดส่งน้ำประจำวัน ${formattedDate}`;
-
-        $('.card-header').html(header);
-    }
 
     refresh = () => {
         const selectedDate = $("#inp_date").val();
         table_branch(selectedDate);
-        loadDataAndProgressBar(selectedDate);
+        // loadDataAndProgressBar(selectedDate);
     }
 
-    function formatDate(selectedDate) {
-        const dateObj = new Date(selectedDate);
-        const day = dateObj.getDate();
-        const month = dateObj.getMonth() + 1;
-        const year = dateObj.getFullYear();
-        const formattedDate = `${day}/${month < 10 ? '0' : ''}${month}/${year}`;
-        return formattedDate;
-    }
+    // function formatDate(selectedDate) {
+    //     const dateObj = new Date(selectedDate);
+    //     const day = dateObj.getDate();
+    //     const month = dateObj.getMonth() + 1;
+    //     const year = dateObj.getFullYear();
+    //     const formattedDate = `${day}/${month < 10 ? '0' : ''}${month}/${year}`;   
+    //     console.log(formattedDate);
+    //     return formattedDate;
+     
+    // }
 
     function getStatusClass(status) {
         switch (status) {
@@ -352,6 +419,7 @@
             })
             .then(function(data) {
                 if (data[0].status == '1') {
+                    updateProgressBar(data.slice(1));
                     const table = document.getElementById('main_table');
                     const table_body = document.getElementById('table_branch');
                     table.querySelector('thead').innerHTML = '';
@@ -445,6 +513,7 @@
 
                                     });
                                 } else {
+                                       updateProgressBar(data);
                                     table_head = document.querySelector('#main_table thead');
                                     table_body = document.querySelector('#table_branch');
 
@@ -487,15 +556,27 @@
                                         <input type="text" id="modal_confirm_input" placeholder="ระบุจำนวนเงิน" class="form-control">
                                         </div>
                                         <div class="mt-3 col-md-6">
-                                        <label class="form-label" for="modal_confirm_file"></label>
+                                        <label class="form-label" for="modal_confirm_file">
+                                        หลักฐาน
+                                        <span class="need">*</span>
+                                        </label>
                                         <img id="modal_confirm_img" class="w-100" src="#" alt="">
-                                        <input type="file" id="modal_confirm_file" accept="image/*" placeholder="ภาพ" class="form-control" capture="camera" onclick="previewImg()"/>
+                                        <input type="file" id="modal_confirm_file" accept="image/*" class="form-control" capture="camera" onclick="previewImg()"/>
                                         </div>
                                         `);
         $("#modal_confirm_submit").on("click", () => {
+            if($("#modal_confirm_file").val().length == "" ){
+                alert_snackbar("warning", "ถ่ายภาพก่อนอ้าย");
+                setTimeout(function() {
+                    $("#modal_confirm_file").focus();
+                }, 300)
+                return false
+            }
+
             const pay_type = $("#modal_pay_type").val();
             const amount = $("#modal_confirm_input").val();
-            const img = $("#modal_confirm_file")[0].files[0];
+            const img = $("#modal_confirm_file")[0].files[0].name;
+            console.log(img)
             submitTask(task_id, pay_type, amount, img);
             $("#modal_confirm_submit").off("click");
         });
