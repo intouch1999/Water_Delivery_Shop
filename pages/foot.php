@@ -30,7 +30,8 @@
           <!-- Modal -->
           <div class="modal fade" id="modal_confirm" data-bs-backdrop="static" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
-              <form class="modal-content">
+              <div class="modal-content">
+                <!-- <form class="modal-content"> -->
                 <div class="modal-header">
                   <h5 class="modal-title" id="backDropModalTitle">ยืนยันดำเนินการ</h5>
                   <button
@@ -53,7 +54,8 @@
                   </button>
                   <button type="button" id="modal_confirm_submit" class="btn btn-primary">ยืนยัน</button>
                 </div>
-              </form>
+</div>
+<!-- </form> -->
             </div>
           </div> 
     <!-- Core JS -->

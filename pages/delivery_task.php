@@ -435,7 +435,7 @@ $(document).ready(function() {
                     });
 
                     const productHeaders = Array.from(productSet.entries());
-                    const productOrder = ['P00001', 'P00002', 'P00003'];
+                    const productOrder = ['P00003', 'P00002', 'P00001'];
 
                     // Sort productHeaders based on the custom order
                     const sortedProductHeaders = productHeaders.sort(([, idA], [, idB]) => {
@@ -538,110 +538,246 @@ $(document).ready(function() {
                                 });
                         }
 
-    submitCheck = (task_id) => {
-        $("#modal_confirm_text").html(`
-                                        ยืนยันการจัดส่ง
+    // submitCheck = (task_id) => {
+    //     $("#modal_confirm_text").html(`
+    //                                     ยืนยันการจัดส่ง
                                         
-                                        <div class="mt-3 col-md-6">
-                                            <label id="modal_pay_type_label" class="form-label" for="modal_pay_type">รูปแบบการจ่าย </label>
-                                            <select id="modal_pay_type" class="form-select form-control-sm color-dropdown">
-                                                <option selected>--เลือกรูปแบบการจ่าย--</option>
-                                                <option value="0">เงินสด</option>
-                                                <option value="1">เงินโอน</option>
-                                                <option value="2">บัตรเครดิต</option>
-                                            </select>
-                                        </div>
-                                        <div class="mt-3 col-md-6">
-                                        <label class="form-label" for="modal_confirm_input">จำนวนเงิน</label>
-                                        <input type="text" id="modal_confirm_input" placeholder="ระบุจำนวนเงิน" class="form-control">
-                                        </div>
-                                        <div class="mt-3 col-md-6">
-                                        <label class="form-label" for="modal_confirm_file">
-                                        หลักฐาน
-                                        <span class="need">*</span>
-                                        </label>
-                                        <img id="modal_confirm_img" class="w-100" src="#" alt="">
-                                        <input type="file" id="modal_confirm_file" accept="image/*" class="form-control" capture="camera" onclick="previewImg()"/>
-                                        </div>
-                                        `);
-        $("#modal_confirm_submit").on("click", () => {
-            if($("#modal_confirm_file").val().length == "" ){
-                alert_snackbar("warning", "ถ่ายภาพก่อนอ้าย");
-                setTimeout(function() {
-                    $("#modal_confirm_file").focus();
-                }, 300)
-                return false
-            }
+    //                                     <div class="mt-3 col-md-6">
+    //                                         <label id="modal_pay_type_label" class="form-label" for="modal_pay_type">รูปแบบการจ่าย </label>
+    //                                         <select id="modal_pay_type" class="form-select form-control-sm color-dropdown">
+    //                                             <option selected>--เลือกรูปแบบการจ่าย--</option>
+    //                                             <option value="0">เงินสด</option>
+    //                                             <option value="1">เงินโอน</option>
+    //                                             <option value="2">บัตรเครดิต</option>
+    //                                         </select>
+    //                                     </div>
+    //                                     <div class="mt-3 col-md-6">
+    //                                     <label class="form-label" for="modal_confirm_input">จำนวนเงิน</label>
+    //                                     <input type="text" id="modal_confirm_input" placeholder="ระบุจำนวนเงิน" class="form-control">
+    //                                     </div>
+    //                                     <div class="mt-3 col-md-6">
+    //                                     <label class="form-label" for="modal_confirm_file">
+    //                                     หลักฐาน
+    //                                     <span class="need">*</span>
+    //                                     </label>
+    //                                     <img id="modal_confirm_img" class="w-100" src="#" alt="">
+    //                                     <input type="file" id="modal_confirm_file" accept="image/*" class="form-control" capture="camera" onclick="previewImg()"/>
+    //                                     </div>
+    //                                     `);
+    //     $("#modal_confirm_submit").on("click", () => {
+    //         if($("#modal_confirm_file").val().length == "" ){
+    //             alert_snackbar("warning", "ถ่ายภาพก่อนอ้าย");
+    //             setTimeout(function() {
+    //                 $("#modal_confirm_file").focus();
+    //             }, 300)
+    //             return false
+    //         }
 
-            const pay_type = $("#modal_pay_type").val();
-            const amount = $("#modal_confirm_input").val();
-            const img = $("#modal_confirm_file")[0].files[0].name;
-            console.log(img)
-            submitTask(task_id, pay_type, amount, img);
-            $("#modal_confirm_submit").off("click");
-        });
+    //         const pay_type = $("#modal_pay_type").val();
+    //         const amount = $("#modal_confirm_input").val();
+    //         const img = $("#modal_confirm_file")[0].files[0].name;
+    //         console.log(img)
+    //         submitTask(task_id, pay_type, amount, img);
+    //         $("#modal_confirm_submit").off("click");
+    //     });
 
-        $("#modal_confirm").modal("show");
-    }
+    //     $("#modal_confirm").modal("show");
+    // }
 
-    previewImg = () => {
-        modal_confirm_file.onchange = evt => {
-        const [file] = modal_confirm_file.files
-        if (file) {
-            modal_confirm_img.src = URL.createObjectURL(file)
-        }
-        }
-    }
+    // previewImg = () => {
+    //     modal_confirm_file.onchange = evt => {
+    //     const [file] = modal_confirm_file.files
+    //     if (file) {
+    //         modal_confirm_img.src = URL.createObjectURL(file)
+    //     }
+    //     }
+    // }
 
-    getdatenow = () => {
-        var timestamp = Date.now();
-        var localDateTime = new Date(timestamp);
-        localDateTime.setHours(localDateTime.getHours() + 7);
-        var datetimeNow = localDateTime.toISOString();
-        return datetimeNow
-    }
+    // getdatenow = () => {
+    //     var timestamp = Date.now();
+    //     var localDateTime = new Date(timestamp);
+    //     localDateTime.setHours(localDateTime.getHours() + 7);
+    //     var datetimeNow = localDateTime.toISOString();
+    //     return datetimeNow
+    // }
 
-    submitTask = (task_id, pay_type, amount, img) => {
-        TimeNOW = getdatenow()
-        fetch('../api/product?case=task_success', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    case: 'task_success',
-                    taskID: task_id,
-                    pay_type: pay_type,
-                    amount: amount,
-                    last_datetime: TimeNOW,
-                    img: img
+    // submitTask = (task_id, pay_type, amount, img) => {
+    //     TimeNOW = getdatenow()
+    //     fetch('../api/product?case=task_success', {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json'
+    //             },
+    //             body: JSON.stringify({
+    //                 case: 'task_success',
+    //                 taskID: task_id,
+    //                 pay_type: pay_type,
+    //                 amount: amount,
+    //                 last_datetime: TimeNOW,
+    //                 img: img
 
-                })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to submit task. Server responded with ' + response.status);
-                }
-                return response.json();
-            })
-            .then(json => {
-                $("#modal_confirm").modal("hide");
-                if (json[0].status == '0') {
-                    alert_snackbar('error', json[0].error_message);
-                } else {
-                    alert_snackbar('success', "จัดส่งสำเร็จ");
-                    setTimeout(function() {
-                        refresh()
-                    }, 1500);
-                }
-            })
-            .catch(error => {
-                console.error('Error submitting task:', error);
-            });
-    }
+    //             })
+    //         })
+    //         .then(response => {
+    //             if (!response.ok) {
+    //                 throw new Error('Failed to submit task. Server responded with ' + response.status);
+    //             }
+    //             return response.json();
+    //         })
+    //         .then(json => {
+    //             $("#modal_confirm").modal("hide");
+    //             if (json[0].status == '0') {
+    //                 alert_snackbar('error', json[0].error_message);
+    //             } else {
+    //                 alert_snackbar('success', "จัดส่งสำเร็จ");
+    //                 setTimeout(function() {
+    //                     refresh()
+    //                 }, 1500);
+    //             }
+    //         })
+    //         .catch(error => {
+    //             console.error('Error submitting task:', error);
+    //         });
+    // }
 
-    $(document).on('click', '.btn-cancel-modal', () => {
-        $("#modal_confirm").modal("hide");
-        $("#modal_confirm_submit").off("click");
+    // $(document).on('click', '.btn-cancel-modal', () => {
+    //     $("#modal_confirm").modal("hide");
+    //     $("#modal_confirm_submit").off("click");
+    // });
+    submitCheck = (task_id) => {
+    $("#modal_confirm_text").html(`
+        ยืนยันการจัดส่ง
+
+        
+        <div class="card-body">
+        <h1 class="text-center">${task_id}</h1>
+        <form id="formAccountSettings" enctype="multipart/form-data">
+        <div class="row justify-content-center">
+            <div class="mt-3 col-md-9">
+                <label id="modal_pay_type_label" class="form-label" for="modal_pay_type">รูปแบบการจ่าย </label>
+                <select id="modal_pay_type" name="pay_type" class="form-select form-control-sm color-dropdown">
+                    <option selected>--เลือกรูปแบบการจ่าย--</option>
+                    <option value="0">เงินสด</option>
+                    <option value="1">เงินโอน</option>
+                    <option value="2">บัตรเครดิต</option>
+                </select>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="mt-3 col-md-9">
+                <label class="form-label" for="modal_confirm_input">จำนวนเงิน</label>
+                <input type="text" id="modal_confirm_input" name="amount" placeholder="ระบุจำนวนเงิน" class="form-control">
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="mt-3 col-md-9">
+                <label class="form-label" for="modal_confirm_file">
+                    หลักฐาน
+                    <span class="need">*</span>
+                </label>
+                <img id="modal_confirm_img" class="w-100 rounded mb-3" src="#" alt="">
+                <div class="text-center">
+                <label class="form-label" for="modal_confirm_file">
+                <span class="h5 border-dark rounded-pill p-2 text-center cursor-pointer" id="modal_confirm_file_label" style="color: white; background-color: skyblue">  ถ่ายภาพ  </span>
+                </label>
+                <input type="file" id="modal_confirm_file" name="img" accept="image/*" capture="camera" class="form-control" hidden>
+                </div>
+            </div>
+        </div>
+    </form>
+    </div>
+    
+    `);
+
+    $('#modal_confirm_file_label').hover(function() {
+        $(this).css({"background-color": "deepskyblue" , 
+        "color": "white"
+    })
+    }, function() {
+        $(this).css({"background-color": "skyblue", 
+        "color": "white" 
+    })
     });
+
+    $("#modal_confirm_file").on("change", previewImg);
+
+    $("#modal_confirm_submit").off("click").on("click", () => {
+        if ($("#modal_confirm_file").val().length == "" ){
+            alert_snackbar("warning", "ถ่ายภาพก่อนอ้าย");
+            setTimeout(function() {
+                $("#modal_confirm_file").focus();
+            }, 300)
+            return false;
+        }
+
+        TimeNOW = getdatenow();
+        const formElement = $('#formAccountSettings')[0]; // เลือกฟอร์มโดยใช้ jQuery
+        console.log(formElement);
+        const formData = new FormData(formElement);
+        console.log(formData);
+
+        formData.append('case', 'task_success');
+        formData.append('last_datetime', TimeNOW);
+        formData.append('task_id', task_id);
+        // formData.append('pay_type', pay_type);
+        // formData.append('amount', amount);
+        // formData.append('file', file);
+
+        tasklist_success(formData);
+
+    });
+
+    $("#modal_confirm").modal("show");
+}
+
+tasklist_success = (formData) => {
+    fetch('../api/product?case=task_success', {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to submit task. Server responded with ' + response.status);
+            }
+            return response.json();
+        })
+        .then(json => {
+            $("#modal_confirm").modal("hide");
+            if (json['status'] == '0') {
+                alert_snackbar('error', json['error_message']);
+            } else {
+                alert_snackbar('success', "จัดส่งสำเร็จ");
+                setTimeout(function() {
+                    refresh();
+                }, 1500);
+            }
+        })
+        .catch(error => {
+            console.error(error);;
+        });
+}
+
+previewImg = () => {
+    const fileInput = document.getElementById('modal_confirm_file');
+    const img = document.getElementById('modal_confirm_img');
+
+    const [file] = fileInput.files;
+    if (file) {
+        img.src = URL.createObjectURL(file);
+    }
+}
+
+getdatenow = () => {
+    var timestamp = Date.now();
+    var localDateTime = new Date(timestamp);
+    localDateTime.setHours(localDateTime.getHours() + 7);
+    var datetimeNow = localDateTime.toISOString();
+    return datetimeNow;
+}
+
+$(document).on('click', '.btn-cancel-modal', () => {
+    $("#modal_confirm").modal("hide");
+    $("#modal_confirm_submit").off("click");
+});
+
 </script>

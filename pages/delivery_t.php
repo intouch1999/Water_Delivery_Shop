@@ -61,11 +61,7 @@
         }
     }
 
-    #product_detail_modal .card.mb-4 {
-        display: none;
-    }
-
-    #product_detail_modal .card.mb-2 {
+    #product_detail_modal .card.mb-4,.card.mb-2,.card.mb-3 {
         display: none;
     }
     .need{
@@ -202,7 +198,6 @@
                         </h5>
                         <div class="row gx-3 gy-2 align-items-center">
                             <input id="task_id_update" type="hidden"> </input>
-                            <img id="img_update" class="w-100" src="" alt="">
                             <label class="form-label" for="datetime_update">วันเวลาจัดส่ง </label>
                             <input type="datetime-local" class="form-control" id="datetime_update" name="datetime_update">
                             <div class="col-md">
@@ -224,7 +219,7 @@
                             </div>
                             <label class="form-label" for="pay_total_update" id="pay_total_update_label">จำนวนเงินที่ได้รับ </label>
                             <input type="number" class="form-control" id="pay_total_update" name="pay_total" placeholder="ระบุจำนวนเงิน">
-                            <h5>รายการที่สั่ง
+                            <h5>สินค้าที่สั่ง
                             </h5>
                             <div id="product_list_update">
 
@@ -245,6 +240,14 @@
                         </div>
                     </div>
                 </div>
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5>รูปภาพการจัดส่ง</h5>
+                    </div>
+                    <div id="image_list" >
+
+                    </div>
+                </div>
                 <table class="table">
                     <thead>
                         <tr>
@@ -262,6 +265,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary add_task" id="toggleCardadd" data-dismiss="modal">เพิ่มสินค้า</button>
                 <button type="button" class="btn btn-primary fig_task" id="toggleCardBtn" data-dismiss="modal">แก้ไขข้อมูล</button>
+                <button type="button" class="btn btn-primary image_task" id="toggleCardimage" data-dismiss="modal">ภาพยืนยัน</button>
                 <button type="button" class="btn btn-secondary" aria-hidden="true" data-dismiss="modal">Close</button>
             </div>
         </div>
@@ -338,6 +342,10 @@
             $('.card.mb-2', $(this).closest('.modal-content')).toggle();
         })
 
+        $('#product_detail_modal').off('click', '.image_task').on('click', '.image_task', function() {
+            $('.card.mb-3', $(this).closest('.modal-content')).toggle();
+        })
+
         document.querySelector('#product_detail_modal').addEventListener('hidden.bs.modal', function(event) {
             var modalContent = event.target.querySelector('.modal-content');
             var card_mb_2 = modalContent.querySelector('.card.mb-2');
@@ -347,6 +355,10 @@
             var card_mb_4 = modalContent.querySelector('.card.mb-4');
             if (card_mb_4) {
                 card_mb_4.style.display = 'none';
+            }
+            var card_mb_3 = modalContent.querySelector('.card.mb-3');
+            if (card_mb_3) {
+                card_mb_3.style.display = 'none';
             }
         });
 
@@ -399,7 +411,6 @@
             return false;
         }
 
-
         $("#modal_confirm_text").html("ยืนยันการนัดหมาย")
         $("#modal_confirm_submit").attr("onclick", "confirm_task();");
         $("#modal_confirm").modal("show");
@@ -410,7 +421,7 @@
         let foundOne = false;
         const quantityInputs = document.querySelectorAll('#product_list_update input[type="number"]');
         const productTypes = document.querySelectorAll('#product_list_update select');
-        console.log(quantityInputs, productTypes);
+        const task_id = document.querySelector('#task_id_update').value;
 
         quantityInputs.forEach(input => {
             if (parseInt(input.value) > 0) {
@@ -423,7 +434,7 @@
             return false;
         }
 
-        $("#modal_confirm_text").html("ยืนยันการแก้ไข")
+        $("#modal_confirm_text").html(`ยืนยันการแก้ไขหมายเลข : <span style="color: red">${task_id}</span> หรือไม่`)
         $("#modal_confirm_submit").attr("onclick", "update_task();");
         $("#modal_confirm").modal("show");
     }
@@ -433,7 +444,7 @@
         let foundOne = false;
         const quantityInputs = document.querySelectorAll('#product_list_add input[type="number"]');
         const productTypes = document.querySelectorAll('#product_list_add select');
-        console.log(quantityInputs, productTypes);
+        let task_id_input = document.querySelector('#task_id_update').value;
 
         quantityInputs.forEach(input => {
             if (parseInt(input.value) > 0) {
@@ -447,7 +458,7 @@
         }
 
         $("#modal_confirm_text").html(`
-                                        ยืนยันการการเพิ่มสินค้า
+                                        ยืนยันการการเพิ่มสินค้าหมายเลข : <span style="color: red">${task_id_input}</span> หรือไม่
     
                                         `)
         $("#modal_confirm_submit").attr("onclick", "submitmoreproduct();");
@@ -458,34 +469,65 @@
         $('#taskData').off('click', '.drop-success').on('click', '.drop-success', function() {
             var rowData = getTableRowData($(this), 'taskData');
             var task_id = rowData.task_id;
-
+            
             $("#modal_confirm_text").html(`
-                                        ยืนยันการจัดส่ง
+                                            ยืนยันการจัดส่ง
+
+                                            
+                                            <div class="card-body">
+                                            <h1 class="text-center">${task_id}</h1>
+                                            <form id="formAccountSettings" enctype="multipart/form-data">
+                                            <div class="row justify-content-center">
+                                                <div class="mt-3 col-md-9">
+                                                    <label id="modal_pay_type_label" class="form-label" for="modal_pay_type">รูปแบบการจ่าย </label>
+                                                    <select id="modal_pay_type" name="pay_type" class="form-select form-control-sm color-dropdown">
+                                                        <option selected>--เลือกรูปแบบการจ่าย--</option>
+                                                        <option value="0">เงินสด</option>
+                                                        <option value="1">เงินโอน</option>
+                                                        <option value="2">บัตรเครดิต</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="row justify-content-center">
+                                                <div class="mt-3 col-md-9">
+                                                    <label class="form-label" for="modal_confirm_input">จำนวนเงิน</label>
+                                                    <input type="text" id="modal_confirm_input" name="amount" placeholder="ระบุจำนวนเงิน" class="form-control">
+                                                </div>
+                                            </div>
+                                            <div class="row justify-content-center">
+                                                <div class="mt-3 col-md-9">
+                                                    <label class="form-label" for="">
+                                                        หลักฐาน
+                                                        <span class="need">*</span>
+                                                    </label>
+                                                    <img id="modal_confirm_img" class="w-100 rounded mb-3" src="#" alt="">
+                                                    <div class="text-center">
+                                                    <label class="form-label" for="modal_confirm_file">
+                                                        <span class="h5 border-dark rounded-pill p-2 text-center cursor-pointer" id="modal_confirm_file_label" style="color: white; background-color: skyblue">  ถ่ายภาพ  </span>
+                                                    </label>
+                                                    <input type="file" id="modal_confirm_file" name="img" accept="image/*" capture="camera" class="form-control" hidden>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                        </div>
                                         
-                                        ยืนยันการจัดส่ง
-                                        
-                                        <div class="mt-3 col-md-6">
-                                            <label id="modal_pay_type_label" class="form-label" for="modal_pay_type">รูปแบบการจ่าย </label>
-                                            <select id="modal_pay_type" class="form-select form-control-sm color-dropdown">
-                                                <option selected>--เลือกรูปแบบการจ่าย--</option>
-                                                <option value="0">เงินสด</option>
-                                                <option value="1">เงินโอน</option>
-                                                <option value="2">บัตรเครดิต</option>
-                                            </select>
-                                        </div>
-                                        <div class="mt-3 col-md-6">
-                                        <label class="form-label" for="modal_confirm_input">จำนวนเงิน</label>
-                                        <input type="text" id="modal_confirm_input" placeholder="ระบุจำนวนเงิน" class="form-control">
-                                        </div>
-                                        <div class="mt-3 col-md-6">
-                                        <label class="form-label" for="modal_confirm_file">
-                                        หลักฐาน
-                                        <span class="need">*</span>
-                                        </label>
-                                        <img id="modal_confirm_img" class="w-100" src="#" alt="">
-                                        <input type="file" id="modal_confirm_file" accept="image/*" class="form-control" capture="camera" onclick="previewImg()"/>
-                                        </div>
                                         `);
+
+                                        $('#modal_confirm_file_label').hover(function() {
+                                            $(this).css({"background-color": "deepskyblue" , 
+                                                "color": "white"
+                                            })
+
+                                        }, function() {
+                                            $(this).css({"background-color": "skyblue", 
+                                            "color": "white" 
+                                            })
+                                        });
+
+
+            $("#modal_confirm_file").on("change", previewImg);
+
             $("#modal_confirm_submit").off("click").on("click", function() {
                 if($("#modal_confirm_file").val().length == "" ){
                 alert_snackbar("warning", "ถ่ายภาพก่อนอ้าย");
@@ -494,10 +536,21 @@
                 }, 300)
                 return false
             }
-                var pay_type = $("#modal_pay_type").val();
-                var amount = $("#modal_confirm_input").val();
-                var img = $("#modal_confirm_file")[0].files[0].name;
-                tasklist_success(task_id , pay_type, amount , img);
+                TimeNOW = getdatenow();
+                const formElement = $('#formAccountSettings')[0]; // เลือกฟอร์มโดยใช้ jQuery
+                console.log(formElement);
+                const formData = new FormData(formElement);
+                console.log(formData);
+
+                formData.append('case', 'task_success');
+                formData.append('last_datetime', TimeNOW);
+                formData.append('task_id', task_id);
+                // formData.append('pay_type', pay_type);
+                // formData.append('amount', amount);
+                // formData.append('file', file);
+
+                tasklist_success(formData);
+
             });
 
             $("#modal_confirm").modal("show");
@@ -505,12 +558,21 @@
     }
 
     previewImg = () => {
-        modal_confirm_file.onchange = evt => {
-        const [file] = modal_confirm_file.files
-        if (file) {
-            modal_confirm_img.src = URL.createObjectURL(file)
-        }
-        }
+    const fileInput = document.getElementById('modal_confirm_file');
+    const img = document.getElementById('modal_confirm_img');
+
+    const [file] = fileInput.files;
+    if (file) {
+        img.src = URL.createObjectURL(file);
+    }
+    }
+
+    getdatenow = () => {
+    var timestamp = Date.now();
+    var localDateTime = new Date(timestamp);
+    localDateTime.setHours(localDateTime.getHours() + 7);
+    var datetimeNow = localDateTime.toISOString();
+    return datetimeNow;
     }
 
     function cancel_check() {
@@ -518,7 +580,7 @@
             var rowData = getTableRowData($(this), 'taskData');
             var task_id = rowData.task_id;
 
-            $("#modal_confirm_text").html("ยืนยันการยกเลิก");
+            $("#modal_confirm_text").html(`ยืนยันการยกเลิกหมายเลข : <span style="color: red">${task_id}</span> หรือไม่`);
             $("#modal_confirm_submit").off("click").on("click", function() {
                 tasklist_cancel(task_id);
             });
@@ -1046,7 +1108,7 @@
 
         fetchProductDetails(task_id)
             .then(json => {
-
+                document.querySelector('#exampleModalLabel').innerHTML = 'รายการที่สั่งหมายเลข ' + `<span style='color: red'>${task_id}</span>`
                 if (json[0] && json[0].status == '1') {
                     const productTableBody = document.getElementById('productTableBody');
                     const product_list_Div_update = document.getElementById("product_list_update");
@@ -1055,7 +1117,6 @@
                     product_list_Div_update.innerHTML = '';
 
                     json.slice(1).forEach(product => {
-                        document.getElementById('img_update').src = 'data:image/jpeg;base64,' + json[0].suc_img; // here img
                         document.getElementById('task_id_update').value = task_id;
                         document.getElementById('datetime_update').value = product.task_datetime;
                         document.getElementById('pay_status_update').value = product.pay_status;
@@ -1114,6 +1175,9 @@
                     $('#toggleCardadd').off("click").on("click", () => {
                         addMoreProduct(rowData);
                     });
+                    $('#toggleCardimage').off("click").on("click", () => {
+                        data_image(rowData);
+                    })
                     productTableBody.appendChild(totalRow);
                     productTableBody.appendChild(new_pay_Row);
                     $('#product_detail_modal').modal('show');
@@ -1125,6 +1189,53 @@
                 console.error('Error fetching product details:', error);
             });
     }
+
+    data_image = (rowData) => {
+        var task_id = rowData.task_id;
+        fetch ('../api/product?case=suc_img', {
+            method: 'POST',
+            body: JSON.stringify({
+                case: 'suc_img',
+                task_id: task_id
+            }),
+        })
+        .then(function(response) {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data[0].status == '1') {
+                delivered_image(data);
+            } else {
+                console.error('Error:', data.error_message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+    delivered_image = (data) => {
+    const imageList = document.querySelector('#image_list');
+    imageList.innerHTML = ''; 
+        data.slice(1).forEach(product => {
+            if (product.suc_img == "") { 
+                const h1 = document.createElement('h1');
+                h1.textContent = 'ยังไม่มีภาพ';
+                h1.classList.add('text-center', 'pb-3');
+                imageList.appendChild(h1);
+            } else {
+            const img = document.createElement('img');
+            img.src = '../assets/img/task/' + product.suc_img;
+            img.classList.add('w-75','mb-3');
+            img.style.borderRadius = '10px'
+            imageList.appendChild(img);
+            }
+        imageList.style.textAlign = 'center';
+    })
+}
 
     function product_l() {
         fetch('../api/product?case=product_task_show', {
@@ -1163,40 +1274,31 @@
             })
     }
 
-    function tasklist_success(task_id , pay_type, amount , img) {
-        var timestamp = Date.now();
-        var localDateTime = new Date(timestamp);
-        localDateTime.setHours(localDateTime.getHours() + 7);
-        var datetimeNow = localDateTime.toISOString();
-
-        fetch('../api/product?case=task_success', {
-                method: 'POST',
-                body: JSON.stringify({
-                    case: 'task_success',
-                    taskID: task_id,
-                    pay_type: pay_type,
-                    amount: amount,
-                    last_datetime: datetimeNow,
-                    img: img
-                }),
-            })
-            .then(function(response) {
-                return response.json();
-            })
-            .then(function(json) {
-                $("#modal_confirm").modal("hide");
-                if (json[0].status == '0') {
-                    alert_snackbar('error', json[0].error_message);
-                } else {
-                    alert_snackbar('success', "จัดส่งสำเร็จ");
-                    setTimeout(function() {
-                        location.reload();
-                    }, 1500);
-                }
-            })
-            .catch(function(error) {
-                console.error('Error:', error);
-            });
+    tasklist_success = (formData) => {
+    fetch('../api/product?case=task_success', {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to submit task. Server responded with ' + response.status);
+            }
+            return response.json();
+        })
+        .then(json => {
+            $("#modal_confirm").modal("hide");
+            if (json['status'] == '0') {
+                alert_snackbar('error', json['error_message']);
+            } else {
+                alert_snackbar('success', "จัดส่งสำเร็จ");
+                setTimeout(function() {
+                    location.reload();
+                }, 1500);
+            }
+        })
+        .catch(error => {
+            console.error(error);;
+        });
     }
 
     function tasklist_cancel(task_id) {

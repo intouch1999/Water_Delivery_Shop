@@ -283,45 +283,48 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
         $data[0]['error_message'] = $e->getMessage();
     }
     echo json_encode(@$data);
-} else if (@$decode['case'] == 'task_success') {
+}	else if (@$_POST['case'] == 'task_success') {
     try {
-        $data[0] = array('status' => 0);
-        $taskID = $decode['taskID'];
-		$pay_type = $decode['pay_type'];
-		$pay_total = $decode['amount'];
-		$last_datetime = $decode['last_datetime'];
-		$image = $decode['img'];
+        $data = array('status' => 0);
+        $taskID = $_POST['task_id'];
+        $pay_type = $_POST['pay_type'];
+        $pay_total = $_POST['amount'];
+        $last_datetime = $_POST['last_datetime'];
 
-		$base64img = base64_decode($image);
+        if (isset($_FILES['img']) && $_FILES['img']['error'] == 0) {
+			$image = $_FILES['img']['tmp_name'];
+			$image_name = $taskID. '.jpg';
+			$image_base64 = base64_encode($image_name);
+			$image_path = '../assets/img/task/' . $image_base64;
+		
+			move_uploaded_file($image, $image_path);
 
-		$image_name = $base64img. '.jpg';
-		$image_path = '../assets/img/task/' . $image_name;
+            // อัปเดตฐานข้อมูล
+            if (empty($pay_total)) {
+                $query_task = "UPDATE `delivery_task` SET `task_status` = 2, `suc_img` = '{$image_name}' WHERE `task_id` = '{$taskID}'";
+            } else {
+                $query_task = "UPDATE `delivery_task` SET `task_status` = 2, `pay_type` = '{$pay_type}', `pay_total` = '{$pay_total}', `pay_datetime` = '{$last_datetime}', `suc_img` = '{$image_name}' WHERE `task_id` = '{$taskID}'";
+            }
+            $stmt_task = $conn->query($query_task);
 
-		file_put_contents($image_path, $base64img);
-        
-		if (empty($pay_total)) {
-			$query_task = "UPDATE `delivery_task` SET `task_status` = 2 , `suc_img` = '{$image_name}'  WHERE `task_id` = '{$taskID}'";
-			$stmt_task = $conn->query($query_task);
-		} else {
-			$query_task = "UPDATE `delivery_task` SET `task_status` = 2 , `pay_type` = '{$pay_type}' , `pay_total` = '{$pay_total}' , `pay_datetime` = '{$last_datetime}' , `suc_img` = '{$image_name}' WHERE `task_id` = '{$taskID}'  ";
-			$stmt_task = $conn->query($query_task);
-		}
+            // อัปเดตตาราง delivery_task_product
+            $query_product = "UPDATE `delivery_task_product` SET `product_active` = 2, `last_datetime` = '{$last_datetime}' WHERE `task_id` = '{$taskID}' AND `product_active` = 1";
+            $stmt_product = $conn->query($query_product);
 
-        // Update delivery_task_product table
-        $query_product = "UPDATE `delivery_task_product` SET `product_active` = 2 , `last_datetime` = '{$last_datetime}' WHERE `task_id` = '{$taskID}' AND `product_active` = 1";
-        $stmt_product = $conn->query($query_product);
-
-        // Check if both queries were successful
-        if ($stmt_task && $stmt_product) {
-            $data[0] = array('status' => 1);
+            if ($stmt_task && $stmt_product) {
+                $data['status'] = 1;
+            } else {
+                $data['status'] = 0;
+            }
         } else {
-			$data[0] = array('status' => 0);
+            $data['error_message'] = 'Error uploading image.';
         }
     } catch (PDOException $e) {
-        $data[0]['error_message'] = $e->getMessage();
-	}
-    echo json_encode($data);
+        $data['error_message'] = $e->getMessage();
+    }
+    echo json_encode(@$data);
 
+	
 } else if (@$decode['case'] == 'task_cancel') {
 	try {
 		$data[0] = array('status' => 0);
@@ -395,8 +398,7 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 						pi.product_active,
 						dt.pay_total,
 						dt.price_total,
-						dtp.product_price,
-						dt.suc_img
+						dtp.product_price
 					FROM 
 						delivery_task AS dt
 					JOIN 
@@ -412,7 +414,6 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
         $stmt = $conn->query($query);
 		if ($stmt->rowCount() > 0) {
 			while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-				// $row['suc_img'] = base64_encode($row['suc_img']);
 				$data[0] = array('status' => 1);
 				$data[] = $row;
 			}
@@ -666,7 +667,25 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 		$data[0]['error_message'] = $e->getMessage();
 	}
 	echo json_encode(@$data);
-}
+} else if (@$decode['case'] == 'suc_img') {
 
+	try {
+		$data[0] = array('status' => 0);
+		$query = "SELECT `suc_img` FROM `delivery_task` WHERE `task_id` = '{$decode['task_id']}'";
+		$stmt = $conn->query($query);
+		if ($stmt->rowCount() > 0) {
+			while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+				$row['suc_img'] = base64_encode($row['suc_img']);
+				$data[0] = array('status' => 1);
+				$data[] = $row;
+			}
+		} else {
+			$data[0] = array('status' => 0);
+		}
+	} catch (PDOException $e) {
+		$data[0]['error_message'] = $e->getMessage();
+	}
+	echo json_encode(@$data);
+}
 
 ?>
