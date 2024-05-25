@@ -654,7 +654,9 @@ $(document).ready(function() {
         <form id="formAccountSettings" enctype="multipart/form-data">
         <div class="row justify-content-center">
             <div class="mt-3 col-md-9">
-                <label id="modal_pay_type_label" class="form-label" for="modal_pay_type">รูปแบบการจ่าย </label>
+                <label id="modal_pay_type_label" class="form-label" for="modal_pay_type">
+                <span class="h6">รูปแบบการจ่าย</span>
+                </label>
                 <select id="modal_pay_type" name="pay_type" class="form-select form-control-sm color-dropdown">
                     <option selected>--เลือกรูปแบบการจ่าย--</option>
                     <option value="0">เงินสด</option>
@@ -665,14 +667,16 @@ $(document).ready(function() {
         </div>
         <div class="row justify-content-center">
             <div class="mt-3 col-md-9">
-                <label class="form-label" for="modal_confirm_input">จำนวนเงิน</label>
+                <label class="form-label" for="modal_confirm_input">
+                <span class="h6">จำนวนเงิน</span>
+                </label>
                 <input type="text" id="modal_confirm_input" name="amount" placeholder="ระบุจำนวนเงิน" class="form-control">
             </div>
         </div>
         <div class="row justify-content-center">
             <div class="mt-3 col-md-9">
                 <label class="form-label" for="modal_confirm_file">
-                    หลักฐาน
+                <span class="h6">หลักฐาน</span>
                     <span class="need">*</span>
                 </label>
                 <img id="modal_confirm_img" class="w-100 rounded mb-3" src="#" alt="">
