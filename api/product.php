@@ -294,8 +294,7 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
         if (isset($_FILES['img']) && $_FILES['img']['error'] == 0) {
 			$image = $_FILES['img']['tmp_name'];
 			$image_name = $taskID. '.jpg';
-			$image_base64 = base64_encode($image_name);
-			$image_path = '../assets/img/task/' . $image_base64;
+			$image_path = '../assets/img/task/' . $image_name;
 		
 			move_uploaded_file($image, $image_path);
 
@@ -675,7 +674,6 @@ while ( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ){
 		$stmt = $conn->query($query);
 		if ($stmt->rowCount() > 0) {
 			while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-				$row['suc_img'] = base64_encode($row['suc_img']);
 				$data[0] = array('status' => 1);
 				$data[] = $row;
 			}

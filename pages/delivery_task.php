@@ -261,7 +261,7 @@ $(document).ready(function() {
         return dateParam ? dateParam : null;
     };
 
-    window.onload = function() {
+
     const urlDate = getDateFromURL();
     let selectedDate_CA;
     let selectedDate_GB;
@@ -288,7 +288,6 @@ $(document).ready(function() {
     table_branch(selectedDate_CA); 
     changeDateHeader(formattedDateForDisplay);
     // loadDataAndProgressBar(selectedDate); 
-};
 
     $('#inp_date').change(function() {
         var selectedDate = $(this).val();

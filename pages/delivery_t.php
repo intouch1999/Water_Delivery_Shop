@@ -276,8 +276,8 @@
 
 <?php include("foot.php"); ?>
 <footer>
-    <!-- Include jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Include jQuery
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
 
     <!-- Include DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/2.0.2/css/dataTables.dataTables.css" />
@@ -292,13 +292,12 @@
 </footer>
 <script>
     $(document).ready(function() {
-        window.onload = function() {
             if (location.href.endsWith('delivery_t')) {
                 customer_task();
             } else {
                 product_l()
             }
-        }
+        
 
         $('#backButton').on('click', function() {
             location.href = 'delivery_t.php';

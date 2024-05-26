@@ -14,7 +14,7 @@
           <!-- Account -->
           <hr class="my-0" />
           <div class="card-body">
-          <div id="calendar"></div>
+          <div id="calendar" style="word-wrap: normal"></div>
           </div>
           <!-- /Account -->
         </div>
