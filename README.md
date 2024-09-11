@@ -1,4 +1,4 @@
-# Beverage Shop Management System
+# Water Delivery Management System
 
 ## Overview
 This project streamlines the management of a beverage shop by organizing inventory, processing orders, and keeping records. It ensures all activities are well-documented and easily accessible, supporting daily operations smoothly.
